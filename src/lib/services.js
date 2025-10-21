@@ -20,7 +20,7 @@ const postAction = async (action, data = {}) => {
 export const getServices = async () => {
   try {
     const res = await axios.post(API_URL, {
-      key: API_KEY,     // must exactly match API docs
+      key: API_KEY,     
       action: 'services' 
     }, {
       headers: { 'Content-Type': 'application/json' }
