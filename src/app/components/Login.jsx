@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import ReCAPTCHA from "react-google-recaptcha";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const schema = yup.object().shape({
   email: yup.string().email("Invalid email").required("Email required"),
@@ -19,6 +20,7 @@ export default function LoginForm() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [captchaValue, setCaptchaValue] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm({ resolver: yupResolver(schema) });
 
@@ -37,30 +39,63 @@ export default function LoginForm() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="max-w-md w-full bg-white p-8 rounded-3xl shadow-lg flex flex-col gap-4"
-    >
-      <h1 className="text-3xl font-bold text-center text-gray-900">Login</h1>
+    <div className="w-full min-h-screen flex items-center justify-center bg-gray-200 px-4">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-md w-full bg-white p-8 rounded-3xl shadow-lg flex flex-col gap-4"
+      >
+        <h1 className="text-3xl font-bold text-center text-gray-900">Login</h1>
 
-      <input type="email" placeholder="Email" {...register("email")}
-        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.email ? "border-red-500" : ""}`} />
-      {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+        {/* Email */}
+        <input 
+          type="email" 
+          placeholder="Email" 
+          {...register("email")}
+          className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder-gray-400 ${errors.email ? "border-red-500" : ""}`} 
+        />
+        {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
 
-      <input type="password" placeholder="Password" {...register("password")}
-        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.password ? "border-red-500" : ""}`} />
-      {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+        {/* Password */}
+        <div className="relative">
+          <input 
+            type={showPassword ? "text" : "password"} 
+            placeholder="Password" 
+            {...register("password")}
+            className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder-gray-400 ${errors.password ? "border-red-500" : ""}`} 
+          />
+          <span 
+            className="absolute right-3 top-3 cursor-pointer text-gray-500"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
+        </div>
+        {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
 
-      <ReCAPTCHA sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY} onChange={value => setCaptchaValue(value)} />
+        {/* ReCAPTCHA */}
+        <ReCAPTCHA sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY} onChange={value => setCaptchaValue(value)} />
 
-      <button onClick={handleSubmit(onSubmit)}
-        className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition">
-        {loading ? "Logging in..." : "Login"}
-      </button>
+        {/* Login Button */}
+        <button 
+          onClick={handleSubmit(onSubmit)}
+          className="w-full py-3 bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 text-white font-semibold rounded-xl hover:opacity-90 transition cursor-pointer"
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
 
-      {message && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-black">{message}</motion.p>}
-    </motion.div>
+        {/* Already have account / Signup link */}
+        <p className="text-center text-gray-700">
+          Don't have an account? 
+          <span className="text-indigo-600 font-semibold cursor-pointer ml-1" onClick={() => router.push("/auth/signup")}>
+            Sign Up
+          </span>
+        </p>
+
+        {/* Message */}
+        {message && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-black">{message}</motion.p>}
+      </motion.div>
+    </div>
   );
 }

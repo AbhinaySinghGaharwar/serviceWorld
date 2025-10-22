@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 
 import Header from './components/Header'
 import Footer from './components/Footer'
-import Login from './components/Login'
+
 import FeatureSection from './components/FeatureSection'
 
 const StatItem = ({ value, label, icon }) => (
@@ -94,7 +94,7 @@ export default function Home() {
       <Header />
 
       <div className="container mx-auto px-4">
-        <Login />
+    
     <StatsRow />
         <ServicesSection />
         
