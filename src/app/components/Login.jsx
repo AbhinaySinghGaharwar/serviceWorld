@@ -1,46 +1,66 @@
-'use client'
-import React from "react"
-import { motion } from "framer-motion"
-export default function Login() {
-  const cardVariants = {
-    hidden: { opacity: 0, y: -20, scale: 0.98 },
-    show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: 'easeOut' } }
-  }
+"use client";
+
+import { useState } from "react";
+import { motion } from "framer-motion";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import ReCAPTCHA from "react-google-recaptcha";
+
+const schema = yup.object().shape({
+  email: yup.string().email("Invalid email").required("Email required"),
+  password: yup.string().required("Password required"),
+});
+
+export default function LoginForm() {
+  const router = useRouter();
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [captchaValue, setCaptchaValue] = useState(null);
+
+  const { register, handleSubmit, formState: { errors } } = useForm({ resolver: yupResolver(schema) });
+
+  const onSubmit = async (data) => {
+    if (!captchaValue) { setMessage("Complete CAPTCHA"); return; }
+
+    setLoading(true);
+    try {
+      const res = await axios.post("/api/auth/login", { ...data, captcha: captchaValue });
+      setMessage(res.data.message);
+      router.push("/dashboard");
+    } catch (err) {
+      setMessage(err.response?.data.error || "Login failed");
+    }
+    setLoading(false);
+  };
 
   return (
     <motion.div
-      initial="hidden"
-      animate="show"
-      variants={cardVariants}
-      className="max-w-3xl mx-auto mt-6 md:mt-8 p-6 md:p-8 rounded-xl shadow-lg bg-white border border-amber-100"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="max-w-md w-full bg-white p-8 rounded-3xl shadow-lg flex flex-col gap-4"
     >
-      <div className="flex flex-col md:flex-row items-center gap-6">
-        <div className="flex-1 w-full">
-          <h2 className="font-semibold text-lg md:text-2xl">Sign in to Your Account</h2>
-          <p className="text-xs text-gray-500 mt-1">Access your dashboard and manage orders</p>
+      <h1 className="text-3xl font-bold text-center text-gray-900">Login</h1>
 
-          <form className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input className="p-3 border rounded" placeholder="Username" />
-            <input className="p-3 border rounded" placeholder="Password" type="password" />
-            <div className="md:col-span-2 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="remember" />
-                <label htmlFor="remember" className="text-sm text-gray-500">Remember me</label>
-              </div>
-              <a className="text-sm text-emerald-600">Forgot password?</a>
-            </div>
-            <button className="md:col-span-2 bg-gradient-to-r from-amber-400 to-emerald-400 text-white py-2 rounded">Sign in</button>
-          </form>
-        </div>
+      <input type="email" placeholder="Email" {...register("email")}
+        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.email ? "border-red-500" : ""}`} />
+      {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
 
-        <div className="w-40 h-40 bg-gradient-to-br from-amber-200 to-emerald-200 rounded-lg flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-sm text-gray-600">0.2rs/1K</div>
-            <div className="text-xs text-gray-600">Starting Price</div>
-            <div className="mt-2 text-sm font-medium">24/7 Support</div>
-          </div>
-        </div>
-      </div>
+      <input type="password" placeholder="Password" {...register("password")}
+        className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.password ? "border-red-500" : ""}`} />
+      {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+
+      <ReCAPTCHA sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY} onChange={value => setCaptchaValue(value)} />
+
+      <button onClick={handleSubmit(onSubmit)}
+        className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition">
+        {loading ? "Logging in..." : "Login"}
+      </button>
+
+      {message && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-black">{message}</motion.p>}
     </motion.div>
-  )
+  );
 }
