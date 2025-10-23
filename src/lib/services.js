@@ -1,10 +1,9 @@
-// /lib/smmApi.js
+// /lib/services.js
 import axios from "axios";
 
 const API_URL = process.env.BASE_URL
 const API_KEY = process.env.KEY
 
-// Helper for POST requests (x-www-form-urlencoded)
 const postAction = async (action, data = {}) => {
   try {
     const params = new URLSearchParams();
@@ -18,7 +17,6 @@ const postAction = async (action, data = {}) => {
     const res = await axios.post(API_URL, params, {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
     });
-
     return res.data;
   } catch (error) {
     console.error("SMM API Error:", error.response?.data || error.message);
