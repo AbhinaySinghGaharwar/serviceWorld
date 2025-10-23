@@ -80,9 +80,15 @@ export default function Dashboard() {
   // Loading
   if (!user)
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-900">
-        <p className="text-white text-lg animate-pulse">Loading Dashboard...</p>
-      </div>
+      <div className="flex flex-col justify-center items-center min-h-screen bg-gray-900">
+  <div className="flex space-x-2">
+    <div className="w-4 h-4 bg-indigo-500 rounded-full animate-bounce"></div>
+    <div className="w-4 h-4 bg-purple-500 rounded-full animate-bounce animation-delay-200"></div>
+    <div className="w-4 h-4 bg-pink-500 rounded-full animate-bounce animation-delay-400"></div>
+  </div>
+  <p className="mt-4 text-white text-lg font-semibold">Loading Dashboard...</p>
+</div>
+
     );
 
   // Render main content based on selected menu
