@@ -9,6 +9,7 @@ export default function NewOrderForm() {
   const [charge, setCharge] = useState("");
   const [services, setServices] = useState([]);
   const [loadingServices, setLoadingServices] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   // Fetch services from API
   useEffect(() => {
@@ -43,10 +44,44 @@ export default function NewOrderForm() {
     }
   }, [service, quantity, services]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ service, link, quantity, charge });
-    alert("Form submitted! Check console for values.");
+
+    if (!service || !link || !quantity || !charge) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ service, link, quantity, charge }),
+        credentials: "include", // important: sends cookies
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "Failed to create order");
+      } else {
+        alert(`Order created! ID: ${data.orderId}`);
+        // Reset form
+        setService("");
+        setLink("");
+        setQuantity("");
+        setCharge("");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong while creating the order");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -64,7 +99,7 @@ export default function NewOrderForm() {
             {loadingServices ? (
               <option>Loading services...</option>
             ) : (
-              services.map((srv) => (
+              services&&services.map((srv) => (
                 <option key={srv.service} value={srv.service}>
                   {srv.name} | ₹{srv.rate}
                 </option>
@@ -119,9 +154,12 @@ export default function NewOrderForm() {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-all"
+          className={`w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-all ${
+            submitting ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          disabled={submitting}
         >
-          Submit
+          {submitting ? "Submitting..." : "Submit"}
         </button>
       </form>
     </div>

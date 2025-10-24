@@ -11,7 +11,8 @@ import UserStatistics from "../components/UserStatistics";
 import CategoryFilter from "../components/CategoryFilter";
 import JoinButtons from "../components/JoinButton";
 import NewOrderForm from "../components/NewOrderForm";
-
+import OrderHistory from "../components/OrderHistory";
+import PaymentHistory from "../components/PaymentHistory";
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
@@ -120,8 +121,19 @@ export default function Dashboard() {
       <NewOrderForm/>
           </>
         )
-      case "Orders History":
-      case "Add Funds":
+      case "Orders History":{
+        return(
+          <>
+          <OrderHistory/>
+   </>
+        )
+      }
+      case "Add Funds":{
+        return(
+          <>
+          <PaymentHistory/></>
+        )
+      }
       default:
         return (
           <div className="p-6">
