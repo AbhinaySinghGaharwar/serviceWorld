@@ -12,7 +12,7 @@ import {
 } from 'react-icons/fa'
 import { createOrder, getOrderStatus } from '@/lib/services'
 
-export default function ServicesPage({ services }) {
+export default function ServicesList({ services }) {
   const orders = {} // Keep state if needed
   const [selectedService, setSelectedService] = useState(null)
 
@@ -75,7 +75,7 @@ export default function ServicesPage({ services }) {
   }
 
   return (
-    <div className="p-4 md:p-8 bg-gray-200 min-h-screen text-black flex justify-center">
+    <div className=" md:p-8  min-h-screen text-black flex justify-center">
       <div className="w-full max-w-[1100px]">
         <h1 className="text-3xl md:text-4xl font-extrabold text-center mb-8 bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 text-transparent bg-clip-text">
           💎 Available Services

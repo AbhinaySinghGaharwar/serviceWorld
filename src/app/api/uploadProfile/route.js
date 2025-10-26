@@ -44,7 +44,7 @@ export async function POST(req) {
 
     // Save avatar URL in MongoDB
     const client = await clientPromise;
-    const db = client.db("mydb");
+    const db = client.db("smmpanel");
     const imageUrl = "/uploads/" + fileName;
 
     await db.collection("users").updateOne(
@@ -62,7 +62,7 @@ export async function POST(req) {
 export async function GET(req) {
   try {
     // Get token from cookies
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
     if (!token) {
       return new Response(JSON.stringify({ error: "Not authenticated" }), { status: 401 });
@@ -78,13 +78,13 @@ export async function GET(req) {
 
     // Fetch user from MongoDB
     const client = await clientPromise;
-    const db = client.db("mydb");
+    const db = client.db("smmpanel");
 
     const user = await db.collection("users").findOne(
       { email: payload.email },
       { projection: { username: 1, email: 1, balance: 1, avatar: 1 } }
     );
-
+ 
     if (!user) {
       return new Response(JSON.stringify({ error: "User not found" }), { status: 404 });
     }

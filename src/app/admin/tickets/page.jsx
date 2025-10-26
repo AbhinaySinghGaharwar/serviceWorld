@@ -17,6 +17,7 @@ export default function TicketsPage() {
           method: "GET",
           credentials: "include",
         });
+        
         if (!res.ok) {
           const errData = await res.json();
           setError(errData.error || "Failed to fetch tickets");
@@ -157,24 +158,51 @@ export default function TicketsPage() {
                 placeholder="Type your reply..."
                 className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 onKeyDown={async (e) => {
-                  if (e.key === "Enter") {
-                    // Add reply (you can call API here)
-                    const message = e.target.value;
-                    if (!message) return;
+  if (e.key === "Enter") {
+    const message = e.target.value.trim();
+    if (!message) return;
 
-                    const updatedTicket = {
-                      ...selectedTicket,
-                      replies: [
-                        ...(selectedTicket.replies || []),
-                        { type: "admin", message, created_at: new Date().toISOString() },
-                      ],
-                    };
-                    setSelectedTicket(updatedTicket);
+    try {
+     const res = await fetch("/api/admin/replyticket", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ ticketId: selectedTicket._id, message }),
+});
 
-                    // Clear input
-                    e.target.value = "";
-                  }
-                }}
+
+      const data = await res.json();
+      if (res.ok) {
+        // Update local state
+        const newReplies = [
+          ...(selectedTicket.replies || []),
+          data.reply,
+        ];
+        setSelectedTicket({
+          ...selectedTicket,
+          replies: newReplies,
+          status: "answered",
+        });
+
+        // Also reflect status change in table
+        setTickets((prev) =>
+          prev.map((t) =>
+            t._id === selectedTicket._id
+              ? { ...t, status: "answered" }
+              : t
+          )
+        );
+
+        e.target.value = "";
+      } else {
+        alert(data.error || "Failed to send reply");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network error while replying");
+    }
+  }
+}}
+
               />
               <button
                 className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white px-4 py-2 rounded"

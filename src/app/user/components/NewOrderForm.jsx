@@ -10,9 +10,10 @@ export default function NewOrderForm() {
   const [services, setServices] = useState([]);
   const [loadingServices, setLoadingServices] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [responseMessage, setResponseMessage] = useState(null); // ✅ New
-  const [responseType, setResponseType] = useState("success"); // ✅ success | error
-  const [quantityError, setQuantityError] = useState(""); // ✅ for min/max validation
+  const [responseMessage, setResponseMessage] = useState(null);
+  const [responseType, setResponseType] = useState("success");
+  const [quantityError, setQuantityError] = useState("");
+  const [serviceError, setServiceError] = useState(""); // ✅ new
 
   // 🔹 Fetch services
   useEffect(() => {
@@ -21,9 +22,15 @@ export default function NewOrderForm() {
         const res = await fetch("/api/services/getservices");
         if (!res.ok) throw new Error("Failed to fetch services");
         const data = await res.json();
-        setServices(data);
+
+        if (!Array.isArray(data) || data.length === 0) {
+          setServiceError("⚠️ No service data found. Please contact the administrator.");
+        } else {
+          setServices(data);
+        }
       } catch (err) {
         console.error(err);
+        setServiceError("❌ Failed to load services. Please contact the administrator.");
       } finally {
         setLoadingServices(false);
       }
@@ -33,12 +40,13 @@ export default function NewOrderForm() {
 
   // 🔹 Calculate charge
   useEffect(() => {
-    if (service && quantity) {
+    if (service && quantity && services.length > 0) {
       const selectedService = services.find((s) => s.service === service);
-      if (selectedService) {
+      if (selectedService && selectedService.rate) {
         const rate = parseFloat(selectedService.rate.toString().replace(/,/g, ""));
         const qty = parseInt(quantity, 10);
-        setCharge((rate * qty).toFixed(2));
+        if (!isNaN(rate) && !isNaN(qty)) setCharge((rate * qty).toFixed(2));
+        else setCharge("");
       } else {
         setCharge("");
       }
@@ -49,8 +57,7 @@ export default function NewOrderForm() {
 
   // 🔹 Handle quantity validation
   useEffect(() => {
-    if (!service) return;
-
+    if (!service || services.length === 0) return;
     const selectedService = services.find((s) => s.service === service);
     if (!selectedService) return;
 
@@ -92,7 +99,6 @@ export default function NewOrderForm() {
       });
 
       const data = await res.json();
-      console.log(data);
 
       if (!res.ok) {
         setResponseMessage(`❌ ${data.error || "Failed to create order."}`);
@@ -114,7 +120,17 @@ export default function NewOrderForm() {
     }
   };
 
-  const selectedService = services.find((s) => s.service === service);
+  const selectedService = service
+    ? services.find((s) => s.service === service)
+    : null;
+
+  // 🔹 Check if service data is missing or broken
+  const invalidServiceData =
+    !selectedService ||
+    !selectedService.name ||
+    !selectedService.rate ||
+    selectedService.min == null ||
+    selectedService.max == null;
 
   return (
     <div className="card-body bg-gray-100 p-6 rounded-2xl shadow-lg">
@@ -138,10 +154,18 @@ export default function NewOrderForm() {
             </div>
           )}
 
+          {/* ✅ Service Loading / Error */}
+          {serviceError && (
+            <div className="mb-3 p-3 text-sm bg-red-100 text-red-700 border border-red-300 rounded-lg">
+              {serviceError}
+            </div>
+          )}
+
           <select
             className="w-full border border-gray-300 rounded-lg p-2 bg-white"
             value={service}
             onChange={(e) => setService(e.target.value)}
+            disabled={loadingServices || serviceError}
           >
             <option value="">Select a service</option>
             {loadingServices ? (
@@ -160,9 +184,9 @@ export default function NewOrderForm() {
         <div>
           <label className="block font-semibold mb-1">Description</label>
           <div className="p-2 border rounded-lg bg-white min-h-[48px]">
-            {service
-              ? selectedService?.desc || "No description available"
-              : "Select a service to see description"}
+            {invalidServiceData
+              ? "⚠️ Service details are missing or invalid. Please contact the administrator."
+              : selectedService?.desc || "No description available"}
           </div>
         </div>
 
@@ -196,7 +220,7 @@ export default function NewOrderForm() {
         </div>
 
         {/* ===================== Rate / Min / Max ===================== */}
-        {selectedService && (
+        {selectedService && !invalidServiceData && (
           <div className="grid grid-cols-3 gap-4 mt-2 bg-white p-3 rounded-lg shadow-sm border border-gray-200">
             <div>
               <p className="text-gray-500 text-sm font-medium">Rate (per 1)</p>
@@ -230,7 +254,7 @@ export default function NewOrderForm() {
           className={`w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-all ${
             submitting ? "opacity-50 cursor-not-allowed" : ""
           }`}
-          disabled={submitting}
+          disabled={submitting || serviceError || invalidServiceData}
         >
           {submitting ? "Submitting..." : "Submit"}
         </button>

@@ -44,7 +44,7 @@ export async function POST(req) {
 
   try {
     const client = await clientPromise;
-    const db = client.db("mydb");
+    const db = client.db("smmpanel");
 
     // Check if user/email exists
     const existingUser = await db.collection("users").findOne({ $or: [{ email }, { username }] });

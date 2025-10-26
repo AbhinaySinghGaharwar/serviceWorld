@@ -43,7 +43,7 @@ export async function POST(req) {
 
   try {
     const client = await clientPromise;
-    const db = client.db("mydb");
+    const db = client.db("smmpanel");
 
     const user = await db.collection("users").findOne({ email });
     if (!user) return new Response(JSON.stringify({ error: "Invalid credentials" }), { status: 400 });

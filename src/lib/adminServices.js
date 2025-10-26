@@ -13,7 +13,7 @@ export  async function getAdminByEmail(email) {
 export  async function getAllUsers(){
     try {
         await client.connect()
-        const db=client.db('mydb')
+        const db=client.db('smmpanel')
         const users=await db.collection('users').find().toArray()
         return users
 
