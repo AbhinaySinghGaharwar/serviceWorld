@@ -10,8 +10,11 @@ export default function NewOrderForm() {
   const [services, setServices] = useState([]);
   const [loadingServices, setLoadingServices] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [responseMessage, setResponseMessage] = useState(null); // ✅ New
+  const [responseType, setResponseType] = useState("success"); // ✅ success | error
+  const [quantityError, setQuantityError] = useState(""); // ✅ for min/max validation
 
-  // Fetch services from API
+  // 🔹 Fetch services
   useEffect(() => {
     const fetchServices = async () => {
       try {
@@ -28,7 +31,7 @@ export default function NewOrderForm() {
     fetchServices();
   }, []);
 
-  // Update charge whenever service or quantity changes
+  // 🔹 Calculate charge
   useEffect(() => {
     if (service && quantity) {
       const selectedService = services.find((s) => s.service === service);
@@ -44,33 +47,59 @@ export default function NewOrderForm() {
     }
   }, [service, quantity, services]);
 
+  // 🔹 Handle quantity validation
+  useEffect(() => {
+    if (!service) return;
+
+    const selectedService = services.find((s) => s.service === service);
+    if (!selectedService) return;
+
+    const qty = parseInt(quantity, 10);
+    if (qty < selectedService.min) {
+      setQuantityError(`Minimum allowed quantity is ${selectedService.min}`);
+    } else if (qty > selectedService.max) {
+      setQuantityError(`Maximum allowed quantity is ${selectedService.max}`);
+    } else {
+      setQuantityError("");
+    }
+  }, [quantity, service, services]);
+
+  // 🔹 Submit order
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!service || !link || !quantity || !charge) {
-      alert("Please fill all fields");
+      setResponseMessage("⚠️ Please fill all fields before submitting.");
+      setResponseType("error");
+      return;
+    }
+
+    if (quantityError) {
+      setResponseMessage("⚠️ Quantity must be within the allowed range.");
+      setResponseType("error");
       return;
     }
 
     setSubmitting(true);
+    setResponseMessage(null);
 
     try {
-      const res = await fetch("/api/orders", {
+      const res = await fetch("/api/orders/createorder", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ service, link, quantity, charge }),
-        credentials: "include", // important: sends cookies
+        credentials: "include",
       });
 
       const data = await res.json();
+      console.log(data);
 
       if (!res.ok) {
-        alert(data.error || "Failed to create order");
+        setResponseMessage(`❌ ${data.error || "Failed to create order."}`);
+        setResponseType("error");
       } else {
-        alert(`Order created! ID: ${data.orderId}`);
-        // Reset form
+        setResponseMessage(`✅ Order created successfully! ID: ${data.orderId}`);
+        setResponseType("success");
         setService("");
         setLink("");
         setQuantity("");
@@ -78,20 +107,39 @@ export default function NewOrderForm() {
       }
     } catch (err) {
       console.error(err);
-      alert("Something went wrong while creating the order");
+      setResponseMessage("❌ Something went wrong while creating the order.");
+      setResponseType("error");
     } finally {
       setSubmitting(false);
     }
   };
 
+  const selectedService = services.find((s) => s.service === service);
+
   return (
     <div className="card-body bg-gray-100 p-6 rounded-2xl shadow-lg">
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Service */}
+        {/* ===================== Service Section ===================== */}
         <div>
-          <label className="block mb-1 font-semibold">Service</label>
+          <label className="block mb-1 font-semibold text-lg text-gray-800">
+            Service
+          </label>
+
+          {/* ✅ Response Message Below Title */}
+          {responseMessage && (
+            <div
+              className={`mb-3 rounded-lg p-3 text-sm ${
+                responseType === "success"
+                  ? "bg-green-100 text-green-700 border border-green-300"
+                  : "bg-red-100 text-red-700 border border-red-300"
+              }`}
+            >
+              {responseMessage}
+            </div>
+          )}
+
           <select
-            className="w-full border border-gray-300 rounded-lg p-2"
+            className="w-full border border-gray-300 rounded-lg p-2 bg-white"
             value={service}
             onChange={(e) => setService(e.target.value)}
           >
@@ -99,7 +147,7 @@ export default function NewOrderForm() {
             {loadingServices ? (
               <option>Loading services...</option>
             ) : (
-              services&&services.map((srv) => (
+              services.map((srv) => (
                 <option key={srv.service} value={srv.service}>
                   {srv.name} | ₹{srv.rate}
                 </option>
@@ -108,17 +156,17 @@ export default function NewOrderForm() {
           </select>
         </div>
 
-        {/* Description */}
+        {/* ===================== Description ===================== */}
         <div>
           <label className="block font-semibold mb-1">Description</label>
-          <div className="p-2 border rounded-lg bg-white">
+          <div className="p-2 border rounded-lg bg-white min-h-[48px]">
             {service
-              ? services.find((s) => s.service === service)?.desc || "No description available"
+              ? selectedService?.desc || "No description available"
               : "Select a service to see description"}
           </div>
         </div>
 
-        {/* Link */}
+        {/* ===================== Link ===================== */}
         <div>
           <label className="block font-semibold mb-1">Link</label>
           <input
@@ -126,22 +174,46 @@ export default function NewOrderForm() {
             className="w-full border border-gray-300 rounded-lg p-2"
             value={link}
             onChange={(e) => setLink(e.target.value)}
+            placeholder="Enter post or video link"
           />
         </div>
 
-        {/* Quantity */}
+        {/* ===================== Quantity ===================== */}
         <div>
           <label className="block font-semibold mb-1">Quantity</label>
           <input
             type="number"
-            className="w-full border border-gray-300 rounded-lg p-2"
+            className={`w-full border rounded-lg p-2 ${
+              quantityError ? "border-red-500" : "border-gray-300"
+            }`}
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
+            placeholder="Enter quantity"
           />
-          <small className="text-gray-500">Enter quantity as number</small>
+          {quantityError && (
+            <small className="text-red-600 font-medium">{quantityError}</small>
+          )}
         </div>
 
-        {/* Charge */}
+        {/* ===================== Rate / Min / Max ===================== */}
+        {selectedService && (
+          <div className="grid grid-cols-3 gap-4 mt-2 bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+            <div>
+              <p className="text-gray-500 text-sm font-medium">Rate (per 1)</p>
+              <p className="font-semibold text-gray-800">₹{selectedService.rate}</p>
+            </div>
+            <div>
+              <p className="text-gray-500 text-sm font-medium">Min</p>
+              <p className="font-semibold text-gray-800">{selectedService.min}</p>
+            </div>
+            <div>
+              <p className="text-gray-500 text-sm font-medium">Max</p>
+              <p className="font-semibold text-gray-800">{selectedService.max}</p>
+            </div>
+          </div>
+        )}
+
+        {/* ===================== Charge ===================== */}
         <div>
           <label className="block font-semibold mb-1">Charge</label>
           <input
@@ -152,6 +224,7 @@ export default function NewOrderForm() {
           />
         </div>
 
+        {/* ===================== Submit Button ===================== */}
         <button
           type="submit"
           className={`w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-all ${
