@@ -4,11 +4,9 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-
-import Header from './components/Header'
-import Footer from './components/Footer'
-
-import FeatureSection from './components/FeatureSection'
+import Header from './admin/components/Header'
+import Footer from './user/components/Footer'
+import FeatureSection from './user/components/FeatureSection'
 
 const StatItem = ({ value, label, icon }) => (
   <div className="flex items-center gap-3">
