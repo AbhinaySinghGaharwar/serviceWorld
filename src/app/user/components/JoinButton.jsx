@@ -19,23 +19,23 @@ export default function JoinButtons() {
   ];
 
   return (
-    <div className="flex flex-wrap justify-center gap-4 p-4 bg-gray-200 rounded-2xl shadow-lg">
+    <div className="flex flex-wrap justify-center gap-3 sm:gap-4 p-4 bg-gray-200 rounded-2xl shadow-lg">
       {buttons.map((btn, index) => (
         <a
           key={index}
           href={btn.href}
           target="_blank"
           rel="noopener noreferrer"
-          className={`flex items-center gap-3 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition-all duration-300 ${btn.color} hover:scale-105`}
+          className={`flex items-center gap-2 sm:gap-3 text-white font-semibold px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-md transition-all duration-300 ${btn.color} hover:scale-105`}
         >
           <Image
             src={btn.img}
             alt={btn.label}
-            width={28}
-            height={28}
-            className="rounded-full bg-white p-1"
+            width={20}
+            height={20}
+            className="rounded-full bg-white p-1 sm:w-6 sm:h-6"
           />
-          <span>Join {btn.label}</span>
+          <span className="text-xs sm:text-sm md:text-base">Join {btn.label}</span>
         </a>
       ))}
     </div>

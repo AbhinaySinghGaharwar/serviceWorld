@@ -40,14 +40,13 @@ export default function CategoryFilter() {
   };
 
   return (
-    <div className="w-full bg-gray-200 rounded-3xl shadow-lg">
-
-      <div className="flex flex-wrap px-3 gap-2">
+    <div className="w-full bg-gray-200 rounded-3xl shadow-lg p-3">
+      <div className="flex flex-wrap justify-center gap-2">
         {categories.map((cat, index) => (
           <button
             key={index}
             onClick={() => handleFilter(cat.key, cat.isOther)}
-            className={`flex items-center gap-3 w-55 px-3 py-1 rounded-2xl text-white shadow-lg transition-all duration-300
+            className={`flex items-center gap-2 sm:gap-3 px-3 py-2 rounded-2xl text-white shadow-lg transition-all duration-300
               ${
                 active === cat.key
                   ? "bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-2xl scale-105"
@@ -55,7 +54,7 @@ export default function CategoryFilter() {
               }`}
           >
             <span className="text-2xl">{cat.icon}</span>
-            <span className="font-medium text-lg">{cat.label}</span>
+            <span className="font-medium text-sm sm:text-base">{cat.label}</span>
           </button>
         ))}
       </div>
