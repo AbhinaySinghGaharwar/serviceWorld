@@ -1,19 +1,36 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function UserStatistics() {
+  const [balance,setBalance]=useState('')
   useEffect(() => {
-    const getBalance = async () => {
-      // Fetch user balance logic here (if needed)
-    };
-    getBalance();
+    async function fetchBalance() {
+      try {
+        const res = await fetch("/api/services/getbalance");
+        const data = await res.json();
+      
+        if (data.success) {
+          setBalance(data.balance);
+        } else {
+          console.error("Balance fetch failed:", data.error);
+        }
+      } catch (err) {
+        console.error("Fetch balance error:", err);
+      }
+    }
+
+    fetchBalance();
+
+    // Optional: refresh balance every 30s
+    const interval = setInterval(fetchBalance, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const stats = [
     { icon: "https://cdn.mypanel.link/hmz1fi/bcpg233dh40fsdoc.png", label: "Username", value: "58" },
-    { icon: "https://cdn.mypanel.link/hmz1fi/raj356puppqixik9.png", label: "My Balance", value: "₹ 0" },
+    { icon: "https://cdn.mypanel.link/hmz1fi/raj356puppqixik9.png", label: "My Balance", value: balance },
     { icon: "https://cdn.mypanel.link/hmz1fi/mp50mc1fhx7sm8o1.png", label: "Panel Orders", value: "6642" },
     { icon: "https://cdn.mypanel.link/hmz1fi/aw21tyz9g0kxlk1u.png", label: "Spent Balance", value: "₹ 0" },
   ];

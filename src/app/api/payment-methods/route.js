@@ -4,14 +4,17 @@ import { putPaymentDetails, getAllPaymentMethods } from "@/lib/paymentMethod";
 export async function GET() {
   try {
     const methods = await getAllPaymentMethods();
-    // convert qrImage buffers to base64
+
+    // Only keep type and qrImage, convert qrImage buffer to base64
     const formatted = methods.map((m) => ({
-      ...m,
+      type: m.type,
       qrImage: m.qrImage ? m.qrImage.toString("base64") : null,
     }));
-    return NextResponse.json(formatted);
+
+    return NextResponse.json({ success: true, methods: formatted });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error("Error fetching payment methods:", err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
 
