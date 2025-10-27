@@ -4,10 +4,10 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import Header from './admin/components/Header'
+import Header from './user/components/Header'
 import Footer from './user/components/Footer'
 import FeatureSection from './user/components/FeatureSection'
-
+import Link from 'next/link'
 const StatItem = ({ value, label, icon }) => (
   <div className="flex items-center gap-3">
     <div className="w-12 h-12 rounded-full bg-white shadow flex items-center justify-center">{icon}</div>
@@ -43,6 +43,12 @@ const ServicesSection = () => {
 
   return (
     <section className="max-w-6xl mx-auto mt-14 px-6 md:px-0">
+         <Link
+      href="/auth/login"
+      className="block w-full text-center bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold px-6 py-3 rounded-xl shadow-md hover:from-indigo-600 hover:to-purple-600 transition-all duration-300"
+    >
+      Login
+    </Link>
       <div className="flex flex-col md:flex-row items-center gap-8">
         <motion.div
           initial={{ x: -80, opacity: 0 }}
