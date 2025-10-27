@@ -30,9 +30,9 @@ export default function UserStatistics() {
               <Image
                 src={stat.icon}
                 alt={stat.label}
-                width={16}
-                height={16}
-                className="object-contain w-4 h-4 sm:w-4 sm:h-4 md:w-5 md:h-5"
+                width={12}
+                height={12}
+                className="object-contain w-3 h-3 sm:w-4 sm:h-4 md:w-4 md:h-4"
               />
             </div>
             <div>

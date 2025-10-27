@@ -19,7 +19,7 @@ export default function JoinButtons() {
   ];
 
   return (
-    <div className="flex flex-wrap justify-center gap-3 sm:gap-4 p-4 bg-gray-200 rounded-2xl shadow-lg">
+    <div className="flex flex-wrap justify-center gap-3 sm:gap-4 p-4 bg-gray-100 ">
       {buttons.map((btn, index) => (
         <a
           key={index}

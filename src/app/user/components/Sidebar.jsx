@@ -9,8 +9,9 @@ import clsx from "clsx";
 
 export default function Sidebar({ onLogout, isSidebarOpen, setIsSidebarOpen }) {
   const [user, setUser] = useState(null);
+  const [balance, setBalance] = useState(0); // 🔹 New balance state
   const [uploading, setUploading] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false); // 🔹 for desktop collapse
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -18,10 +19,11 @@ export default function Sidebar({ onLogout, isSidebarOpen, setIsSidebarOpen }) {
     { icon: <MdDashboard />, text: "New Order", href: "/user/dashboard" },
     { icon: <MdHistory />, text: "Services", href: "/user/services" },
     { icon: <MdHistory />, text: "Orders History", href: "/user/orders" },
-    { icon: <MdPayment />, text: "Add Funds", href: "/user/add-funds" },
+    { icon: <MdPayment />, text: "Add Funds", href: "/user/addfunds" },
     { icon: <MdHelp />, text: "Tickets Support", href: "/user/support" },
   ];
 
+  // 🔹 Fetch user data (profile, etc.)
   useEffect(() => {
     async function fetchUser() {
       try {
@@ -31,10 +33,33 @@ export default function Sidebar({ onLogout, isSidebarOpen, setIsSidebarOpen }) {
         const data = await res.json();
         setUser(data);
       } catch (err) {
-        console.error(err);
+        console.error("User fetch error:", err);
       }
     }
     fetchUser();
+  }, []);
+
+  // 🔹 Fetch user balance (from your new route)
+  useEffect(() => {
+    async function fetchBalance() {
+      try {
+        const res = await fetch("/api/services/getbalance");
+        const data = await res.json();
+        if (data.success) {
+          setBalance(data.balance);
+        } else {
+          console.error("Balance fetch failed:", data.error);
+        }
+      } catch (err) {
+        console.error("Fetch balance error:", err);
+      }
+    }
+
+    fetchBalance();
+
+    // Optional: refresh balance every 30s
+    const interval = setInterval(fetchBalance, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -47,19 +72,17 @@ export default function Sidebar({ onLogout, isSidebarOpen, setIsSidebarOpen }) {
           : "-translate-x-full md:translate-x-0 md:w-auto"
       )}
       style={{
-        width: isCollapsed ? "70px" : "260px", // 🔹 desktop collapse width
+        width: isCollapsed ? "70px" : "260px",
         transition: "width 0.3s ease",
       }}
     >
-      {/* 🔹 Hamburger Menu (for all screens) */}
+      {/* 🔹 Hamburger Menu */}
       <div className="flex justify-end p-3">
         <button
           onClick={() => {
             if (window.innerWidth < 768) {
-              // Mobile toggle
               setIsSidebarOpen(!isSidebarOpen);
             } else {
-              // Desktop collapse toggle
               setIsCollapsed(!isCollapsed);
             }
           }}
@@ -93,7 +116,7 @@ export default function Sidebar({ onLogout, isSidebarOpen, setIsSidebarOpen }) {
               {user?.username || "Guest"}
             </h2>
             <p className="text-sm text-white/80">
-              Balance: ₹{user?.balance ?? 0}
+              Balance: ₹{balance.toFixed(2)}
             </p>
           </div>
         )}

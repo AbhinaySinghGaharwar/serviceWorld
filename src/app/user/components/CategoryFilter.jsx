@@ -40,7 +40,7 @@ export default function CategoryFilter() {
   };
 
   return (
-    <div className="w-full bg-gray-200 rounded-3xl shadow-lg p-3">
+    <div className="w-full bg-gray-100   p-3">
       <div className="flex flex-wrap justify-center gap-2">
         {categories.map((cat, index) => (
           <button
