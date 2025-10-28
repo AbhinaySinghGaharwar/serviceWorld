@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { FaBars, FaUserCircle } from "react-icons/fa";
 import { FiLogOut, FiSettings } from "react-icons/fi";
-
+import { useRouter } from "next/navigation";
 export default function Header({ onMenuToggle }) {
+  const router=useRouter()
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -34,7 +35,7 @@ export default function Header({ onMenuToggle }) {
             <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
               <button
                 className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-gray-800 text-sm"
-                onClick={() => alert('Settings clicked')}
+                onClick={() =>router.push('/user/settings') }
               >
                 <FiSettings /> Settings
               </button>
