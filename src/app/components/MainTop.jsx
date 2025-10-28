@@ -25,18 +25,14 @@ export default function MainTop() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ✅ React Hook Form setup
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({ resolver: yupResolver(schema) });
 
-  // ✅ Submit handler
   const onSubmit = async (data) => {
     setMessage("");
-
-    // Get CAPTCHA token
     const captcha = recaptchaRef.current?.getValue();
     if (!captcha) {
       setMessage("Please complete the CAPTCHA before logging in.");
@@ -44,14 +40,12 @@ export default function MainTop() {
     }
 
     setLoading(true);
-
     try {
       const res = await axios.post("/api/auth/login", {
         email: data.email,
         password: data.password,
         captcha,
       });
-
       setMessage(res.data.message || "Login successful!");
       router.push("/user/dashboard");
     } catch (err) {
@@ -65,29 +59,38 @@ export default function MainTop() {
   return (
     <section
       id="main-top"
-      className="relative bg-white shadow-md rounded-tl-[50px] rounded-br-[50px] py-16 px-6 md:px-12 overflow-hidden mt-20"
+      className="relative bg-gradient-to-br from-white via-indigo-50 to-purple-50 shadow-2xl rounded-tl-[50px] rounded-br-[50px] py-16 px-6 md:px-12 overflow-hidden py-20"
     >
       {/* 🌈 Animated Background */}
-      <div className="absolute inset-0 flex justify-center items-center -z-10 overflow-hidden">
+      <div className="absolute inset-0 -z-10">
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1, rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="w-[700px] h-[700px] md:w-[900px] md:h-[900px] bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full blur-3xl opacity-20"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 0.25, rotate: 360 }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute top-[-150px] left-[-150px] w-[700px] h-[700px] bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full blur-[150px]"
+        />
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 0.3, rotate: -360 }}
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          className="absolute bottom-[-200px] right-[-150px] w-[700px] h-[700px] bg-gradient-to-r from-fuchsia-400 to-blue-400 rounded-full blur-[180px]"
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center max-w-6xl mx-auto relative z-10">
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-14 items-center max-w-6xl mx-auto relative z-10">
         {/* LEFT FORM */}
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7 }}
-          className="space-y-6"
+          className="space-y-7 bg-white/70 backdrop-blur-xl border border-white/50 shadow-xl rounded-3xl p-8"
         >
-          <p className="text-blue-600 font-semibold text-lg">websitename.com</p>
+          <p className="text-indigo-600 font-semibold text-lg tracking-wide">
+            websitename.com
+          </p>
 
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 leading-tight flex items-center gap-3 flex-wrap">
+          <h1 className="text-3xl md:text-4xl font-extrabold leading-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 flex items-center gap-3 flex-wrap">
             SMM World Panel – World’s Best and Cheapest SMM Panel
             <Image
               src="https://storage.perfectcdn.com/81013d/q6es6uk1ctks7bew.svg"
@@ -97,67 +100,65 @@ export default function MainTop() {
             />
           </h1>
 
-          <p className="text-gray-600 text-lg">
-            The most usable panel in the world with{" "}
-            <span className="text-blue-600 font-semibold">82,045,541</span>{" "}
-            orders until now! Are you in?
+          <p className="text-gray-700 text-lg">
+            Trusted by{" "}
+            <span className="text-indigo-600 font-semibold">82,045,541+</span>{" "}
+            successful orders — your growth starts here.
           </p>
 
           {/* ✅ Login Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Email */}
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2">
-                  <Image
-                    src="https://storage.perfectcdn.com/81013d/idw6edksk00rd927.svg"
-                    alt="email icon"
-                    width={18}
-                    height={18}
-                  />
-                </span>
-                <input
-                  type="email"
-                  placeholder="Email"
-                  {...register("email")}
-                  className={`w-full pl-10 pr-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 text-black ${
-                    errors.email ? "border-red-500" : "border-gray-300"
-                  }`}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {/* Email */}
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                <Image
+                  src="https://storage.perfectcdn.com/81013d/idw6edksk00rd927.svg"
+                  alt="email icon"
+                  width={18}
+                  height={18}
                 />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Password */}
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2">
-                  <Image
-                    src="https://storage.perfectcdn.com/81013d/m7nhhy1g6cdbc9om.svg"
-                    alt="password icon"
-                    width={18}
-                    height={18}
-                  />
-                </span>
-                <input
-                  type="password"
-                  placeholder="Password"
-                  {...register("password")}
-                  className={`w-full pl-10 pr-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 text-black ${
-                    errors.password ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
-                {errors.password && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.password.message}
-                  </p>
-                )}
-              </div>
+              </span>
+              <input
+                type="email"
+                placeholder="Email"
+                {...register("email")}
+                className={`w-full pl-10 pr-3 py-3 border rounded-xl bg-white/70 text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition ${
+                  errors.email ? "border-red-500" : "border-gray-300"
+                }`}
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
-            {/* ✅ reCAPTCHA */}
+            {/* Password */}
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                <Image
+                  src="https://storage.perfectcdn.com/81013d/m7nhhy1g6cdbc9om.svg"
+                  alt="password icon"
+                  width={18}
+                  height={18}
+                />
+              </span>
+              <input
+                type="password"
+                placeholder="Password"
+                {...register("password")}
+                className={`w-full pl-10 pr-3 py-3 border rounded-xl bg-white/70 text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition ${
+                  errors.password ? "border-red-500" : "border-gray-300"
+                }`}
+              />
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+
+            {/* reCAPTCHA */}
             <div className="flex justify-center">
               <ReCAPTCHA
                 ref={recaptchaRef}
@@ -167,21 +168,27 @@ export default function MainTop() {
 
             <div className="flex justify-between items-center text-sm">
               <label className="flex items-center gap-2 text-gray-600">
-                <input type="checkbox" className="rounded text-blue-600" />
+                <input type="checkbox" className="rounded text-indigo-600" />
                 Remember me
               </label>
-              <a href="/resetpassword" className="text-blue-600 hover:underline">
+              <a
+                href="/resetpassword"
+                className="text-indigo-600 hover:underline font-medium"
+              >
                 Forgot password?
               </a>
             </div>
 
-            <button
+            {/* Submit Button */}
+            <motion.button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-500 text-white font-semibold py-2 rounded-xl shadow-md hover:opacity-90 transition-all"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="w-full py-3 font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 shadow-lg hover:opacity-90 transition-all"
             >
               {loading ? "Signing in..." : "Sign in"}
-            </button>
+            </motion.button>
 
             {message && (
               <motion.p
@@ -193,28 +200,31 @@ export default function MainTop() {
               </motion.p>
             )}
 
-            <p className="text-center text-gray-600 text-sm">
+            <p className="text-center text-gray-700 text-sm">
               Don’t have an account?{" "}
-              <a href="/signup" className="text-blue-600 hover:underline">
+              <a
+                href="/auth/signup"
+                className="text-indigo-600 font-semibold hover:underline"
+              >
                 Sign up
               </a>
             </p>
           </form>
         </motion.div>
 
-        {/* RIGHT: Hero Image */}
+        {/* RIGHT HERO IMAGE */}
         <motion.div
           initial={{ opacity: 0, x: 40 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7 }}
           className="flex justify-center md:justify-end"
         >
-          <div className="relative w-80 h-80 md:w-[400px] md:h-[400px]">
+          <div className="relative w-80 h-80 md:w-[420px] md:h-[420px] rounded-3xl overflow-hidden shadow-2xl">
             <Image
               src="https://storage.perfectcdn.com/81013d/cisiri3e4fe0qu1o.webp"
               alt="hero"
               fill
-              className="object-contain rounded-3xl drop-shadow-lg"
+              className="object-contain scale-105 hover:scale-110 transition-transform duration-700"
               priority
             />
           </div>

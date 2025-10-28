@@ -3,79 +3,111 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaCogs, FaCode, FaBlog } from "react-icons/fa";
 import Link from "next/link";
+
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <nav className=" top-0 z-50 bg-white shadow-md rounded-tl-3xl rounded-br-3xl mx-auto w-full md:w-4/5">
-      <div className="flex justify-between items-center px-6 py-3">
-        {/* Logo */}
-      <Link href="/" className="flex items-center space-x-2">
-        <img
-          src="https://storage.perfectcdn.com/81013d/wzprcb8ileadr37i.png"
-          alt="Smm World Panel"
-          className="h-8 w-auto"
-        />
-      </Link>
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md shadow-md border-b border-gray-100 rounded-b-3xl md:rounded-none transition-all duration-300">
+      <div className="flex justify-between items-center px-6 py-3 max-w-7xl mx-auto">
+        {/* 🌟 Logo */}
+        <Link href="/" className="flex items-center space-x-2">
+          <img
+            src="https://storage.perfectcdn.com/81013d/wzprcb8ileadr37i.png"
+            alt="SMM World Panel"
+            className="h-10 w-auto hover:scale-105 transition-transform duration-200"
+          />
+        </Link>
 
-   {/* Desktop Menu */}
-<ul className="hidden md:flex items-center space-x-8 text-gray-700 font-medium">
-  <li>
-    <a href="/services" className="flex items-center hover:text-blue-600 transition-colors">
-      <FaCogs className="text-blue-500 mr-2 text-[18px]" />
-      Services
-    </a>
-  </li>
+        {/* 🌍 Desktop Menu */}
+        <ul className="hidden md:flex items-center space-x-8 text-gray-700 font-medium">
+          <li>
+            <Link
+              href="/services"
+              className="flex items-center hover:text-indigo-600 transition-colors"
+            >
+              <FaCogs className="text-indigo-500 mr-2 text-[18px]" />
+              Services
+            </Link>
+          </li>
 
-  <li>
-    <a href="/apiv2" className="flex items-center hover:text-blue-600 transition-colors">
-      <FaCode className="text-purple-500 mr-2 text-[18px]" />
-      API
-    </a>
-  </li>
+          <li>
+            <Link
+              href="/apiv2"
+              className="flex items-center hover:text-purple-600 transition-colors"
+            >
+              <FaCode className="text-purple-500 mr-2 text-[18px]" />
+              API
+            </Link>
+          </li>
 
-  <li>
-    <a href="/blogs" className="flex items-center hover:text-blue-600 transition-colors">
-      <FaBlog className="text-green-500 mr-2 text-[18px]" />
-      Blogs
-    </a>
-  </li>
-</ul>
+          <li>
+            <Link
+              href="/blogs"
+              className="flex items-center hover:text-green-600 transition-colors"
+            >
+              <FaBlog className="text-green-500 mr-2 text-[18px]" />
+              Blogs
+            </Link>
+          </li>
+        </ul>
 
-        {/* Buttons (Desktop) */}
+        {/* 🔐 Desktop Buttons */}
         <div className="hidden md:flex items-center space-x-4">
-          <a
+          <Link
             href="/auth/login"
-            className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full font-semibold hover:opacity-90 transition"
+            className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full font-semibold shadow-md hover:opacity-90 hover:scale-[1.03] transition"
           >
             Login
-          </a>
-          <a
+          </Link>
+          <Link
             href="/auth/signup"
-            className="px-4 py-2 bg-gradient-to-r from-pink-500 to-yellow-500 text-white rounded-full font-semibold hover:opacity-90 transition"
+            className="px-5 py-2 bg-gradient-to-r from-pink-500 to-yellow-500 text-white rounded-full font-semibold shadow-md hover:opacity-90 hover:scale-[1.03] transition"
           >
             Signup
-          </a>
+          </Link>
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* 📱 Mobile Menu Button */}
         <button
-          className="md:hidden text-gray-700 focus:outline-none"
+          className="md:hidden text-gray-700 focus:outline-none hover:scale-110 transition-transform"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           {menuOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-7 w-7"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-7 w-7"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           )}
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* 📱 Mobile Dropdown */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -83,26 +115,53 @@ export default function Navbar() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="md:hidden bg-white border-t border-gray-100"
+            className="md:hidden bg-white border-t border-gray-100 shadow-inner"
           >
             <ul className="flex flex-col items-center space-y-4 py-4 text-gray-700 font-medium">
-              <li><a href="/services" className="hover:text-blue-600 transition-colors">Services</a></li>
-              <li><a href="/api" className="hover:text-blue-600 transition-colors">API</a></li>
-              <li><a href="/blogs" className="hover:text-blue-600 transition-colors">Blogs</a></li>
+              <li>
+                <Link
+                  href="/services"
+                  className="hover:text-indigo-600 transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Services
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/apiv2"
+                  className="hover:text-purple-600 transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  API
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/blogs"
+                  className="hover:text-green-600 transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Blogs
+                </Link>
+              </li>
 
-              <div className="flex flex-col space-y-2 w-3/4">
-                <a
+              {/* Buttons for Mobile */}
+              <div className="flex flex-col space-y-3 w-3/4 pt-2">
+                <Link
                   href="/auth/login"
-                  className="block text-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full font-semibold hover:opacity-90 transition"
+                  className="block text-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full font-semibold shadow-md hover:opacity-90 transition"
+                  onClick={() => setMenuOpen(false)}
                 >
                   Login
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/auth/signup"
-                  className="block text-center px-4 py-2 bg-gradient-to-r from-pink-500 to-yellow-500 text-white rounded-full font-semibold hover:opacity-90 transition"
+                  className="block text-center px-4 py-2 bg-gradient-to-r from-pink-500 to-yellow-500 text-white rounded-full font-semibold shadow-md hover:opacity-90 transition"
+                  onClick={() => setMenuOpen(false)}
                 >
                   Signup
-                </a>
+                </Link>
               </div>
             </ul>
           </motion.div>
