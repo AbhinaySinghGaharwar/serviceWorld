@@ -227,91 +227,118 @@ export default function AddFund() {
           </div>
         </div>
 
-        {/* Transaction History */}
-        <div className="bg-gray-50 p-4 sm:p-6 border-t border-gray-200">
-          <h5 className="text-lg sm:text-xl font-semibold text-indigo-600 mb-4">
-            Transaction History
-          </h5>
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border rounded-lg text-gray-800 text-sm sm:text-base">
-              <thead className="bg-indigo-100 font-semibold">
-                <tr>
-                  <th className="py-3 px-4 text-left">ID</th>
-                  <th className="py-3 px-4 text-left">Date</th>
-                  <th className="py-3 px-4 text-left">Method</th>
-                  <th className="py-3 px-4 text-left">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {transactions.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="4"
-                      className="py-4 text-center text-gray-500"
-                    >
-                      No transactions yet.
-                    </td>
-                  </tr>
-                ) : (
-                  transactions.map((tx, idx) => (
-                    <tr
-                      key={idx}
-                      className="border-b hover:bg-indigo-50 transition-colors duration-200"
-                    >
-                      <td className="py-2 px-4">{tx.utr}</td>
-                      <td className="py-2 px-4">
-                        {new Date(tx.createdAt).toLocaleString()}
-                      </td>
-                      <td className="py-2 px-4">{tx.payment_type}</td>
-                      <td className="py-2 px-4 font-semibold">
-                        ₹{tx.payment_amount}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+     {/* Transaction History */}
+<div className="bg-white/70 backdrop-blur-lg border border-gray-200 rounded-2xl shadow-lg mt-10 p-4 sm:p-6 lg:p-8 transition-all duration-300 hover:shadow-xl">
+  <h5 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-6 text-center sm:text-left">
+    Transaction History
+  </h5>
+
+  <div className="overflow-x-auto rounded-xl border border-gray-100">
+    <table className="min-w-full bg-white text-gray-800 text-sm sm:text-base rounded-xl">
+      <thead className="bg-gradient-to-r from-indigo-100 to-purple-100 text-gray-700 font-semibold uppercase tracking-wide">
+        <tr>
+          <th className="py-3 px-4 text-left">ID</th>
+          <th className="py-3 px-4 text-left">Date</th>
+          <th className="py-3 px-4 text-left">Method</th>
+          <th className="py-3 px-4 text-left">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {transactions.length === 0 ? (
+          <tr>
+            <td
+              colSpan="4"
+              className="py-6 text-center text-gray-500 italic bg-gray-50"
+            >
+              No transactions yet.
+            </td>
+          </tr>
+        ) : (
+          transactions.map((tx, idx) => (
+            <tr
+              key={idx}
+              className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 transition-all duration-200"
+            >
+              <td className="py-3 px-4 font-medium text-gray-700">{tx.utr}</td>
+              <td className="py-3 px-4 text-gray-600">
+                {new Date(tx.createdAt).toLocaleString()}
+              </td>
+              <td className="py-3 px-4 text-gray-600 capitalize">
+                {tx.payment_type}
+              </td>
+              <td className="py-3 px-4 font-semibold text-indigo-600">
+                ₹{tx.payment_amount}
+              </td>
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
+
       </div>
 
-      {/* Popup Modal */}
-      {popup.visible && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-2xl max-w-md w-full shadow-xl text-center">
-            <h2
-              className={`text-xl font-bold mb-4 ${
-                popup.success ? "text-green-600" : "text-red-600"
-              }`}
-            >
-              {popup.success ? "Success!" : "Failed!"}
-            </h2>
-            <p className="mb-4">{popup.message}</p>
+     {/* Popup Modal */}
+{popup.visible && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-md z-50 px-4">
+    <div className="relative bg-white/80 backdrop-blur-xl border border-gray-200 p-6 sm:p-8 rounded-3xl max-w-sm sm:max-w-md w-full shadow-2xl animate-fadeInUp text-center">
+      
+      {/* Success or Fail Icon */}
+      <div
+        className={`mx-auto mb-4 w-16 h-16 flex items-center justify-center rounded-full shadow-md ${
+          popup.success
+            ? "bg-gradient-to-r from-green-400 to-emerald-500"
+            : "bg-gradient-to-r from-rose-400 to-red-500"
+        }`}
+      >
+        <span className="text-white text-3xl">
+          {popup.success ? "✅" : "❌"}
+        </span>
+      </div>
 
-            {popup.transaction && (
-              <div className="text-left text-sm bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <p>
-                  <strong>UTR:</strong> {popup.transaction.utr}
-                </p>
-                <p>
-                  <strong>Amount:</strong> ₹{popup.transaction.payment_amount}
-                </p>
-                <p>
-                  <strong>Payment Type:</strong>{" "}
-                  {popup.transaction.payment_type}
-                </p>
-              </div>
-            )}
+      {/* Title */}
+      <h2
+        className={`text-2xl font-extrabold mb-3 ${
+          popup.success
+            ? "bg-gradient-to-r from-green-600 to-emerald-500"
+            : "bg-gradient-to-r from-red-600 to-rose-500"
+        } bg-clip-text text-transparent`}
+      >
+        {popup.success ? "Payment Successful" : "Transaction Failed"}
+      </h2>
 
-            <button
-              onClick={() => setPopup({ ...popup, visible: false })}
-              className="mt-4 bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition"
-            >
-              Close
-            </button>
-          </div>
+      {/* Message */}
+      <p className="text-gray-700 mb-5 text-sm sm:text-base leading-relaxed">
+        {popup.message}
+      </p>
+
+      {/* Transaction Details */}
+      {popup.transaction && (
+        <div className="text-left text-sm bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200 shadow-inner">
+          <p className="mb-1">
+            <strong>UTR:</strong> {popup.transaction.utr}
+          </p>
+          <p className="mb-1">
+            <strong>Amount:</strong> ₹{popup.transaction.payment_amount}
+          </p>
+          <p>
+            <strong>Payment Type:</strong> {popup.transaction.payment_type}
+          </p>
         </div>
       )}
+
+      {/* Close Button */}
+      <button
+        onClick={() => setPopup({ ...popup, visible: false })}
+        className="mt-6 w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold rounded-xl shadow-md hover:shadow-lg hover:opacity-90 active:scale-95 transition-all duration-200"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }

@@ -39,7 +39,6 @@ export default function NewOrderForm() {
     fetchServices();
   }, []);
 
-  // Close dropdown if clicked outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -131,26 +130,26 @@ export default function NewOrderForm() {
     selectedService.max == null;
 
   return (
-    <div className="w-full max-w-3xl mx-auto bg-gray-100 p-4 sm:p-6 md:p-8 rounded-2xl shadow-lg text-black">
+    <div className="w-full max-w-3xl mx-auto bg-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-2xl border border-gray-200 text-black">
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Service */}
         <div ref={dropdownRef}>
-          <label className="block mb-1 font-semibold text-sm sm:text-base text-black">
+          <label className="block mb-1 font-semibold text-sm sm:text-base text-gray-700">
             Service
           </label>
           {responseMessage && (
             <div
               className={`mb-3 rounded-lg p-3 text-sm ${
                 responseType === "success"
-                  ? "bg-green-100 text-green-700 border border-green-300"
-                  : "bg-red-100 text-red-700 border border-red-300"
+                  ? "bg-green-50 text-green-700 border border-green-300"
+                  : "bg-red-50 text-red-700 border border-red-300"
               }`}
             >
               {responseMessage}
             </div>
           )}
           {serviceError && (
-            <div className="mb-3 p-3 text-sm bg-red-100 text-red-700 border border-red-300 rounded-lg">
+            <div className="mb-3 p-3 text-sm bg-red-50 text-red-700 border border-red-300 rounded-lg">
               {serviceError}
             </div>
           )}
@@ -161,15 +160,16 @@ export default function NewOrderForm() {
             onClick={() => setDropdownOpen(!dropdownOpen)}
           >
             <div
-              className={`w-full border border-gray-300 rounded-lg p-2 sm:p-3 text-sm sm:text-base text-black bg-white flex justify-between items-center cursor-pointer`}
+              className={`w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base text-gray-800 bg-gray-50 flex justify-between items-center cursor-pointer shadow-sm hover:shadow-md transition`}
             >
               {service
-                ? services.find((s) => s.service === service)?.name + ` | ₹${services.find((s) => s.service === service)?.rate}`
+                ? services.find((s) => s.service === service)?.name +
+                  ` | ₹${services.find((s) => s.service === service)?.rate}`
                 : "Select a service"}
               <span className="ml-2 text-gray-400">▼</span>
             </div>
             {dropdownOpen && services.length > 0 && (
-              <ul className="absolute z-50 w-full max-h-60 overflow-auto bg-white border border-gray-300 rounded-lg mt-1 shadow-lg text-sm sm:text-base">
+              <ul className="absolute z-50 w-full max-h-60 overflow-auto bg-white border border-gray-200 rounded-lg mt-1 shadow-lg text-sm sm:text-base">
                 {services.map((srv) => (
                   <li
                     key={srv.service}
@@ -177,7 +177,7 @@ export default function NewOrderForm() {
                       setService(srv.service);
                       setDropdownOpen(false);
                     }}
-                    className="p-2 hover:bg-indigo-100 cursor-pointer truncate"
+                    className="p-2 hover:bg-blue-50 cursor-pointer truncate"
                   >
                     {srv.name} | ₹{srv.rate}
                   </li>
@@ -189,8 +189,10 @@ export default function NewOrderForm() {
 
         {/* Description */}
         <div>
-          <label className="block font-semibold mb-1 text-sm sm:text-base text-black">Description</label>
-          <div className="p-2 sm:p-3 border rounded-lg bg-white min-h-[48px] text-xs sm:text-sm text-black">
+          <label className="block font-semibold mb-1 text-sm sm:text-base text-gray-700">
+            Description
+          </label>
+          <div className="p-3 border rounded-lg bg-gray-50 min-h-[48px] text-xs sm:text-sm text-gray-800 shadow-sm">
             {invalidServiceData
               ? "⚠️ Service details missing or invalid."
               : selectedService?.desc || "No description available"}
@@ -199,10 +201,12 @@ export default function NewOrderForm() {
 
         {/* Link */}
         <div>
-          <label className="block font-semibold mb-1 text-sm sm:text-base text-black">Link</label>
+          <label className="block font-semibold mb-1 text-sm sm:text-base text-gray-700">
+            Link
+          </label>
           <input
             type="text"
-            className="w-full border border-gray-300 rounded-lg p-2 sm:p-3 text-sm sm:text-base text-black"
+            className="w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base bg-gray-50 text-gray-900 shadow-sm focus:ring-2 focus:ring-blue-200"
             value={link}
             onChange={(e) => setLink(e.target.value)}
             placeholder="Enter post or video link"
@@ -211,45 +215,57 @@ export default function NewOrderForm() {
 
         {/* Quantity */}
         <div>
-          <label className="block font-semibold mb-1 text-sm sm:text-base text-black">Quantity</label>
+          <label className="block font-semibold mb-1 text-sm sm:text-base text-gray-700">
+            Quantity
+          </label>
           <input
             type="number"
-            className={`w-full border rounded-lg p-2 sm:p-3 text-sm sm:text-base ${
+            className={`w-full border rounded-lg p-3 text-sm sm:text-base bg-gray-50 shadow-sm focus:ring-2 focus:ring-blue-200 ${
               quantityError ? "border-red-500" : "border-gray-300"
-            } text-black`}
+            } text-gray-900`}
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
             placeholder="Enter quantity"
           />
           {quantityError && (
-            <small className="text-red-600 font-medium text-xs sm:text-sm">{quantityError}</small>
+            <small className="text-red-600 font-medium text-xs sm:text-sm">
+              {quantityError}
+            </small>
           )}
         </div>
 
         {/* Rate / Min / Max */}
         {selectedService && !invalidServiceData && (
-          <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-2 bg-white p-2 sm:p-3 rounded-lg shadow-sm border border-gray-200 text-xs sm:text-sm text-black">
+          <div className="grid grid-cols-3 gap-4 mt-2 bg-gray-50 p-3 rounded-lg shadow-sm border border-gray-200 text-xs sm:text-sm text-gray-800">
             <div>
-              <p className="text-gray-600 font-medium">Rate (per 1)</p>
-              <p className="font-semibold text-black">₹{selectedService.rate}</p>
+              <p className="text-gray-500 font-medium">Rate (per 1)</p>
+              <p className="font-semibold text-gray-800">
+                ₹{selectedService.rate}
+              </p>
             </div>
             <div>
-              <p className="text-gray-600 font-medium">Min</p>
-              <p className="font-semibold text-black">{selectedService.min}</p>
+              <p className="text-gray-500 font-medium">Min</p>
+              <p className="font-semibold text-gray-800">
+                {selectedService.min}
+              </p>
             </div>
             <div>
-              <p className="text-gray-600 font-medium">Max</p>
-              <p className="font-semibold text-black">{selectedService.max}</p>
+              <p className="text-gray-500 font-medium">Max</p>
+              <p className="font-semibold text-gray-800">
+                {selectedService.max}
+              </p>
             </div>
           </div>
         )}
 
         {/* Charge */}
         <div>
-          <label className="block font-semibold mb-1 text-sm sm:text-base text-black">Charge</label>
+          <label className="block font-semibold mb-1 text-sm sm:text-base text-gray-700">
+            Charge
+          </label>
           <input
             type="text"
-            className="w-full border border-gray-300 rounded-lg p-2 sm:p-3 text-sm sm:text-base bg-gray-100 text-black"
+            className="w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base bg-gray-50 text-gray-900 shadow-sm"
             value={charge}
             readOnly
           />
@@ -259,7 +275,7 @@ export default function NewOrderForm() {
         <button
           type="submit"
           disabled={submitting || serviceError || invalidServiceData}
-          className="w-full bg-blue-600 text-white py-2 sm:py-3 rounded-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-lg shadow-md hover:shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting ? (
             <span className="flex items-center gap-2">

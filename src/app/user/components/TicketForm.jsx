@@ -45,23 +45,33 @@ export default function TicketForm({ setTickets }) {
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl text-black">
-      <h2 className="text-xl font-semibold mb-4">New Ticket</h2>
+    <div className="relative bg-white/80 backdrop-blur-xl border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-xl transition-all duration-300 hover:shadow-2xl">
+      <h2 className="text-2xl font-extrabold mb-6 bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 bg-clip-text text-transparent text-center">
+        🎫 Create Support Ticket
+      </h2>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-600 text-white p-2 mb-2 rounded text-sm">
+        <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white p-3 mb-4 rounded-lg text-sm text-center shadow-md">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmitTicket} className="space-y-4">
+      {/* Success Message */}
+      {success && (
+        <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-3 mb-4 rounded-lg text-sm text-center shadow-md animate-fadeIn">
+          ✅ Ticket Submitted Successfully
+        </div>
+      )}
+
+      <form onSubmit={handleSubmitTicket} className="space-y-5">
+        {/* Subject Dropdown */}
         <div>
-          <label className="text-black">Subject</label>
+          <label className="block text-gray-700 font-medium mb-1">Subject</label>
           <select
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full p-2 border rounded bg-gray-200 text-black focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full p-3 rounded-xl bg-gray-100 border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
             disabled={loading}
           >
             <option value="order">Order</option>
@@ -71,25 +81,28 @@ export default function TicketForm({ setTickets }) {
           </select>
         </div>
 
+        {/* Message Box */}
         <div>
-          <label className="text-black">Message</label>
+          <label className="block text-gray-700 font-medium mb-1">Message</label>
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             rows={5}
-            className="w-full p-2 border rounded bg-gray-200 text-black focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full p-3 rounded-xl bg-gray-100 border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 transition resize-none"
             disabled={loading}
+            placeholder="Write your issue or query here..."
           />
         </div>
 
+        {/* Submit Button */}
         <button
           type="submit"
-          className={`w-full flex justify-center items-center p-2 rounded-xl text-white font-semibold transition ${
-            success
-              ? "bg-green-500 hover:bg-green-600"
-              : "bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 hover:opacity-90"
-          }`}
           disabled={loading}
+          className={`w-full py-3 rounded-xl text-white font-semibold flex justify-center items-center transition-all duration-300 ${
+            success
+              ? "bg-gradient-to-r from-green-500 to-emerald-500"
+              : "bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 hover:opacity-90 hover:scale-[1.02]"
+          }`}
         >
           {loading ? (
             <svg

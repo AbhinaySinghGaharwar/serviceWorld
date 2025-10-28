@@ -11,7 +11,15 @@ export default function Header({ onMenuToggle }) {
   return (
     <header className="w-full bg-white shadow-md flex items-center justify-between px-4 py-3 relative z-50">
       {/* 🔹 Logo */}
+      
       <div className="flex items-center gap-3">
+         {/* Mobile Menu Toggle */}
+        <button
+          onClick={onMenuToggle}
+          className="md:hidden text-gray-800 bg-gray-100 p-2 rounded-lg shadow-sm"
+        >
+          <FaBars size={20} />
+        </button>
         <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 flex items-center justify-center text-white font-bold">
           SM
         </div>
@@ -41,7 +49,21 @@ export default function Header({ onMenuToggle }) {
               </button>
               <button
                 className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-red-600 text-sm"
-                onClick={() => alert('Logged out')}
+                onClick={() => {
+                   const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      if (res.ok) {
+        localStorage.removeItem("email");
+        localStorage.removeItem("token");
+        router.push("/auth/login");
+      } else alert("Logout failed. Please try again.");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
+  handleLogout()
+                }}
               >
                 <FiLogOut /> Logout
               </button>
@@ -49,13 +71,7 @@ export default function Header({ onMenuToggle }) {
           )}
         </div>
 
-        {/* Mobile Menu Toggle */}
-        <button
-          onClick={onMenuToggle}
-          className="md:hidden text-gray-800 bg-gray-100 p-2 rounded-lg shadow-sm"
-        >
-          <FaBars size={20} />
-        </button>
+       
       </div>
     </header>
   );

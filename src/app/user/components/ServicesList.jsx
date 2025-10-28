@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   FaInstagram,
@@ -9,25 +9,48 @@ import {
   FaTiktok,
   FaTelegramPlane,
   FaGlobe,
+  FaSearch,
 } from 'react-icons/fa'
-import { createOrder, getOrderStatus } from '@/lib/services'
 
 export default function ServicesList({ services }) {
-  const orders = {} // Keep state if needed
   const [selectedService, setSelectedService] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('All')
+
+  // Popup form states
+  const [link, setLink] = useState('')
+  const [quantity, setQuantity] = useState('')
+  const [charge, setCharge] = useState('')
+  const [quantityError, setQuantityError] = useState('')
+  const [responseMessage, setResponseMessage] = useState('')
+  const [responseType, setResponseType] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const dropdownRef = useRef(null)
+
+  // Close dropdown (if used in future)
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        // close any dropdown if required
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const getIconForService = (name) => {
     name = name.toLowerCase()
-    if (name.includes('instagram')) return <FaInstagram className="text-pink-500" />
-    if (name.includes('youtube')) return <FaYoutube className="text-red-500" />
-    if (name.includes('facebook')) return <FaFacebook className="text-blue-500" />
-    if (name.includes('tiktok')) return <FaTiktok className="text-gray-300" />
-    if (name.includes('telegram')) return <FaTelegramPlane className="text-sky-400" />
-    return <FaGlobe className="text-emerald-400" />
+    if (name.includes('instagram')) return <FaInstagram className="text-pink-500 text-2xl" />
+    if (name.includes('youtube')) return <FaYoutube className="text-red-500 text-2xl" />
+    if (name.includes('facebook')) return <FaFacebook className="text-blue-600 text-2xl" />
+    if (name.includes('tiktok')) return <FaTiktok className="text-gray-800 text-2xl" />
+    if (name.includes('telegram')) return <FaTelegramPlane className="text-sky-500 text-2xl" />
+    return <FaGlobe className="text-emerald-500 text-2xl" />
   }
 
   const serviceList = Array.isArray(services) ? services : []
 
+  // Group services by platform
   const groupedServices = useMemo(() => {
     const groups = {
       Instagram: [],
@@ -51,135 +74,272 @@ export default function ServicesList({ services }) {
     return Object.fromEntries(Object.entries(groups).filter(([_, v]) => v.length > 0))
   }, [serviceList])
 
-  const handleOrder = async (service) => {
-    const link = prompt(`Enter link/username for ${service.name}`)
-    const quantity = prompt(`Enter quantity for ${service.name}`)
-    if (!link || !quantity) return
+  // Search + filter
+  const filteredGroupedServices = useMemo(() => {
+    const filtered = {}
+    for (const [category, list] of Object.entries(groupedServices)) {
+      if (selectedCategory !== 'All' && category !== selectedCategory) continue
+      const filteredList = list.filter((s) =>
+        s.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      if (filteredList.length > 0) filtered[category] = filteredList
+    }
+    return filtered
+  }, [groupedServices, searchTerm, selectedCategory])
+
+  // Auto-calculate charge
+  useEffect(() => {
+    if (selectedService && quantity) {
+      const rate = parseFloat(selectedService.rate.toString().replace(/,/g, ''))
+      const qty = parseInt(quantity, 10)
+      if (!isNaN(rate) && !isNaN(qty)) {
+        setCharge((rate * qty / 1000).toFixed(2))
+      } else setCharge('')
+    } else setCharge('')
+  }, [quantity, selectedService])
+
+  // Validate quantity range
+  useEffect(() => {
+    if (!selectedService || !quantity) return
+    const qty = parseInt(quantity, 10)
+    if (qty < selectedService.min) {
+      setQuantityError(`Minimum allowed quantity is ${selectedService.min}`)
+    } else if (qty > selectedService.max) {
+      setQuantityError(`Maximum allowed quantity is ${selectedService.max}`)
+    } else setQuantityError('')
+  }, [quantity, selectedService])
+
+  // Submit order
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!selectedService || !link || !quantity || !charge) {
+      setResponseMessage('⚠️ Please fill all fields before submitting.')
+      setResponseType('error')
+      return
+    }
+    if (quantityError) {
+      setResponseMessage('⚠️ Quantity must be within the allowed range.')
+      setResponseType('error')
+      return
+    }
+
+    setSubmitting(true)
+    setResponseMessage(null)
 
     try {
-      const orderData = await createOrder({
-        service: service.service,
-        link,
-        quantity: Number(quantity),
+      const res = await fetch('/api/orders/createorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service: selectedService.service,
+          link,
+          quantity,
+          charge,
+        }),
+        credentials: 'include',
       })
 
-      if (orderData.error) throw orderData
-      const orderId = orderData.order
-      alert(`Order created: ${orderId}`)
-
-      const statusData = await getOrderStatus(orderId)
-      orders[orderId] = statusData.status || 'Pending'
-    } catch (error) {
-      alert('Error creating order: ' + (error.error || error.message))
+      const data = await res.json()
+      if (!res.ok) {
+        setResponseMessage(`❌ ${data.error || 'Failed to create order.'}`)
+        setResponseType('error')
+      } else {
+        setResponseMessage(`✅ Order created successfully! ID: ${data.orderId}`)
+        setResponseType('success')
+        setLink('')
+        setQuantity('')
+        setCharge('')
+      }
+    } catch (err) {
+      console.error(err)
+      setResponseMessage('❌ Something went wrong while creating the order.')
+      setResponseType('error')
+    } finally {
+      setSubmitting(false)
     }
   }
 
   return (
-    <div className=" md:p-8  min-h-screen text-black flex justify-center">
-      <div className="w-full max-w-[1100px]">
+    <div className="min-h-screen bg-white text-black flex justify-center px-4 md:px-8 py-10">
+      <div className="w-full max-w-[1200px]">
         <h1 className="text-3xl md:text-4xl font-extrabold text-center mb-8 bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 text-transparent bg-clip-text">
           💎 Available Services
         </h1>
 
-        {Object.keys(groupedServices).length === 0 ? (
-          <p className="text-center text-gray-500">No services available.</p>
+        {/* 🔍 Search + Filter */}
+        <div className="flex flex-col sm:flex-row gap-3 justify-between items-center mb-10">
+          <div className="relative w-full sm:w-2/3">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search service..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 outline-none transition"
+            />
+          </div>
+
+          <select
+  value={selectedCategory}
+  onChange={(e) => setSelectedCategory(e.target.value)}
+  className="
+    w-full sm:w-auto
+    px-4 py-2
+    rounded-xl
+    bg-white
+    border-2 border-transparent
+    shadow-md
+    text-gray-800 font-medium
+    outline-none
+    transition-all duration-300
+    focus:(ring-2 ring-indigo-400 border-indigo-400 scale-[1.02])
+    hover:(border-indigo-300)
+    appearance-none
+    bg-gradient-to-r from-indigo-50 to-purple-50
+  "
+>
+  <option value="All" className="text-gray-600 font-semibold">
+    All Categories
+  </option>
+  {Object.keys(groupedServices).map((cat) => (
+    <option key={cat} value={cat} className="text-gray-700">
+      {cat}
+    </option>
+  ))}
+</select>
+
+        </div>
+
+        {/* 🧩 Services */}
+        {Object.keys(filteredGroupedServices).length === 0 ? (
+          <p className="text-center text-gray-500">No matching services found.</p>
         ) : (
-          Object.entries(groupedServices).map(([category, services]) => (
+          Object.entries(filteredGroupedServices).map(([category, services]) => (
             <motion.div
               key={category}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
               className="mb-10"
             >
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-4">
                 {getIconForService(category)}
                 <h2 className="text-xl md:text-2xl font-semibold">{category}</h2>
                 <span className="text-sm text-gray-500">({services.length})</span>
               </div>
 
-              <div className="bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 p-1 rounded-2xl shadow-lg overflow-hidden">
-                <div className="bg-white rounded-xl overflow-hidden border border-gray-200">
-                  <table className="w-full text-sm md:text-base text-left table-fixed">
-                    <thead className="bg-gray-100 text-gray-700 uppercase text-xs md:text-sm">
-                      <tr>
-                        <th className="px-2 py-2 w-12">ID</th>
-                        <th className="px-2 py-2 w-48">Service</th>
-                        <th className="px-2 py-2 w-20">Rate / 1K</th>
-                        <th className="px-2 py-2 hidden md:table-cell w-16">Min</th>
-                        <th className="px-2 py-2 hidden md:table-cell w-16">Max</th>
-                        <th className="px-2 py-2 hidden sm:table-cell w-24">Avg Time</th>
-                        <th className="px-2 py-2 text-center w-40">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {services.map((service, index) => (
-                        <tr
-                          key={service.service || index}
-                          className={`transition duration-200 hover:bg-gray-50 ${
-                            index % 2 === 0 ? 'bg-white/80' : 'bg-white/60'
-                          }`}
-                        >
-                          <td className="px-2 py-2 text-purple-500 font-mono whitespace-nowrap">
-                            {service.service}
-                          </td>
-                          <td className="px-2 py-2 flex items-start gap-2">
-                            {getIconForService(service.name)}
-                            <span className="break-words">{service.name}</span>
-                          </td>
-                          <td className="px-2 py-2 whitespace-nowrap">${service.rate}</td>
-                          <td className="px-2 py-2 hidden md:table-cell">{service.min}</td>
-                          <td className="px-2 py-2 hidden md:table-cell">{service.max}</td>
-                          <td className="px-2 py-2 hidden sm:table-cell text-gray-500">
-                            {service.avg_time || '—'}
-                          </td>
-                          <td className="px-2 py-2 text-center flex flex-wrap gap-3 justify-center">
-                            <button
-                              onClick={() => setSelectedService(service)}
-                              className="px-4 py-2 rounded-md text-sm md:text-base bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 text-white font-semibold hover:opacity-90 transition"
-                            >
-                              View
-                            </button>
-                            <button
-                              onClick={() => handleOrder(service)}
-                              className="px-4 py-2 rounded-md text-sm md:text-base bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 text-white font-semibold hover:opacity-90 transition"
-                            >
-                              Buy
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {services.map((service, index) => (
+                  <motion.div
+                    key={service.service || index}
+                    whileHover={{ scale: 1.02 }}
+                    className="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 p-5 flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center gap-3 mb-3">
+                        {getIconForService(service.name)}
+                        <h3 className="text-lg font-semibold text-gray-900">{service.name}</h3>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">
+                        <strong>ID:</strong> {service.service}
+                      </p>
+                      <p className="text-sm text-gray-600 mb-1">
+                        <strong>Rate / 1K:</strong> ${service.rate}
+                      </p>
+                      <p className="text-sm text-gray-600 mb-1">
+                        <strong>Min:</strong> {service.min}
+                      </p>
+                      <p className="text-sm text-gray-600 mb-1">
+                        <strong>Max:</strong> {service.max}
+                      </p>
+                    </div>
+
+                    <div className="flex gap-3 mt-5">
+                      <button
+                        onClick={() => setSelectedService(service)}
+                        className="w-full px-4 py-2 rounded-md text-sm md:text-base bg-gradient-to-r from-indigo-500 to-pink-500 text-white font-semibold hover:opacity-90 active:scale-95 transition"
+                      >
+                        Buy
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             </motion.div>
           ))
         )}
 
-        {/* Modal */}
+        {/* 🧾 Buy Popup */}
         <AnimatePresence>
           {selectedService && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-3"
             >
               <motion.div
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
                 exit={{ scale: 0.8 }}
-                className="bg-white p-6 rounded-2xl max-w-md w-full shadow-xl"
+                className="bg-white p-6 rounded-2xl max-w-md w-full shadow-2xl"
               >
-                <h3 className="text-xl font-bold mb-4">{selectedService.name}</h3>
-                <p className="mb-6">{selectedService.desc || 'No description available.'}</p>
-                <button
-                  onClick={() => setSelectedService(null)}
-                  className="px-4 py-2 rounded-md bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 text-white font-semibold"
-                >
-                  Close
-                </button>
+                <h3 className="text-2xl font-bold mb-3 text-gray-900">
+                  Buy {selectedService.name}
+                </h3>
+
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder="Enter link or username"
+                    value={link}
+                    onChange={(e) => setLink(e.target.value)}
+                    className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-indigo-200 focus:border-indigo-500 outline-none"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Quantity"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-indigo-200 focus:border-indigo-500 outline-none"
+                  />
+
+                  {quantityError && (
+                    <p className="text-sm text-red-500">{quantityError}</p>
+                  )}
+
+                  <div className="text-gray-700 text-sm">
+                    <strong>Charge:</strong>{' '}
+                    {charge ? `$${charge}` : '—'}
+                  </div>
+
+                  {responseMessage && (
+                    <p
+                      className={`text-sm mt-2 ${
+                        responseType === 'success' ? 'text-green-600' : 'text-red-600'
+                      }`}
+                    >
+                      {responseMessage}
+                    </p>
+                  )}
+
+                  <div className="flex gap-3 mt-4">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedService(null)}
+                      className="w-full px-4 py-2 rounded-md bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full px-4 py-2 rounded-md bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 text-white font-semibold hover:opacity-90 active:scale-95 transition disabled:opacity-50"
+                    >
+                      {submitting ? 'Processing...' : 'Confirm'}
+                    </button>
+                  </div>
+                </form>
               </motion.div>
             </motion.div>
           )}

@@ -50,7 +50,7 @@ export default function TicketSupport() {
       {/* Content Area */}
       <div className="flex flex-col md:flex-row gap-6 px-6 pb-6">
         {/* Ticket Form */}
-        <div className={`${cardClasses} md:w-1/2`}>
+        <div className={`md:w-1/2`}>
           <TicketForm setTickets={setTickets} buttonClasses={buttonClasses} />
         </div>
 

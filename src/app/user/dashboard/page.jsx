@@ -6,6 +6,7 @@ import UserStatistics from "../components/UserStatistics";
 import CategoryFilter from "../components/CategoryFilter";
 import JoinButtons from "../components/JoinButton";
 import NewOrderForm from "../components/NewOrderForm";
+import DashboardOverview from "../components/DashboardOverview";
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
@@ -39,11 +40,9 @@ export default function DashboardPage() {
     );
 
   return (
-    <div className="space-y-6">
-      <UserStatistics />
-      <CategoryFilter />
-      <JoinButtons />
+   <>
+     <DashboardOverview/>
       <NewOrderForm />
-    </div>
+  </>
   );
 }

@@ -24,7 +24,7 @@ export default function UserLayout({ children }) {
           setIsSidebarOpen={setIsSidebarOpen}
           onLogout={handleLogout}
         />
-        <main className="flex-1 overflow-y-auto bg-gray-100 p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto bg-gray-100 ">{children}</main>
       </div>
     </div>
   );
