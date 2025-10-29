@@ -147,7 +147,25 @@ export default function AddFund() {
                     </option>
                   </select>
                 </div>
-
+ {/* QR Section */}
+            <div className="flex-1 flex justify-center items-center">
+              <div className="bg-gray-50 p-4 sm:p-6 rounded-2xl shadow-inner w-full max-w-xs">
+                <h6 className="text-center font-semibold mb-3 text-gray-800">
+                  Scan QR
+                </h6>
+                {filteredPaymentMethod ? (
+                  <img
+                    src={`data:image/png;base64,${filteredPaymentMethod}`}
+                    alt="QR Code"
+                    className="w-full h-auto rounded-lg object-contain"
+                  />
+                ) : (
+                  <p className="text-center text-gray-500 text-sm">
+                    No QR available
+                  </p>
+                )}
+              </div>
+            </div>
                 {/* Instructions */}
                 <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100 text-gray-800">
                   <h6 className="font-semibold text-indigo-700 mb-2">
@@ -205,25 +223,7 @@ export default function AddFund() {
               </form>
             </div>
 
-            {/* QR Section */}
-            <div className="flex-1 flex justify-center items-center">
-              <div className="bg-gray-50 p-4 sm:p-6 rounded-2xl shadow-inner w-full max-w-xs">
-                <h6 className="text-center font-semibold mb-3 text-gray-800">
-                  Scan QR
-                </h6>
-                {filteredPaymentMethod ? (
-                  <img
-                    src={`data:image/png;base64,${filteredPaymentMethod}`}
-                    alt="QR Code"
-                    className="w-full h-auto rounded-lg object-contain"
-                  />
-                ) : (
-                  <p className="text-center text-gray-500 text-sm">
-                    No QR available
-                  </p>
-                )}
-              </div>
-            </div>
+           
           </div>
         </div>
 

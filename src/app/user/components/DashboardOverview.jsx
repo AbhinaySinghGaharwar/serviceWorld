@@ -19,7 +19,7 @@ import {
 
 // Utility component to represent the "card_v2" style
 const CardV2 = ({ children }) => (
-  <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 md:p-5">
+  <div className="bg-white justify-center border border-gray-200 rounded-lg shadow-sm p-4 md:p-5">
     {children}
   </div>
 );
@@ -92,7 +92,8 @@ const categories = [
   ];
 
   return (
-    // Mimicking the original "content" div with a container-fluid effect
+
+    <>
     <div className="content w-full bg-gray-100 py-6">
       <div className="container-fluid mx-auto px-3">
         
@@ -117,63 +118,51 @@ const categories = [
                 </div>
             ))}
             </div>
-        </div>
-<div id="category_filter" className="mb-5">
-  <div className="category_filter_wrap">
-    <CardV2>
-      <div className="filter_btn_wrap flex flex-wrap justify-start sm:justify-center gap-5 sm:gap-2 py-2">
-        {categories.map((cat, index) => (
-          <button
-            key={index}
-            onClick={() => handleFilter(cat.key)}
-            data-change-cat={cat.key}
-            className={`flex-shrink-0 flex items-center justify-center gap-3 
-              text-[18px] capitalize text-white 
-              px-[10px] py-[10px] rounded-md text-center cursor-pointer
-              border-2 border-transparent bg-gradient-to-r from-indigo-500 to-purple-600
-              transition-all duration-300 
-              hover:from-purple-600 hover:to-indigo-500 hover:shadow-lg
-              ${
-                active === cat.key
-                  ? "from-pink-500 to-orange-500 text-white shadow-md ring-2 ring-pink-300 font-semibold"
-                  : ""
-              }`}
-          >
-            {/* 👇 Bigger icon on mobile */}
-            <span className="text-4xl sm:text-lg flex-shrink-0">{cat.icon}</span>
-
-            {/* 👇 Label hidden on mobile */}
-            <span className="filter_txt hidden sm:inline">{cat.label}</span>
-          </button>
-        ))}
-      </div>
-    </CardV2>
-  </div>
-</div>
-
-
-
-        {/* ============ JOIN BUTTONS (button-container) ============ */}
-        {/* Replicating the custom CSS approach for the buttons */}
-        <div className="button-container flex flex-wrap justify-center my-5 gap-3">
-            {joinButtons.map((btn, index) => (
-            <a
-                key={index}
-                href={btn.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                // Custom-button + specific color styles
-                className={`custom-button inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2 rounded-full text-white font-semibold text-sm sm:text-base shadow-lg transition-all hover:opacity-90 ${btn.color}`}
-            >
-                {/* Image tag with proper size */}
-                <Image src={btn.img} alt={btn.label} width={24} height={24} className="flex-shrink-0" />
-                <span>Join {btn.label}</span>
-            </a>
-            ))}
-        </div>
+        </div>     
         
       </div>
     </div>
+
+    <CardV2>
+  <div
+    className="
+      flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-5 
+      p-3 sm:p-4 overflow-x-auto scrollbar-hide
+    "
+  >
+    {categories.map((cat, index) => (
+      <button
+        key={index}
+        onClick={() => handleFilter(cat.key)}
+        data-change-cat={cat.key}
+        className={`
+          flex-shrink-0 flex items-center justify-center gap-2 sm:gap-3
+          text-[16px] sm:text-[18px] capitalize 
+          px-4 py-2 sm:px-5 sm:py-3 rounded-xl cursor-pointer select-none
+          transition-all duration-300 ease-in-out
+          bg-gradient-to-r from-indigo-500 to-purple-600 
+          text-white border-2 border-transparent shadow-sm
+          hover:from-purple-600 hover:to-indigo-500 hover:shadow-lg
+          ${
+            active === cat.key
+              ? "from-pink-500 to-orange-500 text-white shadow-md ring-2 ring-pink-300 font-semibold scale-105"
+              : ""
+          }
+        `}
+      >
+        {/* 👇 Bigger icon on mobile */}
+        <span className="text-2xl sm:text-xl flex-shrink-0">{cat.icon}</span>
+
+        {/* 👇 Label visible on sm+ screens */}
+        <span className="filter_txt hidden sm:inline">{cat.label}</span>
+      </button>
+    ))}
+  </div>
+</CardV2>
+
+    </>
+   
+    
   );
 }
 

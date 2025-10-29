@@ -48,7 +48,7 @@ export default function TicketSupport() {
       </h1>
 
       {/* Content Area */}
-      <div className="flex flex-col md:flex-row gap-6 px-6 pb-6">
+      <div className="flex flex-col md:flex-row gap-6 px-2 pb-6">
         {/* Ticket Form */}
         <div className={`md:w-1/2`}>
           <TicketForm setTickets={setTickets} buttonClasses={buttonClasses} />

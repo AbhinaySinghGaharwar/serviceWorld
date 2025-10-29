@@ -26,7 +26,7 @@ export default function ServicesList({ services }) {
   const [responseType, setResponseType] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const dropdownRef = useRef(null)
-
+const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
   // Close dropdown (if used in future)
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -179,34 +179,51 @@ export default function ServicesList({ services }) {
             />
           </div>
 
-          <select
-  value={selectedCategory}
-  onChange={(e) => setSelectedCategory(e.target.value)}
-  className="
-    w-full sm:w-auto
-    px-4 py-2
-    rounded-xl
-    bg-white
-    border-2 border-transparent
-    shadow-md
-    text-gray-800 font-medium
-    outline-none
-    transition-all duration-300
-    focus:(ring-2 ring-indigo-400 border-indigo-400 scale-[1.02])
-    hover:(border-indigo-300)
-    appearance-none
-    bg-gradient-to-r from-indigo-50 to-purple-50
-  "
->
-  <option value="All" className="text-gray-600 font-semibold">
-    All Categories
-  </option>
-  {Object.keys(groupedServices).map((cat) => (
-    <option key={cat} value={cat} className="text-gray-700">
-      {cat}
-    </option>
-  ))}
-</select>
+       {/* 🔍 Search + Custom Category Filter */}
+<div className="flex flex-col sm:flex-row gap-3 justify-between items-center mb-10">
+ 
+
+  {/* Custom Category Filter */}
+  <div className="relative w-full sm:w-1/3">
+    <button
+      type="button"
+      onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+      className="w-full flex justify-between items-center px-4 py-3 rounded-xl border border-gray-300 bg-gradient-to-r from-indigo-50 to-purple-50 font-medium text-gray-700 hover:shadow-md transition"
+    >
+      <span>{selectedCategory}</span>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className={`h-5 w-5 transition-transform ${
+          showCategoryDropdown ? "rotate-180" : "rotate-0"
+        }`}
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
+
+    {showCategoryDropdown && (
+      <div className="absolute mt-2 w-full bg-white border border-gray-200 shadow-lg rounded-xl z-10 max-h-60 overflow-y-auto">
+        {["All", ...Object.keys(groupedServices)].map((cat) => (
+          <button
+            key={cat}
+            onClick={() => {
+              setSelectedCategory(cat)
+              setShowCategoryDropdown(false)
+            }}
+            className={`block w-full text-left px-4 py-2 hover:bg-indigo-100 transition ${
+              selectedCategory === cat ? "bg-indigo-50 font-semibold text-indigo-700" : "text-gray-700"
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
 
         </div>
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ServicesList from "../components/ServicesList";
-
+import Loader from "../components/Loader";
 export default function ServicesPage() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ export default function ServicesPage() {
     fetchServices();
   }, []);
 
-  if (loading) return <p className="text-center text-gray-500">Loading services...</p>;
+  if (loading) return <Loader message="Fetching latest services..." />
   if (error) return <p className="text-center text-red-500">⚠️ {error}</p>;
 
   return <ServicesList services={services} />;

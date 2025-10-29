@@ -2,32 +2,45 @@
 
 import { useState, useEffect, useRef } from "react";
 
-export default function NewOrderForm() {
+export default function NewOrderPage() {
+  const [category, setCategory] = useState("");
   const [service, setService] = useState("");
   const [link, setLink] = useState("");
   const [quantity, setQuantity] = useState("");
   const [charge, setCharge] = useState("");
   const [services, setServices] = useState([]);
+  const [filteredServices, setFilteredServices] = useState([]);
+  const [topServices, setTopServices] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loadingServices, setLoadingServices] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [responseMessage, setResponseMessage] = useState(null);
   const [responseType, setResponseType] = useState("success");
   const [quantityError, setQuantityError] = useState("");
   const [serviceError, setServiceError] = useState("");
-
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef(null);
 
+  // Fetch all services
   useEffect(() => {
     const fetchServices = async () => {
       try {
         const res = await fetch("/api/services/getservices");
         if (!res.ok) throw new Error("Failed to fetch services");
         const data = await res.json();
+
         if (!Array.isArray(data) || data.length === 0) {
           setServiceError("⚠️ No service data found. Please contact admin.");
         } else {
           setServices(data);
+          setTopServices(data.slice(0, 6));
+
+          const uniqueCats = [
+            ...new Set(data.map((s) => s.category).filter(Boolean)),
+          ];
+          setCategories(uniqueCats);
+          setCategory(uniqueCats[0] || "");
         }
       } catch (err) {
         console.error(err);
@@ -39,6 +52,17 @@ export default function NewOrderForm() {
     fetchServices();
   }, []);
 
+  // Filter services
+  useEffect(() => {
+    const filtered = services.filter(
+      (s) =>
+        (!category || s.category === category) &&
+        s.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredServices(filtered);
+  }, [category, searchTerm, services]);
+
+  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -49,6 +73,7 @@ export default function NewOrderForm() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Calculate charge
   useEffect(() => {
     if (service && quantity && services.length > 0) {
       const selectedService = services.find((s) => s.service === service);
@@ -61,6 +86,7 @@ export default function NewOrderForm() {
     } else setCharge("");
   }, [service, quantity, services]);
 
+  // Quantity validation
   useEffect(() => {
     if (!service || services.length === 0) return;
     const selectedService = services.find((s) => s.service === service);
@@ -129,164 +155,211 @@ export default function NewOrderForm() {
     selectedService.min == null ||
     selectedService.max == null;
 
+  // Auto-fill helper
+  const handleAutoFill = (srv) => {
+    setService(srv.service);
+    setCategory(srv.category);
+    setSearchTerm(srv.name);
+    document.getElementById("orderForm")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
-    <div className="w-full max-w-3xl mx-auto bg-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-2xl border border-gray-200 text-black">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Service */}
-        <div ref={dropdownRef}>
-          <label className="block mb-1 font-semibold text-sm sm:text-base text-gray-700">
-            Service
-          </label>
-          {responseMessage && (
-            <div
-              className={`mb-3 rounded-lg p-3 text-sm ${
-                responseType === "success"
-                  ? "bg-green-50 text-green-700 border border-green-300"
-                  : "bg-red-50 text-red-700 border border-red-300"
-              }`}
-            >
-              {responseMessage}
-            </div>
-          )}
-          {serviceError && (
-            <div className="mb-3 p-3 text-sm bg-red-50 text-red-700 border border-red-300 rounded-lg">
-              {serviceError}
-            </div>
-          )}
-
-          {/* Custom Dropdown */}
-          <div
-            className="relative w-full"
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-          >
-            <div
-              className={`w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base text-gray-800 bg-gray-50 flex justify-between items-center cursor-pointer shadow-sm hover:shadow-md transition`}
-            >
-              {service
-                ? services.find((s) => s.service === service)?.name +
-                  ` | ₹${services.find((s) => s.service === service)?.rate}`
-                : "Select a service"}
-              <span className="ml-2 text-gray-400">▼</span>
-            </div>
-            {dropdownOpen && services.length > 0 && (
-              <ul className="absolute z-50 w-full max-h-60 overflow-auto bg-white border border-gray-200 rounded-lg mt-1 shadow-lg text-sm sm:text-base">
-                {services.map((srv) => (
-                  <li
-                    key={srv.service}
-                    onClick={() => {
-                      setService(srv.service);
-                      setDropdownOpen(false);
-                    }}
-                    className="p-2 hover:bg-blue-50 cursor-pointer truncate"
-                  >
-                    {srv.name} | ₹{srv.rate}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-
-        {/* Description */}
-        <div>
-          <label className="block font-semibold mb-1 text-sm sm:text-base text-gray-700">
-            Description
-          </label>
-          <div className="p-3 border rounded-lg bg-gray-50 min-h-[48px] text-xs sm:text-sm text-gray-800 shadow-sm">
-            {invalidServiceData
-              ? "⚠️ Service details missing or invalid."
-              : selectedService?.desc || "No description available"}
-          </div>
-        </div>
-
-        {/* Link */}
-        <div>
-          <label className="block font-semibold mb-1 text-sm sm:text-base text-gray-700">
-            Link
-          </label>
-          <input
-            type="text"
-            className="w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base bg-gray-50 text-gray-900 shadow-sm focus:ring-2 focus:ring-blue-200"
-            value={link}
-            onChange={(e) => setLink(e.target.value)}
-            placeholder="Enter post or video link"
-          />
-        </div>
-
-        {/* Quantity */}
-        <div>
-          <label className="block font-semibold mb-1 text-sm sm:text-base text-gray-700">
-            Quantity
-          </label>
-          <input
-            type="number"
-            className={`w-full border rounded-lg p-3 text-sm sm:text-base bg-gray-50 shadow-sm focus:ring-2 focus:ring-blue-200 ${
-              quantityError ? "border-red-500" : "border-gray-300"
-            } text-gray-900`}
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            placeholder="Enter quantity"
-          />
-          {quantityError && (
-            <small className="text-red-600 font-medium text-xs sm:text-sm">
-              {quantityError}
-            </small>
-          )}
-        </div>
-
-        {/* Rate / Min / Max */}
-        {selectedService && !invalidServiceData && (
-          <div className="grid grid-cols-3 gap-4 mt-2 bg-gray-50 p-3 rounded-lg shadow-sm border border-gray-200 text-xs sm:text-sm text-gray-800">
-            <div>
-              <p className="text-gray-500 font-medium">Rate (per 1)</p>
-              <p className="font-semibold text-gray-800">
-                ₹{selectedService.rate}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Min</p>
-              <p className="font-semibold text-gray-800">
-                {selectedService.min}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 font-medium">Max</p>
-              <p className="font-semibold text-gray-800">
-                {selectedService.max}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Charge */}
-        <div>
-          <label className="block font-semibold mb-1 text-sm sm:text-base text-gray-700">
-            Charge
-          </label>
-          <input
-            type="text"
-            className="w-full border border-gray-300 rounded-lg p-3 text-sm sm:text-base bg-gray-50 text-gray-900 shadow-sm"
-            value={charge}
-            readOnly
-          />
-        </div>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={submitting || serviceError || invalidServiceData}
-          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-lg shadow-md hover:shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+    <div className="w-full min-h-screen bg-gray-50 py-10 px-3 sm:px-4 lg:px-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-7xl mx-auto items-start">
+        {/* LEFT PANEL */}
+        <div
+          id="orderForm"
+          className="bg-white rounded-2xl shadow-xl p-3 sm:p-4 border border-gray-200"
         >
-          {submitting ? (
-            <span className="flex items-center gap-2">
-              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-              Loading...
-            </span>
-          ) : (
-            "Submit"
-          )}
-        </button>
-      </form>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-6 flex items-center gap-2 text-indigo-700">
+            🧾 Place Your Order
+          </h2>
+
+          <form onSubmit={handleSubmit} className="space-y-6 text-[17px]">
+            {/* Search Bar */}
+            <input
+              type="text"
+              placeholder="🔍 Search service..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 shadow-sm focus:ring-2 focus:ring-blue-200 text-base text-gray-700"
+            />
+
+            {/* Category Dropdown */}
+            <div>
+              <label className="block mb-2 font-semibold text-base text-gray-900">
+                Category
+              </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 text-gray-700 shadow-sm text-base focus:ring-2 focus:ring-indigo-300"
+              >
+                {categories.map((cat, idx) => (
+                  <option key={idx} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Service Dropdown */}
+            <div ref={dropdownRef}>
+              <label className="block mb-2 font-semibold text-base text-gray-700">
+                Service
+              </label>
+              <div
+                className="relative w-full"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                <div className="w-full border border-gray-300 text-gray-700 rounded-xl p-3 bg-gray-50 flex justify-between items-center cursor-pointer hover:shadow-md">
+                  {service
+                    ? services.find((s) => s.service === service)?.name +
+                      ` | ₹${services.find((s) => s.service === service)?.rate}`
+                    : "Select a service"}
+                  <span className="ml-2 text-gray-400">▼</span>
+                </div>
+                {dropdownOpen && filteredServices.length > 0 && (
+                  <ul className="absolute z-50 w-full max-h-60 overflow-auto bg-white border border-gray-200 rounded-xl mt-2 shadow-lg text-base">
+                    {filteredServices.map((srv) => (
+                      <li
+                        key={srv.service}
+                        onClick={() => {
+                          setService(srv.service);
+                          setDropdownOpen(false);
+                        }}
+                        className="p-3 hover:bg-blue-50 cursor-pointer truncate text-gray-700"
+                      >
+                        {srv.name} | ₹{srv.rate}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+
+            {/* Link */}
+            <div>
+              <label className="block mb-2 font-semibold text-base text-gray-700">
+                Link
+              </label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 shadow-sm focus:ring-2 focus:ring-blue-200 text-gray-700"
+                value={link}
+                onChange={(e) => setLink(e.target.value)}
+                placeholder="Enter post or video link"
+              />
+            </div>
+
+            {/* Quantity */}
+            <div>
+              <label className="block mb-2 font-semibold text-base text-gray-700">
+                Quantity
+              </label>
+              <input
+                type="number"
+                className={`text-gray-700 w-full border rounded-xl p-3 bg-gray-50 shadow-sm focus:ring-2 focus:ring-blue-200 ${
+                  quantityError ? "border-red-500" : "border-gray-300"
+                }`}
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                placeholder="Enter quantity"
+              />
+              {quantityError && (
+                <small className="text-red-600 font-medium text-sm">
+                  {quantityError}
+                </small>
+              )}
+            </div>
+
+            {/* Charge */}
+            <div>
+              <label className="block mb-2 font-semibold text-base text-gray-700">
+                Charge
+              </label>
+              <input
+                type="text"
+                className="text-gray-700 w-full border border-gray-300 rounded-xl p-3 bg-gray-50 shadow-sm"
+                value={charge}
+                readOnly
+              />
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={submitting || serviceError || invalidServiceData}
+              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-4 text-lg rounded-xl shadow-md hover:shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {submitting ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  Loading...
+                </span>
+              ) : (
+                "Place your order"
+              )}
+            </button>
+          </form>
+
+          <h1 className="mt-4 text-lg text-center font-medium text-indigo-700">
+            {responseMessage}
+          </h1>
+        </div>
+
+        {/* RIGHT PANEL */}
+        <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 border border-gray-200 mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-indigo-700">
+            ⭐ Our Top Rated Services
+          </h2>
+
+          <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+            Explore our most popular and trusted services — chosen by thousands
+            of users for their reliability, speed, and cost-effectiveness. Select
+            one and we’ll fill the form automatically!
+          </p>
+
+          <div className="space-y-6 max-h-[650px] overflow-y-auto pr-3 text-[18px]">
+            {topServices.map((srv, idx) => (
+              <div
+                key={idx}
+                className="border border-gray-300 rounded-2xl p-6 bg-gray-50 hover:bg-gray-100 transition-all shadow-md"
+              >
+                <p className="font-bold text-gray-900 text-lg">
+                  ID: {srv.service}
+                </p>
+                <p className="text-gray-800 text-lg mt-2">
+                  {srv.name?.slice(0, 90)}...
+                </p>
+                {srv.desc && (
+                  <p className="text-gray-600 text-base mt-3 leading-snug">
+                    {srv.desc?.slice(0, 150)}...
+                  </p>
+                )}
+                <p className="text-base text-gray-700 mt-4">
+                  Rate:{" "}
+                  <span className="font-semibold text-gray-900">
+                    ₹{srv.rate}
+                  </span>{" "}
+                  | Min:{" "}
+                  <span className="font-semibold text-gray-900">{srv.min}</span>{" "}
+                  | Max:{" "}
+                  <span className="font-semibold text-gray-900">{srv.max}</span>
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => handleAutoFill(srv)}
+                  className="mt-5 w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-4 text-lg rounded-xl shadow-md hover:shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-all flex items-center justify-center gap-2"
+                >
+                  🛒 Place Order
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

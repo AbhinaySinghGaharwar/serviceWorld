@@ -90,14 +90,16 @@ export default function MainTop() {
             websitename.com
           </p>
 
-          <h1 className="text-3xl md:text-4xl font-extrabold leading-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 flex items-center gap-3 flex-wrap">
-         SMM World Panel – The Most Trusted and Affordable Growth Platform Worldwide.
-            <Image
+          <h1 className="text-2xl text-center font-bold antialiased">
+         SMM World Panel- World’s Best and Cheapest SMM 
+         <h1 className="text-2xl text-center font-bold antialiased">Panel<Image
               src="https://storage.perfectcdn.com/81013d/q6es6uk1ctks7bew.svg"
               alt="heading-icon"
               width={100}
               height={100}
-            />
+              className="inline"
+            /></h1>
+            
           </h1>
 
           <p className="text-gray-700 text-lg">
