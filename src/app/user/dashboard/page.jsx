@@ -7,6 +7,7 @@ import CategoryFilter from "../components/CategoryFilter";
 import JoinButtons from "../components/JoinButton";
 import NewOrderForm from "../components/NewOrderForm";
 import DashboardOverview from "../components/DashboardOverview";
+import Loader from "../components/Loader";
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
@@ -34,9 +35,7 @@ export default function DashboardPage() {
 
   if (!user)
     return (
-      <div className="flex items-center justify-center min-h-screen text-gray-500">
-        Loading...
-      </div>
+      <Loader message="Loading Dashboard"/>
     );
 
   return (

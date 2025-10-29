@@ -179,16 +179,14 @@ const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
             />
           </div>
 
-       {/* 🔍 Search + Custom Category Filter */}
-<div className="flex flex-col sm:flex-row gap-3 justify-between items-center mb-10">
- 
-
-  {/* Custom Category Filter */}
-  <div className="relative w-full sm:w-1/3">
+  {/* Category Dropdown */}
+  <div className="relative w-full sm:w-60 md:w-72 lg:w-80">
     <button
       type="button"
       onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-      className="w-full flex justify-between items-center px-4 py-3 rounded-xl border border-gray-300 bg-gradient-to-r from-indigo-50 to-purple-50 font-medium text-gray-700 hover:shadow-md transition"
+      className="w-full flex justify-between items-center px-5 py-3 rounded-xl border border-gray-300 
+                 bg-gradient-to-r from-indigo-50 to-purple-50 font-medium text-gray-700 
+                 hover:shadow-md transition duration-300"
     >
       <span>{selectedCategory}</span>
       <svg
@@ -200,12 +198,17 @@ const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
         viewBox="0 0 24 24"
         stroke="currentColor"
       >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M19 9l-7 7-7-7"
+        />
       </svg>
     </button>
 
     {showCategoryDropdown && (
-      <div className="absolute mt-2 w-full bg-white border border-gray-200 shadow-lg rounded-xl z-10 max-h-60 overflow-y-auto">
+      <div className="absolute mt-2 w-full bg-white border border-gray-200 shadow-lg rounded-xl z-20 max-h-60 overflow-y-auto">
         {["All", ...Object.keys(groupedServices)].map((cat) => (
           <button
             key={cat}
@@ -214,7 +217,9 @@ const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
               setShowCategoryDropdown(false)
             }}
             className={`block w-full text-left px-4 py-2 hover:bg-indigo-100 transition ${
-              selectedCategory === cat ? "bg-indigo-50 font-semibold text-indigo-700" : "text-gray-700"
+              selectedCategory === cat
+                ? "bg-indigo-50 font-semibold text-indigo-700"
+                : "text-gray-700"
             }`}
           >
             {cat}
@@ -223,7 +228,7 @@ const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
       </div>
     )}
   </div>
-</div>
+
 
         </div>
 
