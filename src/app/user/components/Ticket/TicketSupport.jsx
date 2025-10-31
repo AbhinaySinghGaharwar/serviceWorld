@@ -51,7 +51,7 @@ export default function TicketSupport() {
   const closeTicket = () => setSelectedTicket(null);
 
   return (
-    <div className="min-h-screen bg-[#0b0b0d] text-gray-100 py-10 px-4 flex justify-center">
+    <div className="min-h-screen text-gray-100 py-10 px-4 flex justify-center">
       <div className="w-full max-w-6xl">
         {/* 🔍 Search Bar */}
         <div className="mb-8 bg-[#161617]/90 border border-yellow-500/20 rounded-2xl p-4 shadow-[0_0_15px_rgba(250,204,21,0.1)]">
