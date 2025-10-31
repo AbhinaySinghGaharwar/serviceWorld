@@ -1,4 +1,5 @@
 // /lib/services.js
+'use server'
 import axios from "axios";
 
 const API_URL = process.env.BASE_URL
@@ -27,41 +28,47 @@ const postAction = async (action, data = {}) => {
 //
 // 🔹 API Actions
 //
+//get all services from api
+export async function getServices() {
+  try {
+    const params = new URLSearchParams();
+    params.append("key", API_KEY);
+    params.append("action", "services");
 
-// ✅ Get all services
-export const getServices = () => postAction("services");
+    const res = await axios.post(API_URL, params, {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
 
-// ✅ Create an order
-export const createOrder = (data) => postAction("add", data);
+    return res.data;
+  } catch (error) {
+    console.error("SMM API Error:", error.response?.data || error.message);
+    return { error: error.response?.data || error.message };
+  }
+}
 
-// ✅ Get single order status
-export const getOrderStatus = (orderId) => postAction("status", { order: orderId });
+// // ✅ Create an order
+// export const createOrder = (data) => postAction("add", data);
 
-// ✅ Get multiple order statuses
-export const getMultipleOrderStatus = (orderIds) =>
-  postAction("status", { orders: orderIds.join(",") });
+// // ✅ Get single order status
+// export const getOrderStatus = (orderId) => postAction("status", { order: orderId });
 
-// ✅ Create a refill for one order
-export const createRefill = (orderId) => postAction("refill", { order: orderId });
+// // ✅ Get multiple order statuses
+// export const getMultipleOrderStatus = (orderIds) =>
+//   postAction("status", { orders: orderIds.join(",") });
 
-// ✅ Create multiple refills
-export const createMultipleRefills = (orderIds) =>
-  postAction("refill", { orders: orderIds.join(",") });
+// // ✅ Create a refill for one order
+// export const createRefill = (orderId) => postAction("refill", { order: orderId });
 
-// ✅ Get refill status
-export const getRefillStatus = (refillId) => postAction("refill_status", { refill: refillId });
+// // ✅ Create multiple refills
+// export const createMultipleRefills = (orderIds) =>
+//   postAction("refill", { orders: orderIds.join(",") });
 
-// ✅ Get multiple refill statuses
-export const getMultipleRefillStatuses = (refillIds) =>
-  postAction("refill_status", { refills: refillIds.join(",") });
+// // ✅ Get refill status
+// export const getRefillStatus = (refillId) => postAction("refill_status", { refill: refillId });
 
-// ✅ Get user balance
-export const getBalance = () => postAction("balance");
+// // ✅ Get multiple refill statuses
+// export const getMultipleRefillStatuses = (refillIds) =>
+//   postAction("refill_status", { refills: refillIds.join(",") });
 
-
-
-
-
-
-//Frontend Services
-
+// // ✅ Get user balance
+// export const getBalance = () => postAction("balance");

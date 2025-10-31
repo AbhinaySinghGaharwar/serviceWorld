@@ -15,6 +15,12 @@ export default function SettingsPage() {
       >
         Manage Payment Methods
       </button>
+      <button
+        onClick={() => router.push("/admin/settings/edit-website")}
+        className="bg-gradient-to-r from-indigo-400 to-purple-400 text-black font-semibold py-3 px-6 rounded-xl shadow hover:from-indigo-500 hover:to-purple-500 transition-all duration-300 cursor"
+      >
+        Edit Website 
+      </button>
     </div>
   );
 }

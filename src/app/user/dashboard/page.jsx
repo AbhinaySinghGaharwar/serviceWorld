@@ -1,47 +1,41 @@
-"use client";
+"use server";
 
-import { useEffect, useState } from "react";
-import axios from "axios";
-import UserStatistics from "../components/UserStatistics";
-import CategoryFilter from "../components/CategoryFilter";
-import JoinButtons from "../components/JoinButton";
-import NewOrderForm from "../components/NewOrderForm";
-import DashboardOverview from "../components/DashboardOverview";
+import DashboardOverview from "./DashboardOverview";
+import OrderForm from "./OrderForm";
 import Loader from "../components/Loader";
+import { getUserDetails } from "@/lib/authentication";
+import { getServices } from "@/lib/services";
 
-export default function DashboardPage() {
-  const [user, setUser] = useState(null);
-  const [error, setError] = useState("");
+export default async function DashboardPage() {
+  try {
+    // ✅ Fetch user
+    const userRes = await getUserDetails();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await axios.get("/api/auth/me");
-        if (res.data?.user) setUser(res.data.user);
-        else throw new Error("Unauthorized");
-      } catch (err) {
-        setError(err.response?.data?.error || "Access Denied");
-      }
-    };
-    fetchUser();
-  }, []);
+    if (userRes.error) {
+      return (
+        <div className="flex items-center justify-center min-h-screen text-red-500">
+          <p>{userRes.error}</p>
+        </div>
+      );
+    }
 
-  if (error)
+    // ✅ Fetch services
+    const services = await getServices();
+
+    // ✅ Convert user & services to plain JSON (removes ObjectId, Dates, etc.)
+    const plainUser = JSON.parse(JSON.stringify(userRes.user));
+    const plainServices = JSON.parse(JSON.stringify(services));
+    return (
+      <>
+        <DashboardOverview user={plainUser} />
+        <OrderForm services={plainServices} />
+      </>
+    );
+  } catch (err) {
     return (
       <div className="flex items-center justify-center min-h-screen text-red-500">
-        <p>{error}</p>
+        <p>⚠️ Something went wrong: {err.message}</p>
       </div>
     );
-
-  if (!user)
-    return (
-      <Loader message="Loading Dashboard"/>
-    );
-
-  return (
-   <>
-     <DashboardOverview/>
-      <NewOrderForm />
-  </>
-  );
+  }
 }

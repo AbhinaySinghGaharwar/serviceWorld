@@ -1,31 +1,17 @@
-"use client";
-
-import { useEffect, useState } from "react";
+// Server Component (default)
+import { getServices } from "@/lib/services";
 import ServicesList from "../components/ServicesList";
-import Loader from "../components/Loader";
-export default function ServicesPage() {
-  const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const res = await fetch("/api/services/getservices");
-        if (!res.ok) throw new Error("Failed to fetch services");
-        const data = await res.json();
-        setServices(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchServices();
-  }, []);
+export default async function ServicesPage() {
+  const res = await getServices();
 
-  if (loading) return <Loader message="Fetching latest services..." />
-  if (error) return <p className="text-center text-red-500">⚠️ {error}</p>;
+  if (res.error) {
+    return (
+      <p className="text-center text-red-500">
+        ⚠️ Failed to fetch services: {res.error}
+      </p>
+    );
+  }
 
-  return <ServicesList services={services} />;
+  return <ServicesList services={res} />;
 }

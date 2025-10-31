@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 
-export default function NewOrderPage() {
+export default function NewOrderPage({services}) {
   const [category, setCategory] = useState("");
   const [service, setService] = useState("");
   const [link, setLink] = useState("");
@@ -175,7 +175,7 @@ export default function NewOrderPage() {
             🧾 Place Your Order
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6 text-[17px]">
+          <form onSubmit={handleSubmit} className="space-y-4 text-[17px]">
             {/* Search Bar */}
             <input
               type="text"

@@ -7,10 +7,10 @@ import { cookies } from "next/headers";
 import { verifyCaptcha } from "@/lib/recaptha";
 
 // =========================
-// RATE LIMIT CONFIG
+// RATE LIMIT CONFIGURATION
 // =========================
 const rateLimitMap = new Map();
-const WINDOW_TIME = 15 * 60 * 1000; // 15 min
+const WINDOW_TIME = 15 * 60 * 1000; // 15 minutes
 const MAX_REQUESTS = 5;
 
 function checkRateLimit(ip) {
@@ -31,7 +31,52 @@ function checkRateLimit(ip) {
 }
 
 // =========================
-// LOGIN FUNCTION
+// USER SIGNUP
+// =========================
+export async function registerUser({ email, username, password, captcha, ip = "127.0.0.1" }) {
+  try {
+    if (checkRateLimit(ip)) {
+      return { error: "Too many requests, try again later." };
+    }
+
+    if (!email || !username || !password || !captcha) {
+      return { error: "Missing fields or CAPTCHA" };
+    }
+
+    const isHuman = await verifyCaptcha(captcha);
+    if (!isHuman) return { error: "CAPTCHA verification failed" };
+
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    const existingUser = await db.collection("users").findOne({
+      $or: [{ email }, { username }],
+    });
+    if (existingUser) return { error: "User or email already exists" };
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = { username, email, password: hashedPassword };
+    await db.collection("users").insertOne(user);
+
+    // Generate JWT
+    const token = jwt.sign({ username, email }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    const cookieStore = await cookies();
+    cookieStore.set("token", token, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60,
+    });
+
+    return { message: "User registered successfully" };
+  } catch (err) {
+    return { error: err.message };
+  }
+}
+
+// =========================
+// USER LOGIN
 // =========================
 export async function loginUser({ email, password, captcha, ip = "127.0.0.1" }) {
   try {
@@ -73,7 +118,7 @@ export async function loginUser({ email, password, captcha, ip = "127.0.0.1" }) 
 }
 
 // =========================
-// LOGOUT FUNCTION
+// LOGOUT USER
 // =========================
 export async function logoutUser() {
   try {
@@ -86,16 +131,26 @@ export async function logoutUser() {
 }
 
 // =========================
-// GET LOGGED-IN USER
+// GET USER DETAILS
 // =========================
-export async function getUser() {
+export async function getUserDetails() {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("token");
 
     if (!token) return { error: "Not authenticated" };
 
-    const user = jwt.verify(token.value, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token.value, process.env.JWT_SECRET);
+
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    const user = await db
+      .collection("users")
+      .findOne({ email: decoded.email }, { projection: { password: 0 } });
+
+    if (!user) return { error: "User not found" };
+
     return { user };
   } catch (err) {
     return { error: err.message };
