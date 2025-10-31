@@ -24,7 +24,7 @@ export default function OrderForm({ services: initialServices = [] }) {
 
   const dropdownRef = useRef(null);
   const categoryRef = useRef(null);
-  const dropdownRefe = useRef(null);
+  const currencyRef = useRef(null);
 
   const currencyRates = {
     INR: { symbol: "₹", rate: 1 },
@@ -37,7 +37,7 @@ export default function OrderForm({ services: initialServices = [] }) {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (dropdownRefe.current && !dropdownRefe.current.contains(e.target)) setCurrencyDropdownOpen(false);
+      if (currencyRef.current && !currencyRef.current.contains(e.target)) setCurrencyDropdownOpen(false);
       if (categoryRef.current && !categoryRef.current.contains(e.target)) setCategoryDropdownOpen(false);
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setDropdownOpen(false);
     };
@@ -142,66 +142,67 @@ export default function OrderForm({ services: initialServices = [] }) {
     selectedService.max == null;
 
   return (
-    <div className="w-full min-h-screen bg-[#0b0b0d] flex items-center justify-center py-10 px-4">
-      <div className="w-full max-w-3xl bg-[#161617]/95 border border-yellow-500/20 rounded-2xl shadow-[0_0_15px_rgba(250,204,21,0.15)] p-6 sm:p-8 text-gray-100">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent text-center mb-8">
+    <div className="w-full min-h-screen bg-[#0b0b0d] flex items-center justify-center py-8 px-3 sm:px-6">
+      <div className="w-full max-w-2xl bg-[#161617]/95 border border-yellow-500/20 rounded-2xl shadow-[0_0_10px_rgba(250,204,21,0.15)] p-4 sm:p-6 text-gray-100">
+        <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent text-center mb-6">
           🧾 Place Your Order
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 text-sm sm:text-base">
           {/* 🔍 Search */}
           <div className="relative">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-500" />
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-500 text-sm sm:text-base" />
             <input
               type="text"
               placeholder="Search service..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-3 rounded-xl p-3 bg-[#0e0e0f] border border-yellow-500/30 text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-yellow-500"
+              className="w-full pl-9 pr-3 py-2 sm:py-3 rounded-lg bg-[#0e0e0f] border border-yellow-500/30 text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 text-sm sm:text-base"
             />
           </div>
 
           {/* 🌍 Currency */}
-          <div className="flex justify-between items-center gap-4">
-            <div className="flex-1" ref={dropdownRefe}>
-              <label className="block mb-2 text-sm font-semibold text-gray-300">Currency</label>
-              <div className="relative" onClick={() => setCurrencyDropdownOpen(!currencyDropdownOpen)}>
-                <div className="w-full border border-yellow-500/30 rounded-xl p-3 bg-[#0e0e0f] flex justify-between items-center cursor-pointer hover:border-yellow-500/50">
-                  <FaGlobe className="text-yellow-500" />
-                  <span className="font-medium">{currency}</span>
-                  <span className="ml-2 text-gray-400">▼</span>
-                </div>
-                {currencyDropdownOpen && (
-                  <ul className="absolute z-50 w-full max-h-56 overflow-auto bg-[#161617] border border-yellow-500/30 rounded-xl mt-2 shadow-lg">
-                    {Object.keys(currencyRates).map((code) => (
-                      <li
-                        key={code}
-                        onClick={() => {
-                          setCurrency(code);
-                          setCurrencyDropdownOpen(false);
-                        }}
-                        className="p-2.5 hover:bg-yellow-500/10 cursor-pointer text-gray-100 flex items-center gap-2"
-                      >
-                        <FaGlobe className="text-yellow-500" />
-                        <span>{code}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+          <div ref={currencyRef}>
+            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">Currency</label>
+            <div
+              className="relative"
+              onClick={() => setCurrencyDropdownOpen(!currencyDropdownOpen)}
+            >
+              <div className="w-full border border-yellow-500/30 rounded-lg p-2.5 sm:p-3 bg-[#0e0e0f] flex justify-between items-center cursor-pointer hover:border-yellow-500/50">
+                <FaGlobe className="text-yellow-500" />
+                <span className="font-medium text-sm sm:text-base">{currency}</span>
+                <span className="ml-2 text-gray-400">▼</span>
               </div>
+              {currencyDropdownOpen && (
+                <ul className="absolute z-50 w-full max-h-56 overflow-auto bg-[#161617] border border-yellow-500/30 rounded-xl mt-2 shadow-lg text-sm">
+                  {Object.keys(currencyRates).map((code) => (
+                    <li
+                      key={code}
+                      onClick={() => {
+                        setCurrency(code);
+                        setCurrencyDropdownOpen(false);
+                      }}
+                      className="p-2 hover:bg-yellow-500/10 cursor-pointer text-gray-100 flex items-center gap-2"
+                    >
+                      <FaGlobe className="text-yellow-500" />
+                      <span>{code}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
 
           {/* 📁 Category */}
           <div ref={categoryRef}>
-            <label className="block mb-2 text-sm font-semibold text-gray-300">Category</label>
+            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">Category</label>
             <div className="relative" onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}>
-              <div className="w-full border border-yellow-500/30 rounded-xl p-3 bg-[#0e0e0f] flex justify-between items-center cursor-pointer hover:border-yellow-500/50">
+              <div className="w-full border border-yellow-500/30 rounded-lg p-2.5 sm:p-3 bg-[#0e0e0f] flex justify-between items-center cursor-pointer hover:border-yellow-500/50 text-sm sm:text-base">
                 {category || "Select category"}
                 <span className="ml-2 text-gray-400">▼</span>
               </div>
               {categoryDropdownOpen && categories.length > 0 && (
-                <ul className="absolute z-50 w-full max-h-56 overflow-auto bg-[#161617] border border-yellow-500/30 rounded-xl mt-2 shadow-lg">
+                <ul className="absolute z-50 w-full max-h-56 overflow-auto bg-[#161617] border border-yellow-500/30 rounded-xl mt-2 shadow-lg text-sm">
                   {categories.map((cat, idx) => (
                     <li
                       key={idx}
@@ -221,16 +222,16 @@ export default function OrderForm({ services: initialServices = [] }) {
 
           {/* 🧩 Service */}
           <div ref={dropdownRef}>
-            <label className="block mb-2 text-sm font-semibold text-gray-300">Service</label>
+            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">Service</label>
             <div className="relative" onClick={() => setDropdownOpen(!dropdownOpen)}>
-              <div className="w-full border border-yellow-500/30 rounded-xl p-3 bg-[#0e0e0f] flex justify-between items-center cursor-pointer hover:border-yellow-500/50">
+              <div className="w-full border border-yellow-500/30 rounded-lg p-2.5 sm:p-3 bg-[#0e0e0f] flex justify-between items-center cursor-pointer hover:border-yellow-500/50 text-sm sm:text-base">
                 {service
                   ? `${services.find((s) => s.service === service)?.name} | ${selectedCurrency.symbol}${services.find((s) => s.service === service)?.rate}`
                   : "Select a service"}
                 <span className="ml-2 text-gray-400">▼</span>
               </div>
               {dropdownOpen && filteredServices.length > 0 && (
-                <ul className="absolute z-50 w-full max-h-60 overflow-auto bg-[#161617] border border-yellow-500/30 rounded-xl mt-2 shadow-lg">
+                <ul className="absolute z-50 w-full max-h-60 overflow-auto bg-[#161617] border border-yellow-500/30 rounded-xl mt-2 shadow-lg text-sm">
                   {filteredServices.map((srv) => (
                     <li
                       key={srv.service}
@@ -251,10 +252,10 @@ export default function OrderForm({ services: initialServices = [] }) {
 
           {/* 🔗 Link */}
           <div>
-            <label className="block mb-2 text-sm font-semibold text-gray-300">Link</label>
+            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">Link</label>
             <input
               type="text"
-              className="w-full border border-yellow-500/30 rounded-xl p-3 bg-[#0e0e0f] text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-yellow-500"
+              className="w-full border border-yellow-500/30 rounded-lg p-2.5 sm:p-3 bg-[#0e0e0f] text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 text-sm sm:text-base"
               value={link}
               onChange={(e) => setLink(e.target.value)}
               placeholder="Enter post or video link"
@@ -263,25 +264,25 @@ export default function OrderForm({ services: initialServices = [] }) {
 
           {/* 🔢 Quantity */}
           <div>
-            <label className="block mb-2 text-sm font-semibold text-gray-300">Quantity</label>
+            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">Quantity</label>
             <input
               type="number"
-              className={`w-full rounded-xl p-3 bg-[#0e0e0f] text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 ${
+              className={`w-full rounded-lg p-2.5 sm:p-3 bg-[#0e0e0f] text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 text-sm sm:text-base ${
                 quantityError ? "border-red-500" : "border-yellow-500/30"
               }`}
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               placeholder="Enter quantity"
             />
-            {quantityError && <small className="text-red-400 font-medium text-sm">{quantityError}</small>}
+            {quantityError && <small className="text-red-400 font-medium text-xs sm:text-sm">{quantityError}</small>}
           </div>
 
           {/* 💰 Charge */}
           <div>
-            <label className="block mb-2 text-sm font-semibold text-gray-300">Charge</label>
+            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">Charge</label>
             <input
               type="text"
-              className="w-full border border-yellow-500/30 rounded-xl p-3 bg-[#0e0e0f] text-gray-100"
+              className="w-full border border-yellow-500/30 rounded-lg p-2.5 sm:p-3 bg-[#0e0e0f] text-gray-100 text-sm sm:text-base"
               value={charge ? `${selectedCurrency.symbol}${charge}` : ""}
               readOnly
             />
@@ -291,11 +292,11 @@ export default function OrderForm({ services: initialServices = [] }) {
           <button
             type="submit"
             disabled={submitting || invalidServiceData}
-            className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-black py-3.5 rounded-xl font-semibold hover:shadow-[0_0_20px_rgba(250,204,21,0.3)] transition-all disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-black py-2.5 sm:py-3.5 rounded-lg font-semibold hover:shadow-[0_0_15px_rgba(250,204,21,0.3)] transition-all disabled:opacity-50 text-sm sm:text-base"
           >
             {submitting ? (
               <span className="flex items-center justify-center gap-2">
-                <span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
+                <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
                 Loading...
               </span>
             ) : (
@@ -306,7 +307,7 @@ export default function OrderForm({ services: initialServices = [] }) {
 
         {responseMessage && (
           <p
-            className={`mt-5 text-center font-medium ${
+            className={`mt-4 text-center font-medium text-sm sm:text-base ${
               responseType === "error" ? "text-red-400" : "text-green-400"
             }`}
           >
