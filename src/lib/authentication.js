@@ -34,6 +34,7 @@ function checkRateLimit(ip) {
 // USER SIGNUP
 // =========================
 export async function registerUser({ email, username, password, captcha, ip = "127.0.0.1" }) {
+  console.log(email,username,password,captcha,ip)
   try {
     if (checkRateLimit(ip)) {
       return { error: "Too many requests, try again later." };
@@ -130,32 +131,6 @@ export async function logoutUser() {
   }
 }
 
-// =========================
-// GET USER DETAILS
-// =========================
-export async function getUserDetails() {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token");
-
-    if (!token) return { error: "Not authenticated" };
-
-    const decoded = jwt.verify(token.value, process.env.JWT_SECRET);
-
-    const client = await clientPromise;
-    const db = client.db("smmpanel");
-
-    const user = await db
-      .collection("users")
-      .findOne({ email: decoded.email }, { projection: { password: 0 } });
-
-    if (!user) return { error: "User not found" };
-
-    return { user };
-  } catch (err) {
-    return { error: err.message };
-  }
-}
 
 // =========================
 // CHECK USERNAME
@@ -165,9 +140,20 @@ export async function checkUsername(username) {
     const client = await clientPromise;
     const db = client.db("smmpanel");
     const user = await db.collection("users").findOne({ username });
-    return { exists: !!user };
+   if(user.username){
+    return {
+      status:true
+    }
+   }else{
+    return{
+      status:false
+    }
+   }
   } catch (err) {
-    return { error: err.message };
+    return {
+      status:false,
+       error: err.message 
+      };
   }
 }
 
@@ -179,7 +165,74 @@ export async function checkEmail(email) {
     const client = await clientPromise;
     const db = client.db("smmpanel");
     const user = await db.collection("users").findOne({ email });
-    return { exists: !!user };
+    if(user.email)
+      return { status: true }
+    else{
+      return {
+        status:false
+      }
+     }
+  } catch (err) {
+    return { 
+      status:false,
+      error: err.message };
+  }
+}
+
+
+export async function changePassword({ currentPassword, newPassword, ip = "127.0.0.1" }) {
+  try {
+    if (checkRateLimit(ip)) {
+      return { error: "Too many requests, try again later." };
+    }
+
+    if (!currentPassword || !newPassword) {
+      return { error: "Missing required fields" };
+    }
+
+    // ✅ Get user info from JWT cookie
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (!token) return { error: "Unauthorized: No token found" };
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch {
+      return { error: "Invalid or expired session. Please log in again." };
+    }
+
+    const { email } = decoded;
+    if (!email) return { error: "Invalid token data" };
+
+    // ✅ Connect to MongoDB
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    // ✅ Find user
+    const user = await db.collection("users").findOne({ email });
+    if (!user) return { error: "User not found" };
+
+    // ✅ Check current password
+    const isValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isValid) return { error: "Current password is incorrect" };
+
+    // ✅ Hash and update new password
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await db.collection("users").updateOne({ email }, { $set: { password: hashed } });
+
+    // ✅ Optionally refresh JWT (not mandatory)
+    const newToken = jwt.sign(
+      { username: user.username, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+    cookieStore.set("token", newToken, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60,
+    });
+
+    return { message: "Password updated successfully" };
   } catch (err) {
     return { error: err.message };
   }

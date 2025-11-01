@@ -1,21 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect ,useRef} from "react";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  FaUserCircle,
-  FaTimesCircle,
-  FaBars,
-} from "react-icons/fa";
-import {
-  MdDashboard,
-  MdHistory,
-  MdPayment,
-  MdHelp,
-} from "react-icons/md";
+import {FaUserCircle,FaTimesCircle,FaBars,} from "react-icons/fa";
+import {MdDashboard,MdHistory,MdPayment,MdHelp,} from "react-icons/md";
 import { FiLogOut, FiSettings } from "react-icons/fi";
 import clsx from "clsx";
 import Link from "next/link";
+import { getUserBalance,getUserDetails,uploadProfilePicture } from "@/lib/userActions";
+import { logoutUser } from "@/lib/authentication";
 
 export default function Layout({ children }) {
   const [user, setUser] = useState(null);
@@ -23,7 +16,8 @@ export default function Layout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-
+const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -41,27 +35,49 @@ export default function Layout({ children }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
+   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await fetch("/api/uploadProfile", {
-          headers: { "x-user-email": localStorage.getItem("email") },
-        });
-        const data = await res.json();
-        setUser(data);
+       
+        const res = await getUserDetails();
+        if (res.success) {
+          setUser(res);
+          
+        } else {
+          console.error("Fetch error:", res.error);
+        }
       } catch (err) {
         console.error("User fetch error:", err);
       }
     }
     fetchUser();
   }, []);
+   // Handle image upload
+  const handleImageChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    setUploading(true);
+    const res = await uploadProfilePicture(formData);
+    setUploading(false);
+
+    if (res.success) {
+      // Update avatar instantly after upload
+      setUser((prev) => ({ ...prev, avatar: res.avatar }));
+    } else {
+      alert(res.error || "Upload failed");
+    }
+  };
 
   useEffect(() => {
     async function fetchBalance() {
       try {
-        const res = await fetch("/api/services/getbalance");
-        const data = await res.json();
-        if (data.success) setBalance(data.balance);
+        const data = await getUserBalance()
+      
+        if (data.balance) setBalance(data.balance);
       } catch (err) {
         console.error("Balance fetch error:", err);
       }
@@ -73,8 +89,8 @@ export default function Layout({ children }) {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("/api/auth/logout", { method: "POST" });
-      if (res.ok) {
+      const res = await logoutUser()
+      if (!res.error) {
         localStorage.removeItem("email");
         localStorage.removeItem("token");
         router.push("/auth/login");
@@ -115,27 +131,52 @@ export default function Layout({ children }) {
           </button>
         </div>
 
-        {/* User Info */}
         <div className="flex flex-col items-center gap-2 px-4 py-6 border-b border-yellow-500/20">
-          <div className="w-20 h-20 rounded-full bg-yellow-400/20 flex items-center justify-center shadow-md overflow-hidden">
-            {user?.avatar ? (
-              <img
-                src={user.avatar}
-                alt="Avatar"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <FaUserCircle size={60} className="text-yellow-400/80" />
-            )}
-          </div>
-          <h2 className="text-lg font-semibold mt-2 text-yellow-300">
-            {user?.username || "Guest"}
-          </h2>
-          <p className="text-sm text-gray-400">
-            Balance: ₹{balance.toFixed(2)}
-          </p>
+      {/* Avatar */}
+      <div
+        className="w-20 h-20 rounded-full bg-yellow-400/20 flex items-center justify-center shadow-md overflow-hidden cursor-pointer relative group"
+        onClick={() => fileInputRef.current?.click()}
+      >
+        {user?.avatar ? (
+          <img
+            src={user.avatar}
+            alt="Avatar"
+            className={`w-full h-full object-cover ${
+              uploading ? "opacity-50" : ""
+            }`}
+          />
+        ) : (
+          <FaUserCircle
+            size={60}
+            className={`text-yellow-400/80 ${uploading ? "opacity-50" : ""}`}
+          />
+        )}
+
+        {/* Overlay on hover */}
+        <div className="absolute inset-0 bg-black/40 text-xs text-yellow-300 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          {uploading ? "Uploading..." : "Change Photo"}
         </div>
 
+        {/* Hidden file input */}
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          onChange={handleImageChange}
+          className="hidden"
+        />
+      </div>
+
+      {/* Username */}
+      <h2 className="text-lg font-semibold mt-2 text-yellow-300">
+        {user?.username || "Guest"}
+      </h2>
+
+      {/* Balance */}
+      <p className="text-sm text-gray-400">
+        Balance: ₹{balance.toFixed(2)}
+      </p>
+    </div>
         {/* Menu Items */}
         <nav className="flex-1 p-3 space-y-2 overflow-y-auto">
           {menuItems.map((item, idx) => {

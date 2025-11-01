@@ -9,6 +9,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import ReCAPTCHA from "react-google-recaptcha";
 import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
+import { checkEmail,checkUsername, registerUser} from "@/lib/authentication";
 
 const schema = yup.object().shape({
   username: yup.string().min(3, "Username must be at least 3 characters").required("Username required"),
@@ -36,8 +37,8 @@ export default function SignupForm() {
   useEffect(() => {
     if (!usernameValue || usernameValue.length < 3) { setUsernameExists(false); return; }
     const debounce = setTimeout(async () => {
-      const res = await axios.post("/api/auth/check-username", { username: usernameValue });
-      setUsernameExists(res.data.exists);
+      const res = await checkUsername(usernameValue)
+      setUsernameExists(res.status);
     }, 500);
     return () => clearTimeout(debounce);
   }, [usernameValue]);
@@ -46,8 +47,8 @@ export default function SignupForm() {
   useEffect(() => {
     if (!emailValue) { setEmailExists(false); return; }
     const debounce = setTimeout(async () => {
-      const res = await axios.post("/api/auth/check-email", { email: emailValue });
-      setEmailExists(res.data.exists);
+      const res = await checkEmail(emailValue)
+      setEmailExists(res.status);
     }, 500);
     return () => clearTimeout(debounce);
   }, [emailValue]);
@@ -69,11 +70,14 @@ export default function SignupForm() {
 
     setLoading(true);
     try {
-      const res = await axios.post("/api/auth/signup", { ...data, captcha: captchaValue });
-      setMessage(res.data.message);
+      const res = await registerUser({
+        ...data,
+        captcha:captchaValue
+      })
+      setMessage(res?.message);
       router.push("/user/dashboard");
     } catch (err) {
-      setMessage(err.response?.data.error || "Signup failed");
+      setMessage(err?.error || "Signup failed");
     }
     setLoading(false);
   };

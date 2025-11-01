@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { FaSearch, FaGlobe } from "react-icons/fa";
+import { MdReceipt } from "react-icons/md";
 
 export default function OrderForm({ services: initialServices = [] }) {
   const [category, setCategory] = useState("");
@@ -144,9 +145,12 @@ export default function OrderForm({ services: initialServices = [] }) {
   return (
     <div className="w-full min-h-screen bg-[#0b0b0d] flex items-center justify-center py-8 px-3 sm:px-6">
       <div className="w-full max-w-2xl bg-[#161617]/95 border border-yellow-500/20 rounded-2xl shadow-[0_0_10px_rgba(250,204,21,0.15)] p-4 sm:p-6 text-gray-100">
-        <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent text-center mb-6">
-          🧾 Place Your Order
-        </h2>
+      <h2 className="flex items-center justify-center gap-2 text-2xl sm:text-3xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent mb-6">
+  <MdReceipt size={32} className="text-yellow-500" />
+  Place Your Order
+</h2>
+
+
 
         <form onSubmit={handleSubmit} className="space-y-4 text-sm sm:text-base">
           {/* 🔍 Search */}

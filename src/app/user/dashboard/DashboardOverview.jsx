@@ -4,36 +4,42 @@ import { useEffect, useState } from "react";
 import {
   MdAddShoppingCart,
   MdAccountBalanceWallet,
-  MdSupportAgent,
   MdTrendingUp,
+  MdSupportAgent,
 } from "react-icons/md";
 import { FaUserCircle } from "react-icons/fa";
+import Announcements from "./Announcements";
+import LatestOrders from "./LatestOrders";
+import { getUserBalance, getUserDetails } from "@/lib/userActions";
 
 const Card = ({ children, className = "", onClick }) => (
   <div
     onClick={onClick}
-    className={`bg-[#151517] border border-yellow-500/20 rounded-2xl shadow-md p-3 sm:p-4 lg:p-5 hover:border-yellow-500/40 transition-all ${className}`}
+    className={`bg-[#151517] border border-yellow-500/20 rounded-2xl shadow-md p-3 sm:p-4 lg:p-5 hover:border-yellow-500/40 transition-all cursor-pointer ${className}`}
   >
     {children}
   </div>
 );
 
-export default function DashboardLayout({ user }) {
-  const [balance, setBalance] = useState(0);
+export default function DashboardLayout() {
+  const [user, setUser] = useState({});
   const [spent, setSpent] = useState(0);
   const [orders, setOrders] = useState(0);
+  const [balance, setBalance] = useState(0);
 
   useEffect(() => {
-    async function fetchBalance() {
+    async function getUser() {
       try {
-        const res = await fetch("/api/services/getbalance", { cache: "no-store" });
-        const data = await res.json();
-        if (data.success) setBalance(data.balance);
+        const data = await getUserDetails();
+        if (data) {
+          setUser(data);
+          setBalance(data.balance || 0);
+        }
       } catch (err) {
-        console.error("Balance fetch error:", err);
+        console.error("user fetch error:", err);
       }
     }
-    fetchBalance();
+    getUser();
   }, []);
 
   useEffect(() => {
@@ -52,17 +58,7 @@ export default function DashboardLayout({ user }) {
       label: "Add Funds",
       href: "/user/addfunds",
     },
-    // {
-    //   icon: <MdSupportAgent size={22} />,
-    //   label: "Support",
-    //   href: "/user/support",
-    // },
-  ];
 
-  const latestOrders = [
-    { id: "#1324", service: "Instagram Followers", amount: "₹350", status: "Completed" },
-    { id: "#1323", service: "YouTube Views", amount: "₹220", status: "Processing" },
-    { id: "#1322", service: "Twitter Likes", amount: "₹90", status: "Pending" },
   ];
 
   return (
@@ -119,7 +115,9 @@ export default function DashboardLayout({ user }) {
               </div>
               <div>
                 <p className="text-[11px] sm:text-sm text-gray-400">Total Orders</p>
-                <h4 className="text-sm sm:text-lg font-semibold text-yellow-300">{orders}</h4>
+                <h4 className="text-sm sm:text-lg font-semibold text-yellow-300">
+                  {orders}
+                </h4>
               </div>
             </div>
           </Card>
@@ -127,89 +125,39 @@ export default function DashboardLayout({ user }) {
 
         {/* ================= QUICK ACTIONS ================= */}
         <section>
-  <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-yellow-400 tracking-wide">
-    Quick Actions
-  </h3>
-
-  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto">
-    {quickActions.map((action, idx) => (
-      <Card
-        key={idx}
-        className="flex items-center justify-center gap-2 sm:gap-3 py-3 sm:py-4 lg:py-5 cursor-pointer hover:bg-yellow-500/10 text-yellow-300 transition-all"
-        onClick={() => (window.location.href = action.href)}
-      >
-        <div className="text-yellow-400">{action.icon}</div>
-        <span className="text-sm sm:text-base font-medium">{action.label}</span>
-      </Card>
-    ))}
-  </div>
-</section>
-
-
-        {/* ================= LATEST ORDERS ================= */}
-        <section>
           <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-yellow-400 tracking-wide">
-            Latest Orders
+            Quick Actions
           </h3>
-          <Card className="overflow-x-auto">
-            <table className="w-full text-[12px] sm:text-sm text-left text-gray-300">
-              <thead className="text-[11px] sm:text-xs uppercase border-b border-yellow-500/20 text-yellow-400">
-                <tr>
-                  <th className="py-2 px-2 sm:py-3 sm:px-4">Order ID</th>
-                  <th className="py-2 px-2 sm:py-3 sm:px-4">Service</th>
-                  <th className="py-2 px-2 sm:py-3 sm:px-4">Amount</th>
-                  <th className="py-2 px-2 sm:py-3 sm:px-4">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {latestOrders.map((order, idx) => (
-                  <tr
-                    key={idx}
-                    className="border-b border-yellow-500/10 hover:bg-yellow-500/5"
-                  >
-                    <td className="py-2 px-2 sm:py-3 sm:px-4">{order.id}</td>
-                    <td className="py-2 px-2 sm:py-3 sm:px-4 truncate">{order.service}</td>
-                    <td className="py-2 px-2 sm:py-3 sm:px-4 text-yellow-300">
-                      {order.amount}
-                    </td>
-                    <td className="py-2 px-2 sm:py-3 sm:px-4">
-                      <span
-                        className={`px-2 py-[2px] sm:py-1 rounded-lg text-[10px] sm:text-xs ${
-                          order.status === "Completed"
-                            ? "bg-green-500/20 text-green-400"
-                            : order.status === "Processing"
-                            ? "bg-yellow-500/20 text-yellow-300"
-                            : "bg-red-500/20 text-red-400"
-                        }`}
-                      >
-                        {order.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Card>
+
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto">
+            {quickActions.map((action, idx) => (
+              <Card
+                key={idx}
+                onClick={() => (window.location.href = action.href)}
+                className={`flex items-center justify-center gap-2 sm:gap-3 py-3 sm:py-4 lg:py-5 text-yellow-300 transition-all ${
+                  action.neon
+                    ? "hover:shadow-[0_0_20px_rgba(255,255,0,0.7)] hover:bg-yellow-500/10"
+                    : "hover:bg-yellow-500/10"
+                }`}
+              >
+                <div
+                  className={`text-yellow-400 ${
+                    action.neon
+                      ? "drop-shadow-[0_0_6px_rgba(255,255,0,0.8)] animate-pulse"
+                      : ""
+                  }`}
+                >
+                  {action.icon}
+                </div>
+                <span className="text-sm sm:text-base font-medium">{action.label}</span>
+              </Card>
+            ))}
+          </div>
         </section>
 
-        {/* ================= ANNOUNCEMENTS ================= */}
-        <section>
-          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-yellow-400 tracking-wide">
-            Announcements
-          </h3>
-          <Card>
-            <p className="text-[13px] sm:text-sm text-gray-300 leading-relaxed">
-              🎉 Welcome to{" "}
-              <span className="text-yellow-400 font-semibold">InstantSMM</span>!
-              Get the best social media services at lightning speed.
-              <br />
-              💳 Add funds to your account and start placing orders instantly.
-              <br />
-              📩 Need help? Visit our{" "}
-              <span className="text-yellow-400">Support</span> section.
-            </p>
-          </Card>
-        </section>
+        {/* ================= OTHER SECTIONS ================= */}
+        <LatestOrders />
+        <Announcements />
       </div>
     </div>
   );
