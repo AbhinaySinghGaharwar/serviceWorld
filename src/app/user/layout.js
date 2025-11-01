@@ -286,7 +286,7 @@ const fileInputRef = useRef(null);
         </header>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 text-gray-100">
+        <div className="flex-1 overflow-y-auto md:p-6 text-gray-100">
           {children}
         </div>
       </div>

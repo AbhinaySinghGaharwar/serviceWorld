@@ -1,17 +1,18 @@
 "use client";
 
+import { getServices } from "@/lib/services";
 import { useState, useEffect, useRef } from "react";
-import { FaSearch, FaGlobe } from "react-icons/fa";
-import { MdReceipt } from "react-icons/md";
+import { FaSearch, FaSpinner } from "react-icons/fa";
+import { MdReceipt, MdAccessTime } from "react-icons/md";
 
-export default function OrderForm({ services: initialServices = [] }) {
+export default function OrderForm() {
   const [category, setCategory] = useState("");
   const [service, setService] = useState("");
   const [link, setLink] = useState("");
   const [quantity, setQuantity] = useState("");
   const [charge, setCharge] = useState("");
-  const [services, setServices] = useState(initialServices);
-  const [filteredServices, setFilteredServices] = useState(initialServices);
+  const [services, setServices] = useState([]);
+  const [filteredServices, setFilteredServices] = useState([]);
   const [categories, setCategories] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [responseMessage, setResponseMessage] = useState(null);
@@ -20,75 +21,99 @@ export default function OrderForm({ services: initialServices = [] }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
-  const [currency, setCurrency] = useState("INR");
-  const [currencyDropdownOpen, setCurrencyDropdownOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
 
   const dropdownRef = useRef(null);
   const categoryRef = useRef(null);
-  const currencyRef = useRef(null);
+  const searchRef = useRef(null);
 
-  const currencyRates = {
-    INR: { symbol: "₹", rate: 1 },
-    USD: { symbol: "$", rate: 0.012 },
-    EUR: { symbol: "€", rate: 0.011 },
-    GBP: { symbol: "£", rate: 0.0097 },
-    PKR: { symbol: "₨", rate: 3.35 },
-  };
-  const selectedCurrency = currencyRates[currency];
-
+  // ✅ Fetch all services once
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (currencyRef.current && !currencyRef.current.contains(e.target)) setCurrencyDropdownOpen(false);
-      if (categoryRef.current && !categoryRef.current.contains(e.target)) setCategoryDropdownOpen(false);
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setDropdownOpen(false);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    async function fetchServices() {
+      try {
+        const data = await getServices();
+        if (data) setServices(data);
+      } catch (err) {
+        console.error("Failed to fetch services:", err);
+      }
+    }
+    fetchServices();
   }, []);
 
+  // ✅ Extract unique categories
   useEffect(() => {
     if (services.length > 0) {
-      const uniqueCats = [...new Set(services.map((s) => s.category).filter(Boolean))];
+      const uniqueCats = [
+        ...new Set(services.map((s) => s.category).filter(Boolean)),
+      ];
       setCategories(uniqueCats);
       if (!category) setCategory(uniqueCats[0] || "");
     }
   }, [services]);
 
+  // ✅ Debounced global search (not limited by category)
   useEffect(() => {
-    const filtered = services.filter(
-      (s) =>
-        (!category || s.category === category) &&
-        s.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredServices(filtered);
-  }, [category, searchTerm, services]);
+    setLoading(true);
+    const delay = setTimeout(() => {
+      const filtered = services.filter(
+        (s) =>
+          (!searchTerm ||
+            s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (s.description &&
+              s.description.toLowerCase().includes(searchTerm.toLowerCase())))
+      );
+      setFilteredServices(filtered);
+      setLoading(false);
+    }, 300);
 
+    return () => clearTimeout(delay);
+  }, [searchTerm, services]);
+
+  // ✅ Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (categoryRef.current && !categoryRef.current.contains(e.target))
+        setCategoryDropdownOpen(false);
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target))
+        setDropdownOpen(false);
+      if (searchRef.current && !searchRef.current.contains(e.target))
+        setSearchDropdownOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // ✅ Calculate charge dynamically
   useEffect(() => {
     if (service && quantity && services.length > 0) {
-      const selectedService = services.find((s) => s.service === service);
-      if (selectedService && selectedService.rate) {
-        const rate = parseFloat(selectedService.rate.toString().replace(/,/g, ""));
+      const srv = services.find((s) => s.service === service);
+      if (srv && srv.rate) {
+        const rate = parseFloat(srv.rate.toString().replace(/,/g, ""));
         const qty = parseInt(quantity, 10);
         if (!isNaN(rate) && !isNaN(qty)) {
-          const total = rate * qty * selectedCurrency.rate;
+          const total = (rate / 1000) * qty;
           setCharge(total.toFixed(2));
         } else setCharge("");
       } else setCharge("");
     } else setCharge("");
-  }, [service, quantity, services, currency]);
+  }, [service, quantity, services]);
 
+  // ✅ Validate quantity
   useEffect(() => {
     if (!service || services.length === 0) return;
-    const selectedService = services.find((s) => s.service === service);
-    if (!selectedService) return;
+    const srv = services.find((s) => s.service === service);
+    if (!srv) return;
     const qty = parseInt(quantity, 10);
-    if (qty < selectedService.min) {
-      setQuantityError(`Minimum allowed quantity is ${selectedService.min}`);
-    } else if (qty > selectedService.max) {
-      setQuantityError(`Maximum allowed quantity is ${selectedService.max}`);
+    if (qty < srv.min) {
+      setQuantityError(`Minimum allowed quantity is ${srv.min}`);
+    } else if (qty > srv.max) {
+      setQuantityError(`Maximum allowed quantity is ${srv.max}`);
     } else setQuantityError("");
   }, [quantity, service, services]);
 
+  // ✅ Submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!service || !link || !quantity || !charge) {
@@ -109,7 +134,7 @@ export default function OrderForm({ services: initialServices = [] }) {
       const res = await fetch("/api/orders/createorder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ service, link, quantity, charge, currency }),
+        body: JSON.stringify({ service, link, quantity, charge }),
         credentials: "include",
       });
 
@@ -124,6 +149,8 @@ export default function OrderForm({ services: initialServices = [] }) {
         setLink("");
         setQuantity("");
         setCharge("");
+        setSearchTerm("");
+        setSelectedService(null);
       }
     } catch (err) {
       console.error(err);
@@ -134,73 +161,79 @@ export default function OrderForm({ services: initialServices = [] }) {
     }
   };
 
-  const selectedService = service ? services.find((s) => s.service === service) : null;
-  const invalidServiceData =
-    !selectedService ||
-    !selectedService.name ||
-    !selectedService.rate ||
-    selectedService.min == null ||
-    selectedService.max == null;
-
   return (
-    <div className="w-full min-h-screen bg-[#0b0b0d] flex items-center justify-center py-8 px-3 sm:px-6">
+    <div className="w-full min-h-screen  flex items-center justify-center py-8  sm:px-6">
       <div className="w-full max-w-2xl bg-[#161617]/95 border border-yellow-500/20 rounded-2xl shadow-[0_0_10px_rgba(250,204,21,0.15)] p-4 sm:p-6 text-gray-100">
-      <h2 className="flex items-center justify-center gap-2 text-2xl sm:text-3xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent mb-6">
-  <MdReceipt size={32} className="text-yellow-500" />
-  Place Your Order
-</h2>
+        {/* 🧾 Title */}
+        <h2 className="flex items-center justify-center gap-2 text-2xl sm:text-3xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent mb-6">
+          <MdReceipt size={32} className="text-yellow-500" />
+          Place Your Order
+        </h2>
 
-
-
+        {/* 📝 Form */}
         <form onSubmit={handleSubmit} className="space-y-4 text-sm sm:text-base">
           {/* 🔍 Search */}
-          <div className="relative">
+          <div className="relative" ref={searchRef}>
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-500 text-sm sm:text-base" />
             <input
               type="text"
-              placeholder="Search service..."
+              placeholder="Search service by name or description..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setSearchDropdownOpen(true);
+              }}
               className="w-full pl-9 pr-3 py-2 sm:py-3 rounded-lg bg-[#0e0e0f] border border-yellow-500/30 text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 text-sm sm:text-base"
             />
+
+            {/* 🔽 Dropdown */}
+            {searchTerm && searchDropdownOpen && (
+              <div className="absolute z-10 mt-2 w-full bg-[#151517] border border-yellow-500/20 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                {loading ? (
+                  <div className="flex justify-center items-center p-4 text-yellow-400">
+                    <FaSpinner className="animate-spin mr-2" /> Searching...
+                  </div>
+                ) : filteredServices.length > 0 ? (
+                  <ul>
+                    {filteredServices.map((srv, idx) => (
+                      <li
+                        key={idx}
+                        onClick={() => {
+                          setSearchTerm(srv.name);
+                          setSelectedService(srv);
+                          setService(srv.service);
+                          setCategory(srv.category || "");
+                          setFilteredServices([]);
+                          setSearchDropdownOpen(false);
+                          setLoading(false);
+                        }}
+                        className="px-4 py-2 text-gray-200 hover:bg-yellow-500/20 cursor-pointer text-sm sm:text-base"
+                      >
+                        <p className="font-medium text-yellow-400">{srv.name}</p>
+                        <p className="text-gray-400 text-xs truncate">
+                          {srv.description}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="p-3 text-gray-400 text-sm text-center">
+                    No results found.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* 🌍 Currency */}
-          <div ref={currencyRef}>
-            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">Currency</label>
+          {/* 📁 Category Dropdown */}
+          <div ref={categoryRef}>
+            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">
+              Category
+            </label>
             <div
               className="relative"
-              onClick={() => setCurrencyDropdownOpen(!currencyDropdownOpen)}
+              onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
             >
-              <div className="w-full border border-yellow-500/30 rounded-lg p-2.5 sm:p-3 bg-[#0e0e0f] flex justify-between items-center cursor-pointer hover:border-yellow-500/50">
-                <FaGlobe className="text-yellow-500" />
-                <span className="font-medium text-sm sm:text-base">{currency}</span>
-                <span className="ml-2 text-gray-400">▼</span>
-              </div>
-              {currencyDropdownOpen && (
-                <ul className="absolute z-50 w-full max-h-56 overflow-auto bg-[#161617] border border-yellow-500/30 rounded-xl mt-2 shadow-lg text-sm">
-                  {Object.keys(currencyRates).map((code) => (
-                    <li
-                      key={code}
-                      onClick={() => {
-                        setCurrency(code);
-                        setCurrencyDropdownOpen(false);
-                      }}
-                      className="p-2 hover:bg-yellow-500/10 cursor-pointer text-gray-100 flex items-center gap-2"
-                    >
-                      <FaGlobe className="text-yellow-500" />
-                      <span>{code}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-
-          {/* 📁 Category */}
-          <div ref={categoryRef}>
-            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">Category</label>
-            <div className="relative" onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}>
               <div className="w-full border border-yellow-500/30 rounded-lg p-2.5 sm:p-3 bg-[#0e0e0f] flex justify-between items-center cursor-pointer hover:border-yellow-500/50 text-sm sm:text-base">
                 {category || "Select category"}
                 <span className="ml-2 text-gray-400">▼</span>
@@ -224,13 +257,20 @@ export default function OrderForm({ services: initialServices = [] }) {
             </div>
           </div>
 
-          {/* 🧩 Service */}
+          {/* 🧩 Service Dropdown */}
           <div ref={dropdownRef}>
-            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">Service</label>
-            <div className="relative" onClick={() => setDropdownOpen(!dropdownOpen)}>
+            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">
+              Service
+            </label>
+            <div
+              className="relative"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
               <div className="w-full border border-yellow-500/30 rounded-lg p-2.5 sm:p-3 bg-[#0e0e0f] flex justify-between items-center cursor-pointer hover:border-yellow-500/50 text-sm sm:text-base">
                 {service
-                  ? `${services.find((s) => s.service === service)?.name} | ${selectedCurrency.symbol}${services.find((s) => s.service === service)?.rate}`
+                  ? `${services.find((s) => s.service === service)?.service} | ${
+                      services.find((s) => s.service === service)?.name
+                    } | ₹${services.find((s) => s.service === service)?.rate}`
                   : "Select a service"}
                 <span className="ml-2 text-gray-400">▼</span>
               </div>
@@ -241,12 +281,12 @@ export default function OrderForm({ services: initialServices = [] }) {
                       key={srv.service}
                       onClick={() => {
                         setService(srv.service);
+                        setSelectedService(srv);
                         setDropdownOpen(false);
                       }}
                       className="p-2.5 hover:bg-yellow-500/10 cursor-pointer truncate text-gray-100"
                     >
-                      {srv.name} | {selectedCurrency.symbol}
-                      {(srv.rate * selectedCurrency.rate).toFixed(2)}
+                      {srv.service} {srv.name} | ₹{srv.rate}
                     </li>
                   ))}
                 </ul>
@@ -254,9 +294,29 @@ export default function OrderForm({ services: initialServices = [] }) {
             </div>
           </div>
 
+          {/* ℹ️ Dynamic Info */}
+          {selectedService && (
+            <div className="bg-[#0e0e0f] border border-yellow-500/30 rounded-lg p-3 sm:p-4 text-gray-300 text-sm sm:text-base shadow-[0_0_10px_rgba(255,255,0,0.05)]">
+              <p className="text-yellow-400 font-semibold mb-1">
+                {selectedService.service} {selectedService.name}
+              </p>
+              <p className="text-gray-400 mb-2">
+                {selectedService.desc || "No description available."}
+              </p>
+              <p className="flex items-center gap-2 text-xs sm:text-sm text-yellow-500">
+                <MdAccessTime />
+                {selectedService.time
+                  ? `Avg Time: ${selectedService.average_time}`
+                  : "No enough data available"}
+              </p>
+            </div>
+          )}
+
           {/* 🔗 Link */}
           <div>
-            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">Link</label>
+            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">
+              Link
+            </label>
             <input
               type="text"
               className="w-full border border-yellow-500/30 rounded-lg p-2.5 sm:p-3 bg-[#0e0e0f] text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 text-sm sm:text-base"
@@ -268,7 +328,9 @@ export default function OrderForm({ services: initialServices = [] }) {
 
           {/* 🔢 Quantity */}
           <div>
-            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">Quantity</label>
+            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">
+              Quantity
+            </label>
             <input
               type="number"
               className={`w-full rounded-lg p-2.5 sm:p-3 bg-[#0e0e0f] text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 text-sm sm:text-base ${
@@ -278,16 +340,22 @@ export default function OrderForm({ services: initialServices = [] }) {
               onChange={(e) => setQuantity(e.target.value)}
               placeholder="Enter quantity"
             />
-            {quantityError && <small className="text-red-400 font-medium text-xs sm:text-sm">{quantityError}</small>}
+            {quantityError && (
+              <small className="text-red-400 font-medium text-xs sm:text-sm">
+                {quantityError}
+              </small>
+            )}
           </div>
 
           {/* 💰 Charge */}
           <div>
-            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">Charge</label>
+            <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">
+              Charge
+            </label>
             <input
               type="text"
               className="w-full border border-yellow-500/30 rounded-lg p-2.5 sm:p-3 bg-[#0e0e0f] text-gray-100 text-sm sm:text-base"
-              value={charge ? `${selectedCurrency.symbol}${charge}` : ""}
+              value={charge ? `₹${charge}` : ""}
               readOnly
             />
           </div>
@@ -295,7 +363,7 @@ export default function OrderForm({ services: initialServices = [] }) {
           {/* 🚀 Submit */}
           <button
             type="submit"
-            disabled={submitting || invalidServiceData}
+            disabled={submitting}
             className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-black py-2.5 sm:py-3.5 rounded-lg font-semibold hover:shadow-[0_0_15px_rgba(250,204,21,0.3)] transition-all disabled:opacity-50 text-sm sm:text-base"
           >
             {submitting ? (
@@ -309,6 +377,7 @@ export default function OrderForm({ services: initialServices = [] }) {
           </button>
         </form>
 
+        {/* 🧩 Response Message */}
         {responseMessage && (
           <p
             className={`mt-4 text-center font-medium text-sm sm:text-base ${

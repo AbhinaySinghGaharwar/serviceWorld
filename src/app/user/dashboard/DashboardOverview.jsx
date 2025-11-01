@@ -11,6 +11,8 @@ import { FaUserCircle } from "react-icons/fa";
 import Announcements from "./Announcements";
 import LatestOrders from "./LatestOrders";
 import { getUserBalance, getUserDetails } from "@/lib/userActions";
+import OrderForm from "./OrderForm";
+import SupportSection from "./SupportSection";
 
 const Card = ({ children, className = "", onClick }) => (
   <div
@@ -26,6 +28,7 @@ export default function DashboardLayout() {
   const [spent, setSpent] = useState(0);
   const [orders, setOrders] = useState(0);
   const [balance, setBalance] = useState(0);
+
 
   useEffect(() => {
     async function getUser() {
@@ -64,6 +67,7 @@ export default function DashboardLayout() {
   return (
     <div className="w-full min-h-screen bg-[#0e0e0f] text-gray-100 py-4 sm:py-6 flex justify-center">
       <div className="w-full max-w-6xl px-3 sm:px-6 space-y-8">
+
         {/* ================= STATS ================= */}
         <section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card>
@@ -123,7 +127,7 @@ export default function DashboardLayout() {
           </Card>
         </section>
 
-        {/* ================= QUICK ACTIONS ================= */}
+         {/* ================= QUICK ACTIONS ================= */}
         <section>
           <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-yellow-400 tracking-wide">
             Quick Actions
@@ -155,9 +159,18 @@ export default function DashboardLayout() {
           </div>
         </section>
 
+ <LatestOrders />
+
+
+<OrderForm />
+
+        
+       
+
         {/* ================= OTHER SECTIONS ================= */}
-        <LatestOrders />
+       <SupportSection/>
         <Announcements />
+        <SupportSection/>
       </div>
     </div>
   );
