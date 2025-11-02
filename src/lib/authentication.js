@@ -237,3 +237,64 @@ export async function changePassword({ currentPassword, newPassword, ip = "127.0
     return { error: err.message };
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export async function loginAction(formData) {
+  const email = formData.get("email");
+  const password = formData.get("password");
+
+  // Dummy check
+  if (email === "test@gmail.com" && password === "hello") {
+    // Create token
+    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "1h" });
+
+    // Set cookie
+    cookies().set({
+      name: "auth_token",
+      value: token,
+      httpOnly: true,
+      secure: true,
+      path: "/",
+      maxAge: 60 * 60, // 1 hour
+    });
+
+    return { success: true, message: "Login successful" };
+  } else {
+    return { success: false, message: "Invalid credentials" };
+  }
+}
