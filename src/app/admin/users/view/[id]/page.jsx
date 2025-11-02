@@ -1,6 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  Shield,
+  Mail,
+  UserCircle2,
+  Calendar,
+  Hash,
+  ImageOff,
+} from "lucide-react";
 
 export default function ViewUserPage() {
   const { id } = useParams();
@@ -30,26 +39,112 @@ export default function ViewUserPage() {
     fetchUser();
   }, [id]);
 
-  if (error) return <p className="text-red-500">{error}</p>;
-  if (!user) return <p>Loading user...</p>;
+  if (error)
+    return (
+      <div className="flex items-center justify-center min-h-screen text-red-400 text-lg p-4 text-center">
+        {error}
+      </div>
+    );
+
+  if (!user)
+    return (
+      <div className="flex items-center justify-center min-h-screen text-yellow-400 text-lg p-4 text-center">
+        Loading user...
+      </div>
+    );
+
+  // Detect image field
+  const profilePic =
+    user.profilePic || user.avatar || user.image || user.photo || null;
 
   return (
-    <div className="bg-white text-black min-h-screen p-6">
-      <h1 className="text-3xl font-semibold mb-4">View User</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {Object.keys(user).map((key) => (
-          <div key={key} className="p-4 border rounded bg-gray-50">
-            <p className="text-gray-500 font-medium">{key}</p>
-            <p className="text-black">{String(user[key])}</p>
+    <div className="min-h-screen bg-gradient-to-b from-[#0b0b0c] via-[#0e0e0f] to-[#141414] text-gray-100 p-4 sm:p-6 md:p-10">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div className="flex items-center gap-3">
+          <UserCircle2 className="text-yellow-400 shrink-0" size={32} />
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-yellow-400">
+              {user.name || "User Details"}
+            </h1>
+            <p className="text-gray-400 text-sm sm:text-base">
+              Detailed profile view
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => router.back()}
+          className="flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-600/40 to-yellow-500/30 hover:from-yellow-600/60 hover:to-yellow-500/40 border border-yellow-500/20 text-yellow-300 px-4 py-2 rounded-xl transition-all w-full sm:w-auto"
+        >
+          <ArrowLeft size={16} /> Back
+        </button>
+      </div>
+
+      {/* Profile Card */}
+      <div className="bg-[#151517] border border-yellow-500/20 rounded-2xl p-5 sm:p-6 shadow-lg mb-10 hover:border-yellow-500/40 transition-all duration-300">
+        <div className="flex flex-col sm:flex-row items-center gap-6">
+          {/* Profile Picture */}
+          <div className="relative w-28 h-28 rounded-full overflow-hidden border-2 border-yellow-500/30 shadow-md">
+            {profilePic ? (
+              <img
+                src={profilePic}
+                alt={user.name || "Profile"}
+                className="object-cover w-full h-full"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-tr from-yellow-700/40 to-yellow-400/20 flex items-center justify-center">
+                <ImageOff size={40} className="text-yellow-400/70" />
+              </div>
+            )}
+          </div>
+
+          <div className="text-center sm:text-left w-full sm:flex-1">
+            <h2 className="text-2xl font-semibold text-yellow-400 break-words">
+              {user.name || "Unnamed User"}
+            </h2>
+
+            <p className="text-gray-400 flex justify-center sm:justify-start items-center gap-2 mt-1 text-sm sm:text-base">
+              <Mail size={16} className="text-gray-500" />{" "}
+              {user.email || "No Email"}
+            </p>
+
+            <p className="text-gray-400 flex justify-center sm:justify-start items-center gap-2 mt-1 text-sm sm:text-base">
+              <Shield size={16} className="text-gray-500" /> Role:{" "}
+              <span className="capitalize text-yellow-300">
+                {user.role || "user"}
+              </span>
+            </p>
+
+            <p className="text-gray-400 flex justify-center sm:justify-start items-center gap-2 mt-1 text-sm sm:text-base">
+              <Calendar size={16} className="text-gray-500" /> Joined:{" "}
+              {user.createdAt
+                ? new Date(user.createdAt).toLocaleString()
+                : "N/A"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Info Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
+        {Object.entries(user).map(([key, value]) => (
+          <div
+            key={key}
+            className="bg-gradient-to-b from-[#1a1a1c] to-[#101010] border border-yellow-500/10 rounded-2xl p-4 sm:p-5 shadow-md hover:shadow-yellow-500/10 hover:border-yellow-500/30 transition-all duration-300"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs sm:text-sm text-gray-400 uppercase tracking-wide break-words">
+                {key}
+              </span>
+              <Hash size={14} className="text-gray-500 shrink-0" />
+            </div>
+            <p className="text-gray-200 text-sm sm:text-base break-words">
+              {String(value) || "—"}
+            </p>
           </div>
         ))}
       </div>
-      <button
-        onClick={() => router.back()}
-        className="mt-6 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
-      >
-        Back
-      </button>
     </div>
   );
 }

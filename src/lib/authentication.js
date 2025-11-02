@@ -275,15 +275,15 @@ export async function changePassword({ currentPassword, newPassword, ip = "127.0
 
 
 export async function adminLoginAction(email,password) {
-
+console.log(email,password)
   // Dummy check
   if (email === "test@gmail.com" && password === "hello") {
     // Create token
-    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ email,role:'admin' }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
     // Set cookie
     cookies().set({
-      name: "auth_token",
+      name: "token",
       value: token,
       httpOnly: true,
       secure: true,

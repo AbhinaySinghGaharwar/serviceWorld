@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Search, Eye, Edit3, Users, Mail, Shield } from "lucide-react";
+import { getAllUsers } from "@/lib/adminServices";
 
 export default function UsersPage() {
   const router = useRouter();
@@ -11,34 +13,33 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const debounceRef = useRef(null);
 
-  // Fetch all users
   useEffect(() => {
-    const getUsers = async () => {
-      try {
-        const res = await fetch("/api/admin/getusers", {
-          method: "GET",
-          credentials: "include",
-        });
-        if (!res.ok) {
-          const errData = await res.json();
-          setError(errData.error || "Failed to fetch users");
-          setLoading(false);
-          return;
-        }
-        const data = await res.json();
-        setUsers(data.users || []);
-        setFilteredUsers(data.users || []);
-        setLoading(false);
-      } catch (err) {
-        console.error(err);
-        setError("Something went wrong");
-        setLoading(false);
-      }
-    };
-    getUsers();
-  }, []);
+  const getUsers = async () => {
+    try {
+      const res = await getAllUsers();
+      console.log(res);
 
-  // Debounced search
+      if (!res.success) { // ❗ if success is false, then show error
+        setError(res.error || "Failed to fetch users");
+        setLoading(false);
+        return;
+      }
+
+      const users = res.plainUsers || [];
+      setUsers(users);
+      setFilteredUsers(users);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong");
+      setLoading(false);
+    }
+  };
+  getUsers();
+}, []);
+
+
+  // Debounce search
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -47,110 +48,129 @@ export default function UsersPage() {
         setFilteredUsers(users);
         return;
       }
-      const lowerSearch = search.toLowerCase();
-      const results = users.filter((user) =>
-        Object.values(user).some((val) =>
-          String(val).toLowerCase().includes(lowerSearch)
+      const lower = search.toLowerCase();
+      setFilteredUsers(
+        users.filter((u) =>
+          Object.values(u).some((v) => String(v).toLowerCase().includes(lower))
         )
       );
-      setFilteredUsers(results);
-    }, 300); // debounce delay: 300ms
+    }, 300);
 
     return () => clearTimeout(debounceRef.current);
   }, [search, users]);
 
-  if (loading) return <p className="p-6">Loading users...</p>;
-  if (error) return <p className="text-red-500 p-6">{error}</p>;
-  if (!users.length) return <p className="p-6">No users found.</p>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen text-yellow-400 text-lg">
+        Loading users...
+      </div>
+    );
 
-  const headers = Object.keys(users[0]);
+  if (error)
+    return (
+      <div className="flex items-center justify-center min-h-screen text-red-400 text-lg">
+        {error}
+      </div>
+    );
+
+  if (!users.length)
+    return (
+      <div className="flex items-center justify-center min-h-screen text-gray-400 text-lg">
+        No users found.
+      </div>
+    );
 
   return (
-    <div className="bg-gray-100 text-black min-h-screen">
-      <h1 className="text-3xl font-semibold mb-4">Users</h1>
-      <p className="text-gray-700 mb-6">
-        View and manage all users registered on the platform.
-      </p>
+    <div className="min-h-screen bg-[#0a0a0b] text-gray-200 px-4 sm:px-6 md:px-10 py-8 relative overflow-hidden">
+      {/* Subtle background glows */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,0,0.05),transparent_70%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(128,90,213,0.05),transparent_70%)] pointer-events-none" />
 
-      {/* Search Input */}
-      <div className="mb-4 relative">
-        <input
-          type="text"
-          placeholder="Search users..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        {/* Suggestion Dropdown */}
-        {search && filteredUsers.length > 0 && (
-          <ul className="absolute z-50 w-full max-h-60 overflow-y-auto bg-white border border-gray-300 rounded-lg mt-1 shadow-lg">
-            {filteredUsers.slice(0, 10).map((user) => (
-              <li
-                key={user._id}
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setSearch(""); // hide suggestions
-                  router.push(`/admin/users/view/${user._id}`);
-                }}
-              >
-                {Object.values(user).join(" | ").substring(0, 100)}
-                {Object.values(user).join(" | ").length > 100 && "..."}
-              </li>
-            ))}
-          </ul>
-        )}
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 relative z-10">
+        <div className="flex items-center gap-3">
+          <div className="bg-yellow-400/10 p-2 rounded-xl">
+            <Users className="text-yellow-400" size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-yellow-400">
+              Users
+            </h1>
+            <p className="text-gray-400 text-sm">
+              Manage and explore platform users
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Users Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full table-fixed border border-gray-300 rounded-lg">
-          <thead className="bg-gray-200 text-black">
-            <tr>
-              <th className="py-2 px-2 border-b border-gray-300 w-12">#</th>
-              {headers.map((header) => (
-                <th
-                  key={header}
-                  className="py-2 px-2 border-b border-gray-300 text-left truncate capitalize w-40"
-                  title={header}
-                >
-                  {header}
-                </th>
-              ))}
-              <th className="py-2 px-2 border-b border-gray-300 w-36">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map((user, index) => (
-              <tr key={user._id} className="hover:bg-gray-50">
-                <td className="py-2 px-2 border-b border-gray-300">{index + 1}</td>
-                {headers.map((key) => (
-                  <td
-                    key={key}
-                    className="py-2 px-2 border-b border-gray-300 truncate max-w-[10rem]"
-                    title={String(user[key])}
-                  >
-                    {String(user[key])}
-                  </td>
-                ))}
-                <td className="py-2 px-2 border-b border-gray-300 flex gap-2">
-                  <button
-                    className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-3 py-1 rounded"
-                    onClick={() => router.push(`/admin/users/view/${user._id}`)}
-                  >
-                    View
-                  </button>
-                  <button
-                    className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white px-3 py-1 rounded"
-                    onClick={() => router.push(`/admin/users/edit/${user._id}`)}
-                  >
-                    Edit
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Search Bar */}
+      <div className="mb-10 max-w-lg relative z-10 w-full">
+        <div className="flex items-center bg-[#151517]/70 backdrop-blur-md border border-yellow-500/30 rounded-2xl px-3 sm:px-4 shadow-md focus-within:border-yellow-400 transition">
+          <Search size={18} className="text-yellow-400 mr-2" />
+          <input
+            type="text"
+            placeholder="Search users..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-transparent text-gray-200 py-2.5 sm:py-3 focus:outline-none placeholder-gray-500 text-sm sm:text-base"
+          />
+        </div>
+      </div>
+
+      {/* Responsive Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5 sm:gap-7 relative z-10">
+        {filteredUsers.map((user, i) => (
+          <div
+            key={user._id || i}
+            className="group relative bg-[#141415]/70 backdrop-blur-md border border-yellow-500/10 rounded-2xl p-5 sm:p-6 shadow-[0_0_10px_rgba(255,215,0,0.05)] hover:shadow-[0_0_25px_rgba(255,215,0,0.15)] hover:border-yellow-500/30 transition-all duration-500 overflow-hidden"
+          >
+            {/* Hover glow */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br from-yellow-500/10 to-purple-500/10 blur-2xl transition-all duration-500" />
+
+            {/* Header */}
+            <div className="flex items-center justify-between mb-3 sm:mb-4 relative z-10">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <div className="bg-yellow-500/20 text-yellow-400 p-2 rounded-full">
+                  <Users size={18} />
+                </div>
+                <h2 className="font-semibold text-base sm:text-lg truncate max-w-[8rem] sm:max-w-[10rem]">
+                  {user.name || "Unknown User"}
+                </h2>
+              </div>
+              <span className="text-[10px] sm:text-xs bg-gradient-to-r from-yellow-500/30 to-yellow-400/30 text-yellow-200 px-2 py-0.5 sm:py-1 rounded-full uppercase">
+                {user.role || "user"}
+              </span>
+            </div>
+
+            {/* Info */}
+            <div className="text-xs sm:text-sm text-gray-400 space-y-1.5 sm:space-y-2 mb-4 sm:mb-5 relative z-10">
+              <p className="flex items-center gap-2 truncate">
+                <Mail size={14} className="text-yellow-500/60 shrink-0" />{" "}
+                {user.email || "No Email"}
+              </p>
+              <p className="flex items-center gap-2 truncate">
+                <Shield size={14} className="text-yellow-500/60 shrink-0" />{" "}
+                <span className="truncate">{user._id}</span>
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2.5 relative z-10">
+              <button
+                className="flex-1 bg-gradient-to-r from-yellow-600/40 to-yellow-500/30 hover:from-yellow-600/70 hover:to-yellow-500/50 border border-yellow-500/30 text-yellow-300 px-3 py-2 rounded-lg flex items-center justify-center gap-1 font-medium text-sm sm:text-base transition-all duration-300"
+                onClick={() => router.push(`/admin/users/view/${user._id}`)}
+              >
+                <Eye size={14} /> View
+              </button>
+              <button
+                className="flex-1 bg-gradient-to-r from-indigo-600/40 to-purple-500/30 hover:from-indigo-600/70 hover:to-purple-500/50 border border-purple-500/30 text-purple-300 px-3 py-2 rounded-lg flex items-center justify-center gap-1 font-medium text-sm sm:text-base transition-all duration-300"
+                onClick={() => router.push(`/admin/users/edit/${user._id}`)}
+              >
+                <Edit3 size={14} /> Edit
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -3,32 +3,30 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { FaUserShield } from "react-icons/fa";
-
+import { adminLoginAction } from "@/lib/authentication";
+import { useRouter } from "next/navigation";
 export default function AdminLogin() {
+  const router=useRouter()
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const handleLogin = async (e) => {
+    
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
     try {
-      const res = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await adminLoginAction(email,password)
 
-      const data = await res.json();
-      if (res.ok) {
+      if (res.success) {
         setMessage("✅ Login successful!");
         // redirect to dashboard
-        window.location.href = "/admin/dashboard";
+       router.replace('/admin/dashboard')
       } else {
-        setMessage("❌ " + (data.error || "Invalid credentials"));
+        setMessage("❌ " + (res.message || "Invalid credentials"));
       }
     } catch (err) {
       setMessage("⚠️ Network error");

@@ -11,7 +11,6 @@
 
 
 
-Perfect 👌 — so we’ll match the dark dashboard theme:
 
 Background → bg-[#0e0e0f]
 

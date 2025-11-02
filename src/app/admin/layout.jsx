@@ -19,102 +19,116 @@ export default function AdminLayout({ children }) {
   const [openSidebar, setOpenSidebar] = useState(false);
   const [openProfile, setOpenProfile] = useState(false);
   const profileRef = useRef(null);
-console.log(pathname)
+  const sidebarRef = useRef(null);
+
   useEffect(() => {
+    // Close profile menu when clicking outside
     function handleClickOutside(e) {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
         setOpenProfile(false);
       }
+      if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
+        setOpenSidebar(false);
+      }
     }
+
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
+  // Hide layout on login page
+  if (pathname.includes("admin/login")) {
+    return <>{children}</>;
+  }
+
   return (
-    <> 
-    {pathname.includes('admin/login')?(
-      <>{children} </>
-    ):(
-      <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-[#0e0e0f] text-gray-300">
       {/* Sidebar */}
- <aside
-  className={`fixed inset-y-0 left-0 z-40 w-64 text-white transform md:translate-x-0 transition-transform duration-200
-    bg-gradient-to-b from-purple-700 via-indigo-700 to-blue-700
-    ${openSidebar ? "translate-x-0" : "-translate-x-full"}`}
->
-  <div className="flex items-center justify-between px-4 py-3 border-b border-white/20">
-    <h1 className="text-xl font-bold">SMM Admin</h1>
-    <button
-      onClick={() => setOpenSidebar(false)}
-      className="md:hidden text-white hover:text-gray-200"
-    >
-      <X size={22} />
-    </button>
-  </div>
-
-  <nav className="mt-4">
-    {menuItems.map((item) => (
-     <Link
-        key={item.path}
-        href={item.path}
-        className={`block px-6 py-3 text-sm font-medium rounded-md mb-1
-          ${
-            pathname === item.path
-              ? "bg-white/20 text-white"
-              : "hover:bg-white/10 text-white"
-          }`}
+      <aside
+        ref={sidebarRef}
+        className={`fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-200
+        bg-[#151517] border-r border-yellow-500/20 shadow-xl
+        ${openSidebar ? "translate-x-0" : "-translate-x-full"} 
+        md:translate-x-0`}
       >
-        {item.name}
-      </Link>
-    ))}
-  </nav>
-</aside>
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-yellow-500/20">
+          <h1 className="text-lg font-bold text-yellow-400">SMM Admin</h1>
+          <button
+            onClick={() => setOpenSidebar(false)}
+            className="text-gray-400 hover:text-yellow-400 md:hidden"
+          >
+            <X size={22} />
+          </button>
+        </div>
 
-
-      {/* Main content */}
-      <div className="flex-1 flex flex-col md:ml-64"> 
-        {/* Header */}
-        <header className="sticky top-0 z-30 bg-white shadow flex items-center justify-between px-4 py-3 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setOpenSidebar(true)}
-              className="md:hidden text-gray-700"
+        {/* Menu Items */}
+        <nav className="mt-5 space-y-1 px-2">
+          {menuItems.map((item) => (
+            <Link
+              key={item.path}
+              href={item.path}
+              onClick={() => setOpenSidebar(false)}
+              className={`block px-5 py-2.5 rounded-lg font-medium transition
+                ${
+                  pathname === item.path
+                    ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/20"
+                    : "hover:bg-[#1d1d1f] hover:text-yellow-400"
+                }`}
             >
-              <Menu size={24} />
+              {item.name}
+            </Link>
+          ))}
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col md:ml-64">
+        {/* Header */}
+        <header className="sticky top-0 z-30 bg-[#151517] border-b border-yellow-500/20 shadow-md flex items-center justify-between px-5 py-3">
+          <div className="flex items-center gap-3">
+            {/* Hamburger Menu (visible on all screen sizes) */}
+            <button
+              onClick={() => setOpenSidebar(!openSidebar)}
+              className="text-gray-400 hover:text-yellow-400 transition"
+            >
+              {openSidebar ? <X size={22} /> : <Menu size={22} />}
             </button>
-            <h2 className="text-lg font-semibold text-gray-800">
+
+            <h2 className="text-lg font-semibold text-yellow-400">
               Admin Panel
             </h2>
           </div>
 
+          {/* Right-side Icons */}
           <div className="flex items-center gap-4 relative">
-            <button className="relative text-gray-600 hover:text-gray-800">
-              <Bell size={22} />
-              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+            <button className="relative text-gray-400 hover:text-yellow-400">
+              <Bell size={20} />
+              <span className="absolute top-0 right-0 w-2 h-2 bg-yellow-400 rounded-full"></span>
             </button>
 
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setOpenProfile((prev) => !prev)}
-                className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-full"
+                className="flex items-center gap-2 bg-[#0e0e0f] hover:bg-[#1d1d1f] px-3 py-2 rounded-full border border-yellow-500/20"
               >
-                <User size={20} className="text-gray-700" />
-                <span className="hidden md:inline text-sm font-medium text-gray-700">
+                <User size={18} className="text-yellow-400" />
+                <span className="hidden md:inline text-sm font-medium text-gray-300">
                   Admin
                 </span>
               </button>
 
               {openProfile && (
-                <div className="absolute right-0 mt-2 w-48 bg-white shadow-md border rounded-md overflow-hidden">
+                <div className="absolute right-0 mt-2 w-48 bg-[#151517] border border-yellow-500/20 rounded-lg shadow-xl overflow-hidden">
                   <Link
                     href="/admin/settings"
-                    className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-gray-700 text-sm"
+                    className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:bg-[#1d1d1f] hover:text-yellow-400 text-sm"
                   >
                     <Settings size={16} /> Settings
                   </Link>
                   <button
-                    className="w-full text-left flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-red-600 text-sm"
                     onClick={() => alert("Logout clicked")}
+                    className="w-full text-left flex items-center gap-2 px-4 py-2 text-red-400 hover:bg-[#1d1d1f] hover:text-red-300 text-sm"
                   >
                     <LogOut size={16} /> Logout
                   </button>
@@ -124,13 +138,9 @@ console.log(pathname)
           </div>
         </header>
 
-       
-        <main className="flex-2 p-2">{children}</main>
+        {/* Page content */}
+        <main className="flex-1">{children}</main>
       </div>
     </div>
-    )}  
-     
-    </>
-
   );
 }
