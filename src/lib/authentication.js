@@ -267,16 +267,14 @@ export async function changePassword({ currentPassword, newPassword, ip = "127.0
 
 
 
+//**************************************************************************** */
+//*********************************Admin Route*************************** */
+//************************************************************************88 */
 
 
 
 
-
-
-
-export async function loginAction(formData) {
-  const email = formData.get("email");
-  const password = formData.get("password");
+export async function adminLoginAction(email,password) {
 
   // Dummy check
   if (email === "test@gmail.com" && password === "hello") {
