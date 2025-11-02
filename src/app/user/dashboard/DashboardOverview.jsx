@@ -168,7 +168,7 @@ export default function DashboardLayout() {
     <LatestOrders />    
 
         {/* ================= OTHER SECTIONS ================= */}
-       <SupportSection/>
+      
         <Announcements />
         <SupportSection/>
       </div>
