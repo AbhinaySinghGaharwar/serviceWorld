@@ -9,7 +9,7 @@ import {
   FaMoon,
   FaSun,
 } from "react-icons/fa";
-import { MdDashboard, MdHistory, MdPayment, MdHelp } from "react-icons/md";
+import { MdDashboard, MdHistory, MdPayment, MdHelp,MdInventory,MdLink,MdDns } from "react-icons/md";
 import { FiLogOut, FiSettings } from "react-icons/fi";
 import clsx from "clsx";
 import Link from "next/link";
@@ -36,10 +36,13 @@ export default function Layout({ children }) {
 
   const menuItems = [
     { icon: <MdDashboard />, text: "New Order", href: "/user/dashboard" },
+    { icon: <MdInventory />, text: "MassOrder", href: "/user/mass-order" },
     { icon: <MdHistory />, text: "Services", href: "/user/services" },
     { icon: <MdHistory />, text: "Orders History", href: "/user/orders" },
     { icon: <MdPayment />, text: "Add Funds", href: "/user/addfunds" },
     { icon: <MdHelp />, text: "Tickets Support", href: "/user/support" },
+    { icon: <MdLink />, text: "Referral", href: "/user/referral" },
+    { icon: <MdDns />, text: "ChildPanel", href: "/user/child-panel" },
   ];
 
   // 🔹 Handle scroll shadow
