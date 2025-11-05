@@ -36,7 +36,7 @@ export default function DashboardLayout() {
         const data = await getUserDetails();
         if (data) {
           setUser(data);
-          setBalance(data.balance || 0);
+          setBalance(Number(data.balance )|| 0);
         }
       } catch (err) {
         console.error("user fetch error:", err);

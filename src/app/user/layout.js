@@ -90,6 +90,7 @@ export default function Layout({ children }) {
     async function fetchUser() {
       try {
         const res = await getUserDetails();
+        console.log(res)
         if (res.success) setUser(res);
       } catch (err) {
         console.error("User fetch error:", err);
@@ -120,7 +121,11 @@ export default function Layout({ children }) {
     async function fetchBalance() {
       try {
         const data = await getUserBalance();
-        if (data.balance) setBalance(data.balance);
+        if (data.balance) 
+          setBalance(Number(data.balance));
+        else {
+          setBalance(0)
+        }
       } catch (err) {
         console.error("Balance fetch error:", err);
       }
@@ -231,12 +236,10 @@ export default function Layout({ children }) {
           <h2 className="text-lg font-semibold mt-2 text-yellow-300">
             {user?.username || "Guest"}
           </h2>
-
-          <p className="text-sm text-gray-400">
-            Balance: {currency === "USD" ? "$" : "₹"}
-            {balance.toFixed(2)}
-          </p>
-
+<p className="text-sm text-gray-400">
+  Balance: {currency === "USD" ? "$" : "₹"}
+  {typeof balance === "number" ? balance.toFixed(2) : "0.00"}
+</p>
           {/* 💱 Currency Selector */}
           <select
             value={currency}
@@ -326,7 +329,11 @@ export default function Layout({ children }) {
               <span className="text-sm text-gray-400">Balance</span>
               <span className="text-lg font-bold text-yellow-400">
                 {currency === "USD" ? "$" : "₹"}
-                {balance.toFixed(2)}
+               <p className="text-sm text-gray-400">
+  Balance: {currency === "USD" ? "$" : "₹"}
+  {typeof balance === "number" ? balance.toFixed(2) : "0.00"}
+</p>
+
               </span>
             </div>
 

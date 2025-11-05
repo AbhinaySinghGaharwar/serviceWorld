@@ -79,42 +79,77 @@ export async function registerUser({ email, username, password, captcha, ip = "1
 // =========================
 // USER LOGIN
 // =========================
+
+
 export async function loginUser({ email, password, captcha, ip = "127.0.0.1" }) {
   try {
+    // 🧠 1. Rate limiting
     if (checkRateLimit(ip)) {
-      return { error: "Too many requests, try again later." };
+      return { error: "Too many requests, please try again later." };
     }
 
-    if (!email || !password || !captcha)
-      return { error: "Missing fields or CAPTCHA" };
+    // 🧩 2. Field validation
+    if (!email || !password || !captcha) {
+      return { error: "Missing fields or CAPTCHA." };
+    }
 
+    // 🤖 3. Verify CAPTCHA
     const isHuman = await verifyCaptcha(captcha);
-    if (!isHuman) return { error: "CAPTCHA verification failed" };
+    if (!isHuman) return { error: "CAPTCHA verification failed." };
 
+    // ⚙️ 4. Connect to database
     const client = await clientPromise;
     const db = client.db("smmpanel");
 
-    const user = await db.collection("users").findOne({ email });
-    if (!user) return { error: "Invalid credentials" };
+    // 🔍 5. Find user
+    const user = await db.collection("users").findOne({ email: email.toLowerCase() });
+    if (!user) return { error: "Invalid credentials." };
+console.log(user)
+    // 🧊 6. Check if frozen
+    if (user.frozen === true) {
+      return { error: "Your account is frozen. Please contact support." };
+    }
 
+    // 🔑 7. Verify password
     const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) return { error: "Invalid credentials" };
+    if (!validPassword) return { error: "Invalid credentials." };
 
-    const token = jwt.sign(
-      { username: user.username, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    // 🔒 8. Create JWT token
+    const tokenPayload = {
+      username: user.username,
+      email: user.email,
+      frozen: user?.frozen || false,
+      role: user?.role || "user",
+    };
 
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    // 🍪 9. Set secure cookie
     const cookieStore = await cookies();
     cookieStore.set("token", token, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // ✅ important for HTTPS
+      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60,
+      path: "/",
     });
 
-    return { message: "Login successful" };
+    // 🎯 10. Return sanitized user info
+    return {
+      success: true,
+      message: "Login successful",
+      user: {
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        frozen: user.frozen || false,
+      },
+    };
   } catch (err) {
-    return { error: err.message };
+    console.error("❌ Login Error:", err);
+    return { error: "Server error: " + err.message };
   }
 }
 
@@ -279,7 +314,7 @@ console.log(email,password)
   // Dummy check
   if (email === "test@gmail.com" && password === "hello") {
     // Create token
-    const token = jwt.sign({ email,role:'admin' }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    const token = jwt.sign({ email,role:'admin' }, process.env.JWT_SECRET, { expiresIn: "7days" });
 
     // Set cookie
     cookies().set({

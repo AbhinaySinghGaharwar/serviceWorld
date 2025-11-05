@@ -31,6 +31,7 @@ export async function middleware(request) {
     try {
       const { payload } = await jwtVerify(token, SECRET_KEY);
       user = payload;
+    
     } catch (err) {
       console.log("❌ Invalid or expired token:", err.message);
       const redirectTo = isAdminRoute ? "/admin/login" : "/auth/login";

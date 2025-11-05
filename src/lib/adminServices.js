@@ -4,10 +4,13 @@ import clientPromise from "./mongodb";
 import { ObjectId } from "mongodb";
 import fs from 'fs/promises'
 import path from 'path'
+import bcrypt from "bcrypt"; 
 // 🗃️ Database and Collection names
 const DB_SMM_PANEL = "smmpanel";
 const DB_ADMIN = "smmadmin";
 const PAYMENT_COLLECTION = "payment_methods";
+
+
 
 /* -------------------------------------------------------------------------- */
 /*                               🧠 Admin Section                              */
@@ -43,6 +46,83 @@ export async function getAllUsers() {
     };
   } catch (error) {
     console.error("❌ Error fetching users:", error);
+    return { success: false, error: error.message };
+  }
+}
+export async function getDeletedUsers() {
+  try {
+    const client = await clientPromise;
+    const db = client.db(DB_SMM_PANEL);
+
+    // 🧩 Check if 'deleted_users' collection exists
+    const collections = await db.listCollections().toArray();
+    const collectionNames = collections.map((c) => c.name);
+
+    if (!collectionNames.includes("deleted_users")) {
+      // If it doesn’t exist, create it to prevent runtime errors
+      await db.createCollection("deleted_users");
+      console.log("🆕 Created 'deleted_users' collection automatically.");
+      return { success: true, users: [], message: "No deleted users found yet." };
+    }
+
+    // 🟢 Fetch all deleted users
+    const deletedUsers = await db.collection("deleted_users").find().toArray();
+
+    if (!deletedUsers.length) {
+      return { success: true, users: [], message: "No deleted users found." };
+    }
+
+    // 🧠 Convert ObjectIds to strings for client-side rendering
+    const formatted = deletedUsers.map((u) => ({
+      ...u,
+      _id: u._id.toString(),
+    }));
+
+    return {
+      success: true,
+      count: formatted.length,
+      users: formatted,
+    };
+  } catch (error) {
+    console.error("❌ Error fetching deleted users:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function getDeletedUserById(id) {
+  try {
+    const client = await clientPromise;
+    const db = client.db(DB_SMM_PANEL);
+
+    // 🧩 Validate ObjectId
+    if (!ObjectId.isValid(id)) {
+      return { success: false, error: "Invalid user ID" };
+    }
+
+    const userId = new ObjectId(id);
+
+    // 🟡 Ensure 'deleted_users' collection exists
+    const collections = await db.listCollections().toArray();
+    const collectionNames = collections.map((c) => c.name);
+
+    if (!collectionNames.includes("deleted_users")) {
+      await db.createCollection("deleted_users");
+      return { success: false, error: "No deleted users found yet." };
+    }
+
+    // 🔍 Find user in deleted_users
+    const user = await db.collection("deleted_users").findOne({ _id: userId });
+
+    if (!user) {
+      return { success: false, error: "Deleted user not found." };
+    }
+
+    // 🧠 Convert _id to string for frontend
+    const formattedUser = { ...user, _id: user._id.toString() };
+
+    return { success: true, user: formattedUser };
+  } catch (error) {
+    console.error("❌ Error fetching deleted user by ID:", error);
     return { success: false, error: error.message };
   }
 }
@@ -84,6 +164,183 @@ export async function getUserById(id) {
     return { success: false, error: err.message };
   }
 }
+
+
+
+
+/* 🟢 UPDATE USER DETAILS */
+export async function updateUserDetails(id, data) {
+  try {
+    const client = await clientPromise;
+    const db = client.db(DB_SMM_PANEL);
+
+    if (!ObjectId.isValid(id)) {
+      return { success: false, error: "Invalid user ID" };
+    }
+
+    // 🧹 Prevent accidental modification of immutable _id
+    if (data._id) delete data._id;
+
+    // 🔐 If password is provided, hash it before updating
+    if (data.password && typeof data.password === "string" && data.password.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      data.password = hashedPassword;
+    } else {
+      // If password is empty string or undefined, remove it to avoid overwriting existing one
+      delete data.password;
+    }
+
+    // 🟢 Update or create user if missing
+    const result = await db.collection("users").updateOne(
+      { _id: new ObjectId(id) },
+      { $set: data },
+      { upsert: true }
+    );
+
+    return {
+      success: true,
+      message:
+        result.matchedCount === 0
+          ? "User not found — created new entry"
+          : "User updated successfully",
+    };
+  } catch (error) {
+    console.error("❌ Error updating user:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+
+/* 🟡 FREEZE OR UNFREEZE USER */
+export async function FreezeUser(id, freeze = true) {
+  try {
+    const client = await clientPromise;
+    const db = client.db(DB_SMM_PANEL);
+
+    if (!ObjectId.isValid(id)) {
+      return { success: false, error: "Invalid user ID" };
+    }
+
+    // Update existing user or add frozen field if missing
+    const result = await db.collection("users").updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          frozen: freeze,       // create field if missing
+          updatedAt: new Date() // track when changed
+        }
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return { success: false, error: "User not found" };
+    }
+
+    return {
+      success: true,
+      message: freeze
+        ? "User account frozen successfully"
+        : "User account reactivated successfully"
+    };
+  } catch (error) {
+    console.error("❌ Error freezing/unfreezing user:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deleteUserById(id) {
+  try {
+    const client = await clientPromise;
+    const db = client.db(DB_SMM_PANEL);
+
+    // 🧩 Validate ID
+    if (!ObjectId.isValid(id)) {
+      return { success: false, error: "Invalid user ID" };
+    }
+
+    const userId = new ObjectId(id);
+
+    // 🟢 Find existing user in 'users' collection
+    const existingUser = await db.collection("users").findOne({ _id: userId });
+
+    if (!existingUser) {
+      // If no user found, log placeholder in deleted_users
+      await db.collection("deleted_users").insertOne({
+        _id: userId,
+        placeholder: true,
+        deletedAt: new Date(),
+        note: "User not found — created placeholder deletion log.",
+      });
+
+      return {
+        success: true,
+        message:
+          "User not found — created placeholder log in deleted_users collection.",
+      };
+    }
+
+    // 🟣 Ensure deleted_users collection exists
+    const collections = await db.listCollections().toArray();
+    const collectionNames = collections.map((c) => c.name);
+
+    if (!collectionNames.includes("deleted_users")) {
+      await db.createCollection("deleted_users");
+      console.log("🆕 Created deleted_users collection.");
+    }
+
+    // 🟠 Move user document to deleted_users
+    const deletedUserDoc = {
+      ...existingUser,
+      deletedAt: new Date(),
+      deletedBy: "admin", // optional: can be dynamic based on session
+      originalCollection: "users",
+    };
+
+    await db.collection("deleted_users").insertOne(deletedUserDoc);
+
+    // 🔴 Remove from active users
+    const result = await db.collection("users").deleteOne({ _id: userId });
+
+    if (result.deletedCount === 0) {
+      return { success: false, error: "User could not be deleted." };
+    }
+
+    return {
+      success: true,
+      message: "User moved to deleted_users collection successfully.",
+    };
+  } catch (error) {
+    console.error("❌ Error deleting user:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* -------------------------------------------------------------------------- */
 /*                              💳 Payment Methods                            */
 /* -------------------------------------------------------------------------- */

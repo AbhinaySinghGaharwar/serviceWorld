@@ -9,6 +9,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import ReCAPTCHA from "react-google-recaptcha";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { loginUser } from "@/lib/authentication";
 
 const schema = yup.object().shape({
   email: yup.string().email("Invalid email").required("Email required"),
@@ -29,11 +30,17 @@ export default function LoginForm() {
 
     setLoading(true);
     try {
-      const res = await axios.post("/api/auth/login", { ...data, captcha: captchaValue });
-      setMessage(res.data.message);
-      router.push("/user/dashboard");
+      const res = await loginUser({ ...data, captcha: captchaValue })
+    
+if (res.error) {
+  setMessage(res.error);
+  return;
+}
+
+setMessage(res.message);
+router.push("/user/dashboard");
     } catch (err) {
-      setMessage(err.response?.data.error || "Login failed");
+      setMessage( "Login failed");
     }
     setLoading(false);
   };

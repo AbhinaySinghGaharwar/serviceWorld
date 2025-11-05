@@ -33,7 +33,8 @@ export async function getUserDetails() {
     avatar:user.avatar,
     balance:user.balance,
     email:user.email,
-    username:user.username
+    username:user.username,
+    frozen:user.frozen,
 }
   } catch (err) {
     return { error: err.message };
