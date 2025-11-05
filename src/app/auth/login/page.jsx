@@ -1,13 +1,19 @@
-"use client";
-import LoginForm from "@/app/user/components/Login";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-export default function LoginPage() {
-  return (
-    <div className=" min-h-screen bg-gradient-to-r from-purple-400 to-indigo-500">
-      <Header/>
+'use server'
+import LoginForm from "./LoginForm";
+import Navbar from "@/app/components/Header";
+import Footer from "@/app/components/Footer";
+import { getSetting } from "@/lib/adminServices";
+export default async function Login(){
+    const logo=await getSetting('logo')
+    const siteName= await getSetting('siteName')
+   return (
+    <>
+    <div className="bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-600">
+<Navbar logo={logo}/>
     <LoginForm/>
-    <Footer/> 
+    <Footer siteName={siteName}/>
     </div>
-  );
+    
+    </>
+   ) 
 }

@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function Footer({siteName}) {
   return (
-    <footer className="relative bg-gradient-to-r from-indigo-700 via-purple-700 to-blue-700 text-white py-6 md:py-8 mt-16 rounded-t-[30px] shadow-xl overflow-hidden backdrop-blur-md">
+    <footer className="relative bg-gradient-to-r from-indigo-700 via-purple-700 to-blue-700 text-white py-6 md:py-8  rounded-t-[30px] shadow-xl overflow-hidden backdrop-blur-md">
       {/* 🌈 Animated Gradient Glow Background */}
       <div className="absolute inset-0 -z-10">
         <motion.div

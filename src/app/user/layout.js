@@ -188,21 +188,10 @@ export default function Layout({ children }) {
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        {/* Header */}
-        <div className="flex justify-between items-center px-4 py-4 border-b border-yellow-500/20">
-          <h1 className="text-lg font-semibold tracking-wide text-yellow-400">
-            {websitename}
-          </h1>
-          <button
-            className="p-2 rounded-lg hover:bg-yellow-500/10 transition"
-            onClick={() => setIsSidebarOpen(false)}
-          >
-            <FaTimesCircle size={20} />
-          </button>
-        </div>
+      
 
         {/* Profile Section */}
-        <div className="flex flex-col items-center gap-2 px-4 py-6 border-b border-yellow-500/20">
+        <div className="flex flex-col items-center gap-1 px-4 pt-4 border-b border-yellow-500/20">
           <div
             className="w-20 h-20 rounded-full bg-yellow-400/20 flex items-center justify-center shadow-md overflow-hidden cursor-pointer relative group"
             onClick={() => fileInputRef.current?.click()}
@@ -236,24 +225,28 @@ export default function Layout({ children }) {
           <h2 className="text-lg font-semibold mt-2 text-yellow-300">
             {user?.username || "Guest"}
           </h2>
-<p className="text-sm text-gray-400">
-  Balance: {currency === "USD" ? "$" : "₹"}
-  {typeof balance === "number" ? balance.toFixed(2) : "0.00"}
-</p>
-          {/* 💱 Currency Selector */}
-          <select
-            value={currency}
-            onChange={(e) => handleCurrencyChange(e.target.value)}
-            className="mt-2 bg-[#1c1c1e] dark:bg-[#1c1c1e] text-gray-200 dark:text-gray-200 border border-yellow-500/20 rounded-lg px-3 py-1 text-sm focus:outline-none focus:border-yellow-400"
-          >
-            <option value="INR">INR ₹</option>
-            <option value="USD">USD $</option>
-            <option value="EUR">EUR €</option>
-          </select>
+<div className="flex flex-row items-center justify-between gap-3">
+  <p className="text-sm text-gray-400">
+    Balance: {currency === "USD" ? "$" : "₹"}
+    {typeof balance === "number" ? balance.toFixed(2) : "0.00"}
+  </p>
+
+  {/* 💱 Currency Selector */}
+  <select
+    value={currency}
+    onChange={(e) => handleCurrencyChange(e.target.value)}
+    className="bg-[#1c1c1e] dark:bg-[#1c1c1e] text-gray-200 dark:text-gray-200 border border-yellow-500/20 rounded-lg px-3 py-1 text-sm focus:outline-none focus:border-yellow-400"
+  >
+    <option value="INR">INR ₹</option>
+    <option value="USD">USD $</option>
+    <option value="EUR">EUR €</option>
+  </select>
+</div>
+
         </div>
 
         {/* Menu Items */}
-        <nav className="flex-1 p-3 space-y-2 overflow-y-auto">
+        <nav className="flex-1 p-3  overflow-y-auto">
           {menuItems.map((item, idx) => {
             const isActive = pathname === item.href;
             return (

@@ -7,7 +7,7 @@ const dataDir = path.join(process.cwd(), "data");
 const dataFile = path.join(dataDir, "settings.json");
 const uploadDir = path.join(process.cwd(), "public/uploads");
 
-// Ensure directories and default data exist
+// 🧩 Ensure environment setup
 function ensureEnvironment() {
   if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
@@ -16,6 +16,7 @@ function ensureEnvironment() {
       siteName: "My Website",
       panelName: "Admin Panel",
       maintenanceMode: false,
+      servicesEnabled: true, // 🆕 default added
       logo: "/uploads/default-logo.png",
       favicon: "/uploads/default-favicon.png",
       bronzeMember: "Bronze",
@@ -27,7 +28,7 @@ function ensureEnvironment() {
   }
 }
 
-// 🟢 GET — load settings
+// 🟢 GET — Load settings
 export async function GET() {
   try {
     ensureEnvironment();
@@ -39,15 +40,18 @@ export async function GET() {
   }
 }
 
-// 🟢 POST — save new settings
+// 🟢 POST — Save new settings
 export async function POST(req) {
   try {
     ensureEnvironment();
 
     const formData = await req.formData();
+
     const siteName = formData.get("siteName");
     const panelName = formData.get("panelName");
     const maintenanceMode = formData.get("maintenanceMode") === "true";
+    const servicesEnabled = formData.get("servicesEnabled") === "true"; // 🆕 new field
+
     const bronzeMember = formData.get("bronzeMember");
     const silverMember = formData.get("silverMember");
     const goldMember = formData.get("goldMember");
@@ -55,7 +59,7 @@ export async function POST(req) {
 
     let existing = JSON.parse(fs.readFileSync(dataFile, "utf-8"));
 
-    // Handle logo upload
+    // 🟡 Handle logo upload
     const logo = formData.get("logo");
     if (logo && typeof logo !== "string") {
       const bytes = await logo.arrayBuffer();
@@ -66,7 +70,7 @@ export async function POST(req) {
       existing.logo = `/uploads/${fileName}`;
     }
 
-    // Handle favicon upload
+    // 🟠 Handle favicon upload
     const favicon = formData.get("favicon");
     if (favicon && typeof favicon !== "string") {
       const bytes = await favicon.arrayBuffer();
@@ -77,12 +81,13 @@ export async function POST(req) {
       existing.favicon = `/uploads/${fileName}`;
     }
 
-    // Update other fields
+    // 🧩 Update other fields
     existing = {
       ...existing,
       siteName,
       panelName,
       maintenanceMode,
+      servicesEnabled, // 🆕 added here
       bronzeMember,
       silverMember,
       goldMember,

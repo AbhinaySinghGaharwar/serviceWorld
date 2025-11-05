@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { Menu, X, Bell, User, LogOut, Settings } from "lucide-react";
+import { logoutUser } from "@/lib/authentication";
 
 const menuItems = [
   { name: "Dashboard", path: "/admin/dashboard" },
@@ -140,7 +141,7 @@ export default function AdminLayout({ children }) {
                     <Settings size={16} /> Settings
                   </Link>
                   <button
-                    onClick={() => alert("Logout clicked")}
+                    onClick={async() => await logoutUser()}
                     className="w-full text-left flex items-center gap-2 px-4 py-2 text-red-400 hover:bg-[#1d1d1f] hover:text-red-300 text-sm"
                   >
                     <LogOut size={16} /> Logout

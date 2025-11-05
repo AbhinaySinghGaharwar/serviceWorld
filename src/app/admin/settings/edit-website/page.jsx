@@ -8,6 +8,7 @@ export default function EditWebsite() {
     siteName: "",
     panelName: "",
     maintenanceMode: false,
+    servicesEnabled: true, // 🆕 added new toggle
     logo: "",
     favicon: "",
     bronzeMember: "",
@@ -16,12 +17,11 @@ export default function EditWebsite() {
     reseller: "",
   });
   const [loading, setLoading] = useState(false);
-  const [fetched, setFetched] = useState(false); // ✅ prevent refetch
+  const [fetched, setFetched] = useState(false);
 
-  // ✅ Fetch only once
+  // ✅ Fetch once
   useEffect(() => {
-    if (fetched) return; // prevent re-fetch on state updates
-    
+    if (fetched) return;
     setFetched(true);
 
     (async () => {
@@ -78,67 +78,101 @@ export default function EditWebsite() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg mt-10">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Edit Website Settings</h1>
+    <div className="min-h-screen bg-[#0e0e0f] flex justify-center items-start py-10 px-4">
+      <div className="w-full max-w-3xl bg-[#151517] border border-yellow-500/20 p-8 rounded-2xl shadow-lg">
+        <h1 className="text-3xl font-bold mb-8 text-yellow-400">
+          Edit Website Settings
+        </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <Input label="Site Name" name="siteName" value={formData.siteName} onChange={handleChange} />
-        <Input label="Panel Name" name="panelName" value={formData.panelName} onChange={handleChange} />
+        <form onSubmit={handleSubmit} className="space-y-8 text-gray-300">
+          {/* 🔹 General Info */}
+          <SectionTitle title="General Settings" />
+          <Input
+            label="Site Name"
+            name="siteName"
+            value={formData.siteName}
+            onChange={handleChange}
+          />
+          <Input
+            label="Panel Name"
+            name="panelName"
+            value={formData.panelName}
+            onChange={handleChange}
+          />
 
-        <FileInput label="Logo" name="logo" file={formData.logo} onChange={handleFileChange} />
-        <FileInput label="Favicon" name="favicon" file={formData.favicon} onChange={handleFileChange} />
+          {/* 🔹 Media Uploads */}
+          <SectionTitle title="Branding" />
+          <FileInput
+            label="Logo"
+            name="logo"
+            file={formData.logo}
+            onChange={handleFileChange}
+          />
+          <FileInput
+            label="Favicon"
+            name="favicon"
+            file={formData.favicon}
+            onChange={handleFileChange}
+          />
 
-        <div className="flex items-center justify-between bg-gray-50 p-4 rounded-xl">
-          <span className="font-medium text-gray-700">Maintenance Mode</span>
-          <Switch
-            checked={formData.maintenanceMode}
+          {/* 🔹 Toggles */}
+          <SectionTitle title="System Controls" />
+          <ToggleSwitch
+            label="Maintenance Mode"
+            enabled={formData.maintenanceMode}
             onChange={(v) => setFormData((p) => ({ ...p, maintenanceMode: v }))}
-            className={`${
-              formData.maintenanceMode ? "bg-green-500" : "bg-gray-300"
-            } relative inline-flex h-6 w-11 items-center rounded-full transition`}
+          />
+          <ToggleSwitch
+            label="Services"
+            enabled={formData.servicesEnabled}
+            onChange={(v) => setFormData((p) => ({ ...p, servicesEnabled: v }))}
+          />
+
+          {/* 🔹 Memberships */}
+          <SectionTitle title="Membership Pricing" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {["bronzeMember", "silverMember", "goldMember", "reseller"].map(
+              (field) => (
+                <Input
+                  key={field}
+                  label={field.replace(/([A-Z])/g, " $1")}
+                  name={field}
+                  value={formData[field]}
+                  onChange={handleChange}
+                />
+              )
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full mt-8 bg-gradient-to-r from-yellow-600 to-yellow-500 text-black font-semibold py-3 rounded-xl hover:shadow-[0_0_20px_rgba(234,179,8,0.5)] transition duration-300"
           >
-            <span
-              className={`${
-                formData.maintenanceMode ? "translate-x-6" : "translate-x-1"
-              } inline-block h-4 w-4 transform rounded-full bg-white transition`}
-            />
-          </Switch>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {["bronzeMember", "silverMember", "goldMember", "reseller"].map((field) => (
-            <Input
-              key={field}
-              label={field.replace(/([A-Z])/g, " $1")}
-              name={field}
-              value={formData[field]}
-              onChange={handleChange}
-            />
-          ))}
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full mt-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl hover:opacity-90 transition"
-        >
-          {loading ? "Updating..." : "Update Settings"}
-        </button>
-      </form>
+            {loading ? "Updating..." : "Update Settings"}
+          </button>
+        </form>
+      </div>
     </div>
   );
+}
+
+/* ---------------------------- Components ---------------------------- */
+
+function SectionTitle({ title }) {
+  return <h2 className="text-xl font-semibold text-yellow-400 mb-4">{title}</h2>;
 }
 
 function Input({ label, name, value, onChange }) {
   return (
     <div>
-      <label className="block font-medium text-gray-700 mb-2">{label}</label>
+      <label className="block font-medium text-yellow-400 mb-2">{label}</label>
       <input
         type="text"
         name={name}
         value={value || ""}
         onChange={onChange}
-        className="w-full border text-gray-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500"
+        className="w-full bg-[#0e0e0f] text-gray-300 border border-yellow-500/20 rounded-xl px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none"
       />
     </div>
   );
@@ -147,17 +181,42 @@ function Input({ label, name, value, onChange }) {
 function FileInput({ label, name, file, onChange }) {
   return (
     <div>
-      <label className="block font-medium text-gray-700 mb-2">{label}</label>
+      <label className="block font-medium text-yellow-400 mb-2">{label}</label>
       <input
         type="file"
         name={name}
         accept="image/*"
         onChange={onChange}
-        className="w-full border text-gray-700 rounded-xl px-4 py-2"
+        className="w-full bg-[#0e0e0f] text-gray-300 border border-yellow-500/20 rounded-xl px-4 py-2 focus:outline-none"
       />
       {file && typeof file === "string" && (
-        <img src={file} alt={name} className="mt-3 h-14 rounded-lg border" />
+        <img
+          src={file}
+          alt={name}
+          className="mt-3 h-14 rounded-lg border border-yellow-500/20"
+        />
       )}
+    </div>
+  );
+}
+
+function ToggleSwitch({ label, enabled, onChange }) {
+  return (
+    <div className="flex items-center justify-between bg-[#0e0e0f] border border-yellow-500/20 px-4 py-3 rounded-xl">
+      <span className="font-medium text-gray-300">{label}</span>
+      <Switch
+        checked={enabled}
+        onChange={onChange}
+        className={`${
+          enabled ? "bg-yellow-500" : "bg-gray-700"
+        } relative inline-flex h-6 w-11 items-center rounded-full transition`}
+      >
+        <span
+          className={`${
+            enabled ? "translate-x-6" : "translate-x-1"
+          } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+        />
+      </Switch>
     </div>
   );
 }
