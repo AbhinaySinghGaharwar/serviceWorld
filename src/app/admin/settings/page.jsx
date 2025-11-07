@@ -23,21 +23,6 @@ export default function SettingsPage() {
       ],
     },
     {
-      title: "Security",
-      icon: <Shield className="text-yellow-400" size={20} />,
-      desc: "Manage login protection and admin access policies.",
-      actions: [
-        {
-          name: "Change Password",
-          onClick: () => router.push("/admin/settings/change-password"),
-        },
-        {
-          name: "Two-Factor Auth",
-          onClick: () => router.push("/admin/settings/2fa"),
-        },
-      ],
-    },
-    {
       title: "Integrations",
       icon: <Globe className="text-yellow-400" size={20} />,
       desc: "Connect payment systems or APIs to your admin panel.",
@@ -47,7 +32,7 @@ export default function SettingsPage() {
           onClick: () => router.push("/admin/settings/payment-methods"),
         },
         {
-          name: "API & Webhooks",
+          name: "Child Panel",
           onClick: () => router.push("/admin/settings/api"),
         },
       ],

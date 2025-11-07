@@ -8,7 +8,7 @@ export default async function SupportPage() {
   const result = await getUserTickets();
   const tickets = result?.success ? result.tickets : [];
 
-  console.log("🎫 Tickets fetched:", tickets.length);
+  console.log("🎫 Tickets fetched:", result);
 
   // ✅ Pass tickets into client component
   return <TicketSupport tickets={tickets} />;

@@ -1,12 +1,13 @@
 // Server Component (default)
 import { getServices } from "@/lib/services";
 import ServicesList from "../components/ServicesList";
-import { getWebsiteSettings } from "@/lib/getSiteSettings";
+import { getWebsiteSettings } from "@/lib/adminServices";
 import { FaTools } from "react-icons/fa";
 
 export default async function ServicesPage() {
   const res = await getServices();
   const data = await getWebsiteSettings();
+  const result=await JSON.parse(data.plainsettings)
 
   // 🟡 Handle error fetching services
   if (res.error) {
@@ -21,7 +22,7 @@ export default async function ServicesPage() {
   }
 
   // 🔴 When services are turned OFF by admin
-  if (!data.services) {
+  if (!result.services) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-6">
         <div className="bg-[#151517] border border-yellow-500/20 rounded-2xl p-10 max-w-md shadow-[0_0_25px_rgba(234,179,8,0.08)]">

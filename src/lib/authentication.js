@@ -113,15 +113,16 @@ export async function loginUser({ email, password, captcha, ip = "127.0.0.1" }) 
     // 🔑 7. Verify password
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) return { error: "Invalid credentials." };
-const id = user._id.toString();
+
     // 🔒 8. Create JWT token
-    const tokenPayload = {
-      id:id,
-      username: user.username,
-      email: user.email,
-      frozen: user?.frozen || false,
-      role: user?.role || "user",
-    };
+   const tokenPayload = {
+  id: user._id.toString(),
+  username: user.username,
+  email: user.email,
+  frozen: user?.frozen || false,
+  role: user?.role || "user",
+};
+console.log(tokenPayload)
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
       expiresIn: "7d",
