@@ -7,13 +7,14 @@ import {
   MdTrendingUp,
   MdSupportAgent,
 } from "react-icons/md";
+import { FaUserCircle, FaTools } from "react-icons/fa";
 
-import { FaUserCircle,FaTools } from "react-icons/fa";
 import Announcements from "./Announcements";
 import LatestOrders from "./LatestOrders";
 import OrderForm from "./OrderForm";
 import SupportSection from "./SupportSection";
 import CategoryFilter from "./CategoryFilter";
+
 const Card = ({ children, className = "", onClick }) => (
   <div
     onClick={onClick}
@@ -23,12 +24,10 @@ const Card = ({ children, className = "", onClick }) => (
   </div>
 );
 
-
-
 export default function DashboardLayout({ user, serviceEnabled }) {
-  console.log(serviceEnabled)
   const [spent, setSpent] = useState(0);
   const [orders, setOrders] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   useEffect(() => {
     setSpent(1245.75);
@@ -43,7 +42,7 @@ export default function DashboardLayout({ user, serviceEnabled }) {
   return (
     <div className="w-full min-h-screen text-gray-100 py-4 sm:py-6 flex justify-center">
       <div className="w-full max-w-6xl px-3 sm:px-6 space-y-8">
-        
+
         {/* ================= STATS ================= */}
         <section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card>
@@ -68,8 +67,7 @@ export default function DashboardLayout({ user, serviceEnabled }) {
               <div>
                 <p className="text-[11px] sm:text-sm text-gray-400">Balance</p>
                 <h4 className="text-sm sm:text-lg font-semibold text-yellow-300">
-                ₹{user?.balance ? Number(user.balance).toFixed(2) : "0.00"}
-
+                  ₹{user?.balance ? Number(user.balance).toFixed(2) : "0.00"}
                 </h4>
               </div>
             </div>
@@ -105,7 +103,10 @@ export default function DashboardLayout({ user, serviceEnabled }) {
         </section>
 
         {/* ================= CATEGORY FILTER ================= */}
-        <CategoryFilter />
+        <CategoryFilter
+          selectedCategory={selectedCategory}
+          onCategorySelect={setSelectedCategory}
+        />
 
         {/* ================= QUICK ACTIONS ================= */}
         <section className="w-full">
@@ -143,7 +144,7 @@ export default function DashboardLayout({ user, serviceEnabled }) {
 
         {/* ================= ORDER FORM / DISABLED MESSAGE ================= */}
         {serviceEnabled ? (
-          <OrderForm />
+          <OrderForm selectedCategory={selectedCategory} />
         ) : (
           <div className="flex flex-col items-center justify-center text-center px-6 py-10">
             <div className="bg-[#151517] border border-yellow-500/20 rounded-2xl p-10 max-w-md shadow-[0_0_25px_rgba(234,179,8,0.08)]">
@@ -173,4 +174,3 @@ export default function DashboardLayout({ user, serviceEnabled }) {
     </div>
   );
 }
-

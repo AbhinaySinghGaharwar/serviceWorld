@@ -5,8 +5,9 @@ import { useState, useEffect, useRef } from "react";
 import { FaSearch, FaSpinner } from "react-icons/fa";
 import { MdReceipt, MdAccessTime } from "react-icons/md";
 import { createOrderAction } from "@/lib/userActions";
-export default function OrderForm() {
-  const [category, setCategory] = useState("");
+export default function OrderForm({selectedCategory}) {
+ 
+  const [category, setCategory] = useState(selectedCategory);
   const [service, setService] = useState("");
   const [link, setLink] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -41,7 +42,17 @@ export default function OrderForm() {
     }
     fetchServices();
   }, []);
+useEffect(() => {
+  if (selectedCategory && categories?.length > 0) {
+    const matched = categories.find((cat) =>
+      cat.toLowerCase().includes(selectedCategory.toLowerCase())
+    );
 
+    if (matched) {
+      setCategory(matched); // 👈 setCategory with the matched category
+    }
+  }
+}, [selectedCategory]);
   // ✅ Extract unique categories
   useEffect(() => {
     if (services.length > 0) {
@@ -49,6 +60,7 @@ export default function OrderForm() {
         ...new Set(services.map((s) => s.category).filter(Boolean)),
       ];
       setCategories(uniqueCats);
+  
       if (!category) setCategory(uniqueCats[0] || "");
     }
   }, [services]);

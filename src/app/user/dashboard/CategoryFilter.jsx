@@ -30,7 +30,7 @@ const icons = [
   { name: "Network", icon: <FaCircle size={28} /> },
 ];
 
-export default function CategoryFilter() {
+export default function CategoryFilter({ selectedCategory, onCategorySelect }) {
   return (
     <div className="flex items-center justify-center px-2">
       <div
@@ -48,26 +48,37 @@ export default function CategoryFilter() {
           py-6
         "
       >
-        {icons.map((item, i) => (
-          <div
-            key={i}
-            className="
-              bg-[#151517] 
-              border border-yellow-500/20 
-              flex flex-col items-center justify-center 
-              rounded-2xl 
-              py-3 
-              transition-all duration-300 
-              hover:scale-105 
-              hover:shadow-[0_0_18px_rgba(234,179,8,0.25)]
-            "
-          >
-            <span className="text-yellow-400 mb-1">{item.icon}</span>
-            <span className="text-gray-300 text-sm mt-2 font-medium hidden md:block text-center">
-              {item.name}
-            </span>
-          </div>
-        ))}
+        {icons.map((item, i) => {
+          const isSelected = selectedCategory === item.name;
+          return (
+            <div
+              key={i}
+              onClick={() => onCategorySelect(item.name)}
+              className={`
+                bg-[#151517]
+                border ${isSelected ? "border-yellow-500" : "border-yellow-500/20"}
+                flex flex-col items-center justify-center 
+                rounded-2xl 
+                py-3 
+                transition-all duration-300 
+                hover:scale-105 
+                hover:shadow-[0_0_18px_rgba(234,179,8,0.25)]
+                cursor-pointer
+              `}
+            >
+              <span className={`mb-1 ${isSelected ? "text-yellow-300" : "text-yellow-400"}`}>
+                {item.icon}
+              </span>
+              <span
+                className={`text-sm mt-2 font-medium hidden md:block text-center ${
+                  isSelected ? "text-yellow-300" : "text-gray-300"
+                }`}
+              >
+                {item.name}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
