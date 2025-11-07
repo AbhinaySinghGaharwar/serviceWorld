@@ -33,7 +33,7 @@ export default function SettingsPage() {
         },
         {
           name: "Child Panel",
-          onClick: () => router.push("/admin/settings/api"),
+          onClick: () => router.push("/admin/settings/child-panel-requests"),
         },
       ],
     },

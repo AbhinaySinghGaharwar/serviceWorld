@@ -316,7 +316,7 @@ export async function adminLoginAction(email,password) {
   // Dummy check
   if (email === "test@gmail.com" && password === "hello") {
     // Create token
-    const token = jwt.sign({ email,role:'admin' }, process.env.JWT_SECRET, { expiresIn: "7days" });
+    const token = jwt.sign({ email,role:'admin' }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
     // Set cookie
    await cookies().set({

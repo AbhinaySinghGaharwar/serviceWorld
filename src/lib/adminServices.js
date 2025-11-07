@@ -5,6 +5,7 @@ import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt"; 
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken'
+
 // 🗃️ Database and Collection names
 const DB_SMM_PANEL = "smmpanel";
 const DB_ADMIN = "smmadmin";
@@ -523,7 +524,7 @@ export async function ValidateTransactionBharatPe(internalUtr, amount) {
   try {
     const merchantId = process.env.MARCHANT_ID;
     const token = process.env.BHARATPE_TOKEN || "06bc2221af4f426dab9a40a38bff5ac5";
-
+console.log('hello',internalUtr,amount)
     const toDate = new Date();
     const fromDate = new Date();
     fromDate.setDate(toDate.getDate() - 25);
@@ -941,7 +942,7 @@ export async function updateAdminReply({ ticketId, newMessage }) {
     if (!ticketId || !newMessage)
       return { error: "Missing required fields." };
 
-    const token = cookies().get("token")?.value;
+    const token = await cookies().get("token")?.value;
     if (!token) return { error: "Unauthorized: No token found." };
 
     let decoded;
@@ -998,7 +999,7 @@ export async function createTicket({ subject, message }) {
     }
 
     // 🍪 2. Get token from cookies
-    const cookieStore = cookies();
+    const cookieStore =await cookies();
     const token = cookieStore.get("token")?.value;
     if (!token) return { error: "Unauthorized. No token found." };
 
@@ -1051,3 +1052,249 @@ export async function createTicket({ subject, message }) {
     return { error: "Failed to create ticket." };
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export async function getChildPanels() {
+  try {
+    // 🍪 Get token from cookies
+    const token =await cookies().get("token")?.value;
+    if (!token) {
+      return { error: "Unauthorized. Please log in first." };
+    }
+
+    // 🔐 Verify token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return { error: "Invalid or expired token." };
+    }
+
+    const { email, role } = decoded;
+
+    // 🗃️ Connect to DB
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    // 🧾 Fetch all requests (admin sees all, user sees their own)
+    const filter = role === "admin" ? {} : { email };
+    const requests = await db
+      .collection("child_panel_requests")
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    return { success: true, requests };
+  } catch (err) {
+    console.error("❌ Error fetching panels:", err);
+    return { error: "Server error: " + err.message };
+  }
+}
+export async function setChildPanelSettings(formData) {
+  try {
+    const token =await cookies().get("token")?.value;
+    if (!token) return { error: "Unauthorized" };
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== "admin") return { error: "Access denied." };
+
+    const domain = formData.get("domain");
+    const price = formData.get("price");
+
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    await db.collection("settings").updateOne(
+      { key: "child_panel_settings" },
+      { $set: { domain, price, updatedAt: new Date() } },
+      { upsert: true }
+    );
+
+    return { success: true, message: "Settings updated successfully." };
+  } catch (err) {
+    console.error("❌ setChildPanelSettings error:", err);
+    return { error: err.message };
+  }
+}
+
+
+
+
+export async function getChildPanelSettings() {
+  try {
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    // Fetch existing settings from DB
+    const settings = await db.collection("settings").findOne({
+      key: "child_panel_settings",
+    });
+
+    if (!settings) {
+      return {
+        domain: "yourpaneldomain.com",
+        price: "₹ 800",
+        message: "Default values (not yet set by admin)",
+      };
+    }
+
+    return {
+      domain: settings.domain,
+      price: settings.price,
+      updatedAt: settings.updatedAt,
+    };
+  } catch (err) {
+    console.error("❌ getChildPanelSettings error:", err);
+    return { error: err.message };
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export async function createChildPanel({ formData, payment_amount, utr, payment_type }) {
+  console.log(payment_type)
+  try {
+    // 🧮 Parse and validate numeric payment amount
+    const formPrice = parseFloat(formData.get("price").replace(/[^\d.]/g, ""));
+    const paidAmount = parseFloat(payment_amount);
+
+    // ⚠️ Step 1: Amount validation
+    if (isNaN(paidAmount) || paidAmount <= 0) {
+      return { error: "Invalid payment amount." };
+    }
+    if (paidAmount < formPrice) {
+      return { error: `Payment amount is less than required price (${formPrice}).` };
+    }
+
+    // 🍪 Step 2: Get token from cookies
+    const cookie = await cookies()
+    const token=cookie.get("token")?.value;
+    if (!token) {
+      return { error: "Unauthorized. Please login first." };
+    }
+
+    // 🔍 Step 3: Verify JWT
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return { error: "Invalid or expired token." };
+    }
+
+    // 🧠 Step 4: Extract user info
+    const { id, username, email } = decoded;
+
+    // 🗃️ Step 5: Connect to MongoDB
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    // 🚫 Step 6: Prevent reused UTR
+    const existingUTR = await db.collection("used_utr").findOne({ utr });
+    if (existingUTR) {
+      return { error: "This UTR has already been used. Please use a new one." };
+    }
+
+   // 💳 Step 7: Verify Transaction from BharatPe (if payment_type = "BharatPe")
+let matchedTx = null;
+
+if (payment_type?.toLowerCase() === "bharatpe") {
+  try {
+    matchedTx = await ValidateTransactionBharatPe(utr, paidAmount);
+
+    // 🧩 If the function failed
+    if (!matchedTx || matchedTx.success === false) {
+      const errorMsg =
+        matchedTx?.error ||
+        "Transaction not found or payment verification failed.";
+      return { error: errorMsg };
+    }
+  } catch (err) {
+    console.error("❌ BharatPe validation error:", err);
+    return { error: "BharatPe verification failed — please try again later." };
+  }
+}
+
+    
+    console.log(matchedTx,utr,payment_amount) 
+
+    // 🧾 Step 8: Mark UTR as used
+    await db.collection("used_utr").insertOne({
+      utr,
+      payment_type,
+      payment_amount: paidAmount,
+      used_by: email,
+      used_at: new Date(),
+    });
+
+    // 📝 Step 9: Prepare and store the child panel request
+    const request = {
+      userId: id,
+      username,
+      email,
+      domain: formData.get("domain"),
+      currency: formData.get("currency"),
+      panel_username: formData.get("username"),
+      panel_password: formData.get("password"),
+      payment_type,
+      payment_amount: paidAmount,
+      utr,
+      bharatPeId: matchedTx?.id || null,
+      price: formData.get("price"),
+      createdAt: new Date(),
+      status: "confirmed",
+      verified: true,
+    };
+
+    await db.collection("child_panel_requests").insertOne(request);
+
+    // ✅ Step 10: Return success response
+    return {
+      success: true,
+      message: "Child panel request submitted and payment verified successfully.",
+      data: { utr, payment_type, amount: paidAmount },
+    };
+  } catch (err) {
+    console.error("❌ Error submitting child panel:", err);
+    return { error: "Server error: " + err.message };
+  }
+}
+
+
