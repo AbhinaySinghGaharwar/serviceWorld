@@ -8,6 +8,7 @@ import path from "path";
 import { revalidatePath } from "next/cache";
 import { createOrder } from "./services";
 import crypto from "crypto";
+import { ObjectId } from "mongodb";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 // ========================= GET USER DETAILS =========================
@@ -229,8 +230,9 @@ export async function createOrderAction(service, link, qua, paying ) {
     const db = client.db("smmpanel");
     const usersCollection = db.collection("users");
 
-    // 👤 4️⃣ Validate user existence
-    const user = await usersCollection.findOne({ _id: userData.id });
+// 👤 4️⃣ Validate user existence
+const user = await usersCollection.findOne({ _id: new ObjectId(userData.id) });
+    console.log(user)
     if (!user) {
       return { success: false, message: "User not found." };
     }
@@ -284,12 +286,12 @@ export async function createOrderAction(service, link, qua, paying ) {
     // 💾 🔟 Save order in DB
     const ordersCollection = db.collection("orders");
     const newOrder = {
-      userId: user._id,
+      userId: user.id,
       service,
       link,
       quantity,
       charge,
-      status: "Processing",
+      status: "confrim",
       startCount: 0,
       remains: 0,
       providerOrderId: response.order,

@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ServicesList from "../user/components/ServicesList";
-import Header from "../components/Header";
+import ServicesList from "@/components/ServicesList";
 
 export default function ServicesPage() {
   const [services, setServices] = useState([]);
@@ -25,13 +24,15 @@ export default function ServicesPage() {
     fetchServices();
   }, []);
 
-  if (loading) return <p className="text-center text-gray-500">Loading services...</p>;
-  if (error) return <p className="text-center text-red-500">⚠️ {error}</p>;
+  if (loading)
+    return <p className="text-center text-gray-500">Loading services...</p>;
+  if (error)
+    return <p className="text-center text-red-500">⚠️ {error}</p>;
 
   return (
     <>
-    <Header/>
-    <ServicesList services={services} />
+  
+      <ServicesList services={services} />
     </>
   );
 }

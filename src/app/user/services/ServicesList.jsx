@@ -1,0 +1,150 @@
+"use client";
+
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FaInstagram,
+  FaYoutube,
+  FaFacebook,
+  FaTiktok,
+  FaTelegramPlane,
+  FaGlobe,
+} from "react-icons/fa";
+import SearchBar from "./SearchBar";
+import ServiceCard from "./ServiceCard";
+import BuyPopup from "./BuyPopup";
+
+export default function ServicesList({ services = [] }) {
+  const [selectedService, setSelectedService] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [loadingSearch, setLoadingSearch] = useState(false);
+
+  // 🔹 Group services by platform
+  const groupedServices = useMemo(() => {
+    const groups = {
+      Instagram: [],
+      YouTube: [],
+      Facebook: [],
+      TikTok: [],
+      Telegram: [],
+      Other: [],
+    };
+
+    for (const s of services) {
+      const name = s.name?.toLowerCase() || "";
+      if (name.includes("instagram")) groups.Instagram.push(s);
+      else if (name.includes("youtube")) groups.YouTube.push(s);
+      else if (name.includes("facebook")) groups.Facebook.push(s);
+      else if (name.includes("tiktok")) groups.TikTok.push(s);
+      else if (name.includes("telegram")) groups.Telegram.push(s);
+      else groups.Other.push(s);
+    }
+
+    return Object.fromEntries(
+      Object.entries(groups).filter(([_, v]) => v.length > 0)
+    );
+  }, [services]);
+
+  // 🔹 Debounce search
+  useEffect(() => {
+    setLoadingSearch(true);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim().toLowerCase());
+      setLoadingSearch(false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // 🔹 Filter services
+  const filteredGroupedServices = useMemo(() => {
+    const filtered = {};
+    for (const [category, list] of Object.entries(groupedServices)) {
+      const filteredList = list.filter(
+        (s) =>
+          !debouncedSearch ||
+          s.name.toLowerCase().includes(debouncedSearch) ||
+          (s.description &&
+            s.description.toLowerCase().includes(debouncedSearch))
+      );
+      if (filteredList.length > 0) filtered[category] = filteredList;
+    }
+    return filtered;
+  }, [groupedServices, debouncedSearch]);
+
+  // 🔹 Icons
+  const getIconForService = (name = "") => {
+    const lower = name.toLowerCase();
+    if (lower.includes("instagram"))
+      return <FaInstagram className="text-pink-500 text-2xl" />;
+    if (lower.includes("youtube"))
+      return <FaYoutube className="text-red-500 text-2xl" />;
+    if (lower.includes("facebook"))
+      return <FaFacebook className="text-blue-500 text-2xl" />;
+    if (lower.includes("tiktok"))
+      return <FaTiktok className="text-gray-300 text-2xl" />;
+    if (lower.includes("telegram"))
+      return <FaTelegramPlane className="text-sky-500 text-2xl" />;
+    return <FaGlobe className="text-emerald-400 text-2xl" />;
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0e0e0f] text-gray-100 flex justify-center px-3 md:px-8 py-10">
+      <div className="w-full max-w-[1200px]">
+        <h1 className="text-3xl md:text-4xl font-bold text-center mb-10 text-yellow-400">
+          💎 Available Services
+        </h1>
+
+        <SearchBar
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          loadingSearch={loadingSearch}
+        />
+
+        {Object.keys(filteredGroupedServices).length === 0 ? (
+          <p className="text-center text-gray-400">
+            No matching services found.
+          </p>
+        ) : (
+          Object.entries(filteredGroupedServices).map(([category, list]) => (
+            <motion.div
+              key={category}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mb-10"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                {getIconForService(category)}
+                <h2 className="text-xl md:text-2xl font-semibold text-yellow-400">
+                  {category}
+                </h2>
+                <span className="text-sm text-gray-500">({list.length})</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {list.map((service, index) => (
+                  <ServiceCard
+                    key={service.service || index}
+                    service={service}
+                    getIconForService={getIconForService}
+                    onSelect={setSelectedService}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          ))
+        )}
+
+        <AnimatePresence>
+          {selectedService && (
+            <BuyPopup
+              selectedService={selectedService}
+              setSelectedService={setSelectedService}
+            />
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
