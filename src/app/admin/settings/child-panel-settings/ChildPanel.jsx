@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { setChildPanelSettings } from "@/lib/adminServices";
 
-export default function ChildPanelClient({ initialSettings }) {
+export default function ChildPanel({ initialSettings }) {
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
 

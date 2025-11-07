@@ -1,8 +1,8 @@
 import { getChildPanelSettings } from "@/lib/adminServices";
-import ChildPanelClient from "./childPanelClient";
+import ChildPanel from "./ChildPanel";
 
 export default async function Page() {
   const settings = await getChildPanelSettings();
 
-  return <ChildPanelClient initialSettings={settings} />;
+  return <ChildPanel initialSettings={settings} />;
 }
