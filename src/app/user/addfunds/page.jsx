@@ -1,7 +1,17 @@
-"use client";
+"use server";
 
-import AddFund from "../components/AddFund";
+import AddFund from "./AddFund";
+import { getAllPaymentMethods } from "@/lib/adminServices";
+import { getUserTransactions } from "@/lib/userActions";
 
-export default function AddFundsPage() {
-  return <AddFund/>;
+export default async function AddFundsPage() {
+  const paymentMethods = await getAllPaymentMethods();
+  const { transactions = [] } = await getUserTransactions();
+
+  return (
+    <AddFund
+      paymentMethods={paymentMethods?.methods || []}
+      transactions={transactions}
+    />
+  );
 }

@@ -46,7 +46,7 @@ export default function MainTop({websiteName}) {
       const res= await loginUser({...data,captcha})
       if(!res.success){
         setMessage(res.message || res.error     );
-      router.push("/user/dashboard");
+      router.replace("/user/dashboard");
       }else {
         setMessage(res.message)
       }

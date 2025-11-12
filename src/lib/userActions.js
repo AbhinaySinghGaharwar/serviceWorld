@@ -9,7 +9,8 @@ import { revalidatePath } from "next/cache";
 import { createOrder } from "./services";
 import crypto from "crypto";
 import { ObjectId } from "mongodb";
-
+const dbName = "smmpanel";
+const addFundsCollection = "add_funds";
 const JWT_SECRET = process.env.JWT_SECRET;
 // ========================= GET USER DETAILS =========================
 export async function getUserDetails() {
@@ -319,5 +320,55 @@ const user = await usersCollection.findOne({ _id: new ObjectId(userData.id) });
       message: "Internal server error. Please try again later.",
       details: err.message,
     };
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export async function getUserTransactions() {
+  try {
+    // 🔐 Read user token from cookies
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (!token) throw new Error("Unauthorized");
+
+    // 🧩 Decode JWT
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userEmail = decoded.email;
+
+    // 💾 Connect DB once via shared promise
+    const client = await clientPromise;
+    const db = client.db(dbName);
+    const addFundsCol = db.collection(addFundsCollection);
+
+    // 📜 Fetch transactions for this user
+    const transactions = await addFundsCol
+      .find({ userEmail })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    // 🧹 Convert ObjectId and Dates for serialization
+    const safeTransactions = transactions.map((t) => ({
+      ...t,
+      _id: t._id.toString(),
+      createdAt: t.createdAt?.toISOString?.() || null,
+    }));
+
+    return { success: true, transactions: safeTransactions };
+  } catch (err) {
+    console.error("Get history error:", err);
+    return { success: false, error: "Unauthorized" };
   }
 }

@@ -93,7 +93,6 @@ export default function Layout({ children }) {
     async function fetchUser() {
       try {
         const res = await getUserDetails();
-        console.log(res)
         if (res.success) setUser(res);
       } catch (err) {
         console.error("User fetch error:", err);
@@ -145,7 +144,7 @@ export default function Layout({ children }) {
       if (!res.error) {
         localStorage.removeItem("email");
         localStorage.removeItem("token");
-        router.push("/auth/login");
+        router.replace("/auth/login");
       } else alert("Logout failed. Please try again.");
     } catch (err) {
       console.error("Logout error:", err);
