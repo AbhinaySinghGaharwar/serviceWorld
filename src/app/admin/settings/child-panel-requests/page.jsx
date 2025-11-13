@@ -1,4 +1,5 @@
-'use server'
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { getChildPanels } from "@/lib/adminServices";
 import { FaCog } from "react-icons/fa";
@@ -19,13 +20,12 @@ export default async function Page() {
   return (
     <div className="min-h-screen bg-[#0e0e0f] p-6 text-gray-300">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header Section */}
+
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <h1 className="text-3xl font-bold text-yellow-400">
             My Child Panel Requests
           </h1>
 
-          {/* ⚙️ Go to Settings Button */}
           <Link
             href="/admin/settings/child-panel-settings"
             className="inline-flex items-center gap-2 bg-yellow-600 hover:bg-yellow-500 text-black font-semibold py-2 px-4 rounded-lg shadow-lg hover:shadow-yellow-500/40 transition-all"
@@ -34,7 +34,6 @@ export default async function Page() {
           </Link>
         </div>
 
-        {/* Table Section */}
         {panels.length === 0 ? (
           <p className="text-gray-400">No requests found.</p>
         ) : (
