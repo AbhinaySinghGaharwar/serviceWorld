@@ -66,13 +66,16 @@ export default function Header({
 
         {/* 💰 Balance */}
      
-          <div className="hidden sm:flex flex-col items-end">
-            <span className="text-sm text-gray-400">Balance</span>
-            <span className="text-lg font-bold text-yellow-400">
-              {currency === "USD" ? "$" : "₹"}
-              {user.balance}
-            </span>
-          </div>
+         {user?.balance != null && (
+  <div className="hidden sm:flex flex-col items-end">
+    <span className="text-sm text-gray-400">Balance</span>
+    <span className="text-lg font-bold text-yellow-400">
+      {currency === "USD" ? "$" : "₹"}
+      {user.balance}
+    </span>
+  </div>
+)}
+
         
 
         {/* Profile Menu */}

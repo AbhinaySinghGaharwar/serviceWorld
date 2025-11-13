@@ -93,10 +93,12 @@ export default function Sidebar({
         </h2>
 
         <div className="flex flex-row items-center justify-between gap-3">
-         <p className="text-sm text-gray-400">
-  Balance: {currency === "USD" ? "$" : "₹"}
-  {user.balance}
-</p>
+        {user?.balance != null && (
+  <p className="text-sm text-gray-400">
+    Balance: {currency === "USD" ? "$" : "₹"}
+    {user.balance}
+  </p>
+)}
 
 
           {/* 💱 Currency Selector */}

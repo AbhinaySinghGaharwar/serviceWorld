@@ -10,7 +10,7 @@ export default async function UserLayout({ children }) {
 
   const settings = result?.success ? JSON.parse(result.plainsettings) : {};
   const user = res?.success ? res : null;
-console.log(settings)
+
   return (
     <Page
       user={user}
