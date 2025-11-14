@@ -22,7 +22,7 @@ export async function middleware(request) {
 
   const isUserRoute = pathname.startsWith("/user");
   const isAdminRoute = pathname.startsWith("/admin");
-  const isAuthPage = ["/auth/login", "/auth/signup", "/admin/login"].includes(pathname);
+  const isAuthPage = ["/auth/login", "/auth/signup", "/admin/login","/"].includes(pathname);
   const isMaintenancePage = pathname === "/maintenance";
   const isRoot = pathname === "/";
 

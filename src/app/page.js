@@ -20,14 +20,15 @@ const logo=result.logo
 const websiteName=result.sietName
 
   return (
-    <main className="min-h-screen bg-gray-50 text-slate-900">
-      <Header logo={logo}/>
+<>
+ <Header logo={logo}/>
       <MainTop websiteName={websiteName}/>
       <WhyChooseUs/>
       <HowItWorks/>
       <FaqSection/>
       <PaymentMethods/>
-      <Footer/>
-    </main>
+</>
+     
+
   )
 }

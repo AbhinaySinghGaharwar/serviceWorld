@@ -4,7 +4,7 @@ import { FiLogOut } from "react-icons/fi";
 import { FaUserCircle } from "react-icons/fa";
 import clsx from "clsx";
 import { logoutUser } from "@/lib/authentication";
-import { uploadProfilePicture } from "@/lib/userActions"; // ✅ <-- Make sure this path is correct
+import { uploadProfilePicture } from "@/lib/userActions";
 import { usePathname, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 

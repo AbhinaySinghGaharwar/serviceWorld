@@ -1,36 +1,32 @@
 "use client";
-import { useState ,useEffect} from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaCogs, FaCode, FaBlog } from "react-icons/fa";
 import Link from "next/link";
 
-
-export default function Navbar({logo}) {
-
+export default function Navbar({ logo }) {
   const [menuOpen, setMenuOpen] = useState(false);
- 
 
   return (
-    <nav className="sticky top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md shadow-md border-b border-gray-100 rounded-b-3xl md:rounded-none transition-all duration-300">
+    <nav className="sticky top-0 left-0 right-0 z-50 bg-[#0e0e0f]/90 backdrop-blur-md shadow-lg border-b border-yellow-500/20 transition-all duration-300">
       <div className="flex justify-between items-center px-6 py-3 max-w-7xl mx-auto">
-        {/* 🌟 Logo */}
+        {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
-       <img
-  src={logo}
-  alt="SMM World Panel Logo"
-  className="h-14 sm:h-16 w-auto hover:scale-105 transition-transform duration-300 drop-shadow-[0_0_8px_rgba(250,204,21,0.2)]"
-/>
-
+          <img
+            src={logo}
+            alt="SMM World Panel Logo"
+            className="h-14 sm:h-16 w-auto hover:scale-105 transition-transform duration-300 drop-shadow-[0_0_8px_rgba(255,221,64,0.3)]"
+          />
         </Link>
 
-        {/* 🌍 Desktop Menu */}
-        <ul className="hidden md:flex items-center space-x-8 text-gray-700 font-medium">
+        {/* Desktop Menu */}
+        <ul className="hidden md:flex items-center space-x-8 text-gray-300 font-medium">
           <li>
             <Link
               href="/services"
-              className="flex items-center hover:text-indigo-600 transition-colors"
+              className="flex items-center hover:text-yellow-400 transition-colors"
             >
-              <FaCogs className="text-indigo-500 mr-2 text-[18px]" />
+              <FaCogs className="text-yellow-400 mr-2 text-[18px]" />
               Services
             </Link>
           </li>
@@ -38,9 +34,9 @@ export default function Navbar({logo}) {
           <li>
             <Link
               href="/apiv2"
-              className="flex items-center hover:text-purple-600 transition-colors"
+              className="flex items-center hover:text-yellow-400 transition-colors"
             >
-              <FaCode className="text-purple-500 mr-2 text-[18px]" />
+              <FaCode className="text-yellow-400 mr-2 text-[18px]" />
               API
             </Link>
           </li>
@@ -48,33 +44,33 @@ export default function Navbar({logo}) {
           <li>
             <Link
               href="/blogs"
-              className="flex items-center hover:text-green-600 transition-colors"
+              className="flex items-center hover:text-yellow-400 transition-colors"
             >
-              <FaBlog className="text-green-500 mr-2 text-[18px]" />
+              <FaBlog className="text-yellow-400 mr-2 text-[18px]" />
               Blogs
             </Link>
           </li>
         </ul>
 
-        {/* 🔐 Desktop Buttons */}
+        {/* Desktop Buttons */}
         <div className="hidden md:flex items-center space-x-4">
           <Link
             href="/auth/login"
-            className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full font-semibold shadow-md hover:opacity-90 hover:scale-[1.03] transition"
+            className="px-5 py-2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black rounded-full font-semibold shadow-[0_0_15px_rgba(255,221,64,0.3)] hover:shadow-[0_0_20px_rgba(255,221,64,0.5)] hover:scale-[1.03] transition"
           >
             Login
           </Link>
           <Link
             href="/auth/signup"
-            className="px-5 py-2 bg-gradient-to-r from-pink-500 to-yellow-500 text-white rounded-full font-semibold shadow-md hover:opacity-90 hover:scale-[1.03] transition"
+            className="px-5 py-2 bg-gradient-to-r from-yellow-700 to-yellow-500 text-black rounded-full font-semibold shadow-[0_0_15px_rgba(255,221,64,0.3)] hover:shadow-[0_0_20px_rgba(255,221,64,0.5)] hover:scale-[1.03] transition"
           >
             Signup
           </Link>
         </div>
 
-        {/* 📱 Mobile Menu Button */}
+        {/* Mobile Menu Button */}
         <button
-          className="md:hidden text-gray-700 focus:outline-none hover:scale-110 transition-transform"
+          className="md:hidden text-gray-300 hover:text-yellow-400 focus:outline-none hover:scale-110 transition-transform"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           {menuOpen ? (
@@ -111,7 +107,7 @@ export default function Navbar({logo}) {
         </button>
       </div>
 
-      {/* 📱 Mobile Dropdown */}
+      {/* Mobile Dropdown */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -119,13 +115,13 @@ export default function Navbar({logo}) {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="md:hidden bg-white border-t border-gray-100 shadow-inner"
+            className="md:hidden bg-[#151517] border-t border-yellow-500/20 shadow-inner"
           >
-            <ul className="flex flex-col items-center space-y-4 py-4 text-gray-700 font-medium">
+            <ul className="flex flex-col items-center space-y-4 py-4 text-gray-300 font-medium">
               <li>
                 <Link
                   href="/services"
-                  className="hover:text-indigo-600 transition-colors"
+                  className="hover:text-yellow-400 transition-colors"
                   onClick={() => setMenuOpen(false)}
                 >
                   Services
@@ -134,7 +130,7 @@ export default function Navbar({logo}) {
               <li>
                 <Link
                   href="/apiv2"
-                  className="hover:text-purple-600 transition-colors"
+                  className="hover:text-yellow-400 transition-colors"
                   onClick={() => setMenuOpen(false)}
                 >
                   API
@@ -143,25 +139,25 @@ export default function Navbar({logo}) {
               <li>
                 <Link
                   href="/blogs"
-                  className="hover:text-green-600 transition-colors"
+                  className="hover:text-yellow-400 transition-colors"
                   onClick={() => setMenuOpen(false)}
                 >
                   Blogs
                 </Link>
               </li>
 
-              {/* Buttons for Mobile */}
+              {/* Mobile Buttons */}
               <div className="flex flex-col space-y-3 w-3/4 pt-2">
                 <Link
                   href="/auth/login"
-                  className="block text-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full font-semibold shadow-md hover:opacity-90 transition"
+                  className="block text-center px-4 py-2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black rounded-full font-semibold shadow-[0_0_15px_rgba(255,221,64,0.3)] hover:shadow-[0_0_20px_rgba(255,221,64,0.5)] transition"
                   onClick={() => setMenuOpen(false)}
                 >
                   Login
                 </Link>
                 <Link
                   href="/auth/signup"
-                  className="block text-center px-4 py-2 bg-gradient-to-r from-pink-500 to-yellow-500 text-white rounded-full font-semibold shadow-md hover:opacity-90 transition"
+                  className="block text-center px-4 py-2 bg-gradient-to-r from-yellow-700 to-yellow-500 text-black rounded-full font-semibold shadow-[0_0_15px_rgba(255,221,64,0.3)] hover:shadow-[0_0_20px_rgba(255,221,64,0.5)] transition"
                   onClick={() => setMenuOpen(false)}
                 >
                   Signup

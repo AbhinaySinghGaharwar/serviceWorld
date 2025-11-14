@@ -1,14 +1,21 @@
 "use client";
 
-import Header from "../../components/Header";
+import Navbar from "@/app/components/Header";
 import Footer from "../../components/Footer";
 import SignupForm from "@/app/user/components/Signup";
 export default function SignupPage() {
   return (
-    <div className=" min-h-screen bg-gradient-to-r from-purple-400 to-indigo-500">
-      <Header/>
+    <div className="relative min-h-screen bg-[#0e0e0f] overflow-hidden">
+  <div className="absolute inset-0 -z-10">
+    <div className="w-[450px] h-[450px] bg-gradient-to-br from-yellow-600 via-yellow-400 to-yellow-700 blur-3xl rounded-full opacity-20 absolute top-1/3 left-1/3" />
+  </div>
+
+  <Navbar/>
       <SignupForm />
       <Footer/>
-    </div>
+</div>
+
+     
+ 
   );
 }
