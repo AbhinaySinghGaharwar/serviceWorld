@@ -8,44 +8,71 @@ export default function PopupMessage({
 }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50 p-4">
-      <div className={`${bgCard} border ${borderColor} rounded-2xl p-6 max-w-sm w-full text-center`}>
+      
+      <div
+        className={`
+          ${bgCard} border ${borderColor} 
+          rounded-2xl p-6 max-w-sm w-full text-center 
+          shadow-[0_0_18px_rgba(74,108,247,0.15)]
+        `}
+      >
+        {/* Status Icon */}
         <div
-          className={`mx-auto mb-4 w-14 h-14 flex items-center justify-center rounded-full ${
-            popup.success ? "bg-green-600" : "bg-red-600"
-          }`}
+          className={`
+            mx-auto mb-4 w-14 h-14 flex items-center justify-center rounded-full 
+            ${popup.success ? "bg-[#16D1A5]" : "bg-red-600"}
+            shadow-[0_0_12px_rgba(0,0,0,0.25)]
+          `}
         >
           <span className="text-white text-2xl">
-            {popup.success ? "✅" : "❌"}
+            {popup.success ? "✓" : "✕"}
           </span>
         </div>
 
+        {/* Title */}
         <h2
           className={`text-xl font-bold mb-2 ${
-            popup.success ? "text-green-400" : "text-red-400"
+            popup.success ? "text-[#16D1A5]" : "text-red-400"
           }`}
         >
           {popup.success ? "Payment Successful" : "Transaction Failed"}
         </h2>
 
-        <p className="mb-4 text-sm">{popup.message}</p>
+        {/* Message */}
+        <p className="mb-4 text-sm text-gray-300">{popup.message}</p>
 
+        {/* Transaction Details */}
         {popup.transaction && (
-          <div className={`${bgMain} border ${borderColor} rounded-xl p-3 mb-4 text-sm`}>
+          <div
+            className={`
+              ${bgMain} border ${borderColor} 
+              rounded-xl p-3 mb-4 text-sm text-gray-300
+            `}
+          >
             <p>
-              <strong>UTR:</strong> {popup.transaction.utr}
+              <strong className="text-gray-100">UTR:</strong>{" "}
+              {popup.transaction.utr}
             </p>
             <p>
-              <strong>Amount:</strong> ₹{popup.transaction.payment_amount}
+              <strong className="text-gray-100">Amount:</strong>{" "}
+              ₹{popup.transaction.payment_amount}
             </p>
             <p>
-              <strong>Type:</strong> {popup.transaction.payment_type}
+              <strong className="text-gray-100">Type:</strong>{" "}
+              {popup.transaction.payment_type}
             </p>
           </div>
         )}
 
+        {/* Close Button */}
         <button
           onClick={() => setPopup({ ...popup, visible: false })}
-          className="px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-xl transition active:scale-95"
+          className="
+            px-5 py-2 rounded-xl font-semibold text-white
+            bg-[#4A6CF7] hover:bg-[#3C59D4]
+            transition active:scale-95
+            shadow-[0_0_12px_rgba(74,108,247,0.3)]
+          "
         >
           Close
         </button>

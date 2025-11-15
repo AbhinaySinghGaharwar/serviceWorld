@@ -15,10 +15,21 @@ import OrderForm from "./OrderForm";
 import SupportSection from "./SupportSection";
 import CategoryFilter from "./CategoryFilter";
 
+// -------------------------
+// Card Component
+// -------------------------
 const Card = ({ children, className = "", onClick }) => (
   <div
     onClick={onClick}
-    className={`bg-[#151517] border border-yellow-500/20 rounded-2xl shadow-md p-3 sm:p-4 lg:p-5 hover:border-yellow-500/40 transition-all cursor-pointer ${className}`}
+    className={`
+      bg-white dark:bg-[#1A1F2B]
+      border border-gray-300 dark:border-[#2B3143]
+      rounded-2xl shadow-md p-3 sm:p-4 lg:p-5
+      hover:border-[#4A6CF7]
+      hover:shadow-lg hover:shadow-[#4A6CF7]/20
+      transition-all cursor-pointer
+      ${className}
+    `}
   >
     {children}
   </div>
@@ -40,61 +51,71 @@ export default function DashboardLayout({ user, serviceEnabled }) {
   ];
 
   return (
-    <div className="w-full min-h-screen text-gray-100 py-4 sm:py-6 flex justify-center">
+    <div className="
+      w-full min-h-screen 
+      bg-[#F5F7FA] text-[#1A1A1A] 
+      dark:bg-[#0F1117] dark:text-white
+      py-4 sm:py-6 flex justify-center
+    ">
       <div className="w-full max-w-6xl px-3 sm:px-6 space-y-8">
 
         {/* ================= STATS ================= */}
         <section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          
+          {/* Username */}
           <Card>
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 rounded-full bg-yellow-500/20 text-yellow-400">
+              <div className="p-2 sm:p-3 rounded-full bg-[#4A6CF7]/20 text-[#4A6CF7]">
                 <FaUserCircle size={22} />
               </div>
               <div>
-                <p className="text-[11px] sm:text-sm text-gray-400">Username</p>
-                <h4 className="text-sm sm:text-lg font-semibold text-yellow-300 truncate">
+                <p className="text-[11px] sm:text-sm text-[#4B5563] dark:text-[#A0AEC3]">Username</p>
+                <h4 className="text-sm sm:text-lg font-semibold text-[#4A6CF7] truncate">
                   {user?.username || "Guest"}
                 </h4>
               </div>
             </div>
           </Card>
 
+          {/* Balance */}
           <Card>
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 rounded-full bg-yellow-500/20 text-yellow-400">
+              <div className="p-2 sm:p-3 rounded-full bg-[#4A6CF7]/20 text-[#4A6CF7]">
                 <MdAccountBalanceWallet size={22} />
               </div>
               <div>
-                <p className="text-[11px] sm:text-sm text-gray-400">Balance</p>
-                <h4 className="text-sm sm:text-lg font-semibold text-yellow-300">
+                <p className="text-[11px] sm:text-sm text-[#4B5563] dark:text-[#A0AEC3]">Balance</p>
+                <h4 className="text-sm sm:text-lg font-semibold text-[#16D1A5]">
                   ₹{user?.balance ? Number(user.balance).toFixed(2) : "0.00"}
                 </h4>
               </div>
             </div>
           </Card>
 
+          {/* Total Spent */}
           <Card>
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 rounded-full bg-yellow-500/20 text-yellow-400">
+              <div className="p-2 sm:p-3 rounded-full bg-[#4A6CF7]/20 text-[#4A6CF7]">
                 <MdTrendingUp size={22} />
               </div>
               <div>
-                <p className="text-[11px] sm:text-sm text-gray-400">Total Spent</p>
-                <h4 className="text-sm sm:text-lg font-semibold text-yellow-300">
+                <p className="text-[11px] sm:text-sm text-[#4B5563] dark:text-[#A0AEC3]">Total Spent</p>
+                <h4 className="text-sm sm:text-lg font-semibold text-[#16D1A5]">
                   ₹{spent.toFixed(2)}
                 </h4>
               </div>
             </div>
           </Card>
 
+          {/* Orders */}
           <Card>
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 rounded-full bg-yellow-500/20 text-yellow-400">
+              <div className="p-2 sm:p-3 rounded-full bg-[#4A6CF7]/20 text-[#4A6CF7]">
                 <MdAddShoppingCart size={22} />
               </div>
               <div>
-                <p className="text-[11px] sm:text-sm text-gray-400">Total Orders</p>
-                <h4 className="text-sm sm:text-lg font-semibold text-yellow-300">
+                <p className="text-[11px] sm:text-sm text-[#4B5563] dark:text-[#A0AEC3]">Total Orders</p>
+                <h4 className="text-sm sm:text-lg font-semibold text-[#16D1A5]">
                   {orders}
                 </h4>
               </div>
@@ -102,39 +123,31 @@ export default function DashboardLayout({ user, serviceEnabled }) {
           </Card>
         </section>
 
-        {/* ================= CATEGORY FILTER ================= */}
+        {/* CATEGORY FILTER */}
         <CategoryFilter
           selectedCategory={selectedCategory}
           onCategorySelect={setSelectedCategory}
         />
 
-        {/* ================= QUICK ACTIONS ================= */}
+        {/* QUICK ACTIONS */}
         <section className="w-full">
-          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-yellow-400 tracking-wide text-center lg:text-left">
+          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#4A6CF7] tracking-wide text-center lg:text-left">
             Quick Actions
           </h3>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5 max-w-6xl mx-auto px-2 lg:px-0">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
             {quickActions.map((action, idx) => (
               <Card
                 key={idx}
                 onClick={() => (window.location.href = action.href)}
-                className={`flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 py-3 sm:py-4 lg:py-5 text-yellow-300 transition-all cursor-pointer bg-[#151517] border border-yellow-500/20 rounded-2xl hover:scale-105 ${
-                  action.neon
-                    ? "hover:shadow-[0_0_25px_rgba(255,255,0,0.6)] hover:bg-yellow-500/10"
-                    : "hover:bg-yellow-500/10 hover:shadow-[0_0_12px_rgba(234,179,8,0.25)]"
-                }`}
+                className="
+                  flex flex-col sm:flex-row items-center justify-center 
+                  gap-2 sm:gap-3 py-3 sm:py-4 lg:py-5 
+                  hover:bg-[#4A6CF7]/10 hover:shadow-[#4A6CF7]/20 hover:scale-105
+                "
               >
-                <div
-                  className={`text-yellow-400 ${
-                    action.neon
-                      ? "drop-shadow-[0_0_8px_rgba(255,255,0,0.8)] animate-pulse"
-                      : ""
-                  }`}
-                >
-                  {action.icon}
-                </div>
-                <span className="text-sm sm:text-base font-medium text-center">
+                <div className="text-[#4A6CF7]">{action.icon}</div>
+                <span className="text-sm sm:text-base font-medium">
                   {action.label}
                 </span>
               </Card>
@@ -142,34 +155,39 @@ export default function DashboardLayout({ user, serviceEnabled }) {
           </div>
         </section>
 
-        {/* ================= ORDER FORM / DISABLED MESSAGE ================= */}
+        {/* ORDER FORM SECTION */}
         {serviceEnabled ? (
           <OrderForm selectedCategory={selectedCategory} />
         ) : (
           <div className="flex flex-col items-center justify-center text-center px-6 py-10">
-            <div className="bg-[#151517] border border-yellow-500/20 rounded-2xl p-10 max-w-md shadow-[0_0_25px_rgba(234,179,8,0.08)]">
-              <FaTools className="text-yellow-400 text-5xl mx-auto mb-4 animate-pulse" />
-              <h1 className="text-2xl font-semibold text-yellow-400 mb-2">
+            <div className="
+              bg-white dark:bg-[#1A1F2B]
+              border border-gray-300 dark:border-[#2B3143]
+              rounded-2xl p-10 max-w-md
+              shadow-xl shadow-black/5 dark:shadow-black/20
+            ">
+              <FaTools className="text-[#4A6CF7] text-5xl mx-auto mb-4 animate-pulse" />
+              <h1 className="text-2xl font-semibold text-[#4A6CF7] mb-2">
                 Services Temporarily Unavailable
               </h1>
-              <p className="text-gray-300 leading-relaxed">
-                Our order section is currently disabled by the administrator for
-                maintenance or updates.
-                <br /> Please check back later.
+              <p className="text-[#4B5563] dark:text-[#A0AEC3] leading-relaxed">
+                Our order system is temporarily disabled for maintenance.
+                Please check back later.
               </p>
-              <p className="text-sm text-gray-500 mt-3 italic">
-                We’ll be back soon — thank you for your patience!
+              <p className="text-sm text-[#A0AEC3] mt-3 italic">
+                Thank you for your patience!
               </p>
             </div>
           </div>
         )}
 
-        {/* ================= LATEST ORDERS ================= */}
+        {/* LATEST ORDERS */}
         <LatestOrders />
 
-        {/* ================= OTHER SECTIONS ================= */}
+        {/* ADDITIONAL SECTIONS */}
         <SupportSection />
         <Announcements />
+
       </div>
     </div>
   );

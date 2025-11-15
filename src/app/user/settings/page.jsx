@@ -21,16 +21,11 @@ export default function SettingsPage() {
   const [isPending, startTransition] = useTransition();
   const [isGenerating, startGenerate] = useTransition();
 
-  useEffect(()=>{
-
-  })
-
   // Password visibility
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // 🔹 Password Update Logic
   const handlePasswordUpdate = () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       setMessage("⚠️ Please fill all fields.");
@@ -52,7 +47,6 @@ export default function SettingsPage() {
     });
   };
 
-  // 🔹 API Key Generation Logic
   const handleGenerateApiKey = () => {
     startGenerate(async () => {
       setMessage("⏳ Generating API key...");
@@ -68,17 +62,21 @@ export default function SettingsPage() {
 
   return (
     <motion.div
-      className="max-w-6xl mx-auto py-8 px-4 sm:px-6 text-gray-200"
+      className="max-w-6xl mx-auto py-8 px-4 sm:px-6 text-white"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
+      style={{ background: "#0F1117" }}
     >
       {/* Header */}
       <div className="text-center mb-10">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent drop-shadow-[0_0_6px_rgba(255,255,0,0.6)]">
+        <h2
+          className="text-3xl font-bold bg-clip-text text-transparent"
+          style={{ backgroundImage: "linear-gradient(to right, #4A6CF7, #16D1A5)" }}
+        >
           Account Settings
         </h2>
-        <p className="text-gray-400 mt-1">
+        <p className="mt-1" style={{ color: "#A0AEC3" }}>
           Manage your account details and preferences securely.
         </p>
       </div>
@@ -91,11 +89,7 @@ export default function SettingsPage() {
           content={
             <>
               <Input label="Username" value="58" readOnly />
-              <Input
-                label="Email Address"
-                value="testing111250@gmail.com"
-                readOnly
-              />
+              <Input label="Email Address" value="testing111250@gmail.com" readOnly />
             </>
           }
         />
@@ -132,7 +126,14 @@ export default function SettingsPage() {
                 onClick={handlePasswordUpdate}
               />
               {message && (
-                <p className="mt-3 text-sm text-yellow-400 bg-yellow-500/10 border border-yellow-500/30 p-2 rounded-lg text-center">
+                <p
+                  className="mt-3 text-sm p-2 rounded-lg text-center"
+                  style={{
+                    color: "#4A6CF7",
+                    background: "#1A1F2B",
+                    border: "1px solid rgba(74,108,247,0.3)",
+                  }}
+                >
                   {message}
                 </p>
               )}
@@ -146,19 +147,36 @@ export default function SettingsPage() {
           title="API Key Generator"
           content={
             <>
-              <p className="text-gray-400 text-sm mb-3">
+              <p className="text-sm mb-3" style={{ color: "#A0AEC3" }}>
                 Generate a new API key to access developer endpoints. Keep it private.
               </p>
+
               <NeonButton
                 text={isGenerating ? "Generating..." : "Generate New Key"}
                 onClick={handleGenerateApiKey}
               />
+
               {apiKey && (
-                <div className="mt-4 bg-[#0e0e0f] border border-yellow-500/40 text-yellow-300 text-sm p-3 rounded-lg font-mono text-center shadow-[0_0_10px_rgba(255,255,0,0.3)]">
+                <div
+                  className="mt-4 p-3 rounded-lg font-mono text-center"
+                  style={{
+                    background: "#1A1F2B",
+                    border: "1px solid rgba(74,108,247,0.4)",
+                    color: "#4A6CF7",
+                  }}
+                >
                   🔑 {apiKey}
                 </div>
               )}
-              <div className="mt-4 bg-yellow-500/10 text-yellow-400 text-sm p-3 rounded-lg border border-yellow-500/30">
+
+              <div
+                className="mt-4 text-sm p-3 rounded-lg"
+                style={{
+                  background: "rgba(22,209,165,0.1)",
+                  border: "1px solid rgba(22,209,165,0.3)",
+                  color: "#16D1A5",
+                }}
+              >
                 ⚠️ Generating a new key will invalidate your previous one. Keep it secret.
               </div>
             </>
@@ -174,13 +192,7 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Select
                   label="Language"
-                  options={[
-                    "English (Default)",
-                    "Hindi",
-                    "Spanish",
-                    "French",
-                    "German",
-                  ]}
+                  options={["English (Default)", "Hindi", "Spanish", "French", "German"]}
                 />
                 <Select
                   label="Timezone"
@@ -193,6 +205,7 @@ export default function SettingsPage() {
                   ]}
                 />
               </div>
+
               <NeonButton text="Save Preferences" />
             </>
           }
@@ -209,13 +222,20 @@ function Section({ icon, title, content }) {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="bg-[#151517] border border-yellow-500/20 rounded-2xl p-6 shadow-[0_0_12px_rgba(255,255,0,0.05)] hover:shadow-[0_0_18px_rgba(255,255,0,0.15)] transition"
+      className="rounded-2xl p-6 transition"
+      style={{
+        background: "#1A1F2B",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 6px 24px rgba(0,0,0,0.4)",
+      }}
     >
       <div className="flex items-center gap-3 mb-4">
-        <div className="text-2xl text-yellow-400 drop-shadow-[0_0_6px_rgba(255,255,0,0.6)]">
+        <div className="text-2xl" style={{ color: "#4A6CF7" }}>
           {icon}
         </div>
-        <h3 className="text-lg font-semibold text-yellow-400">{title}</h3>
+        <h3 className="text-lg font-semibold" style={{ color: "#4A6CF7" }}>
+          {title}
+        </h3>
       </div>
       {content}
     </motion.div>
@@ -226,19 +246,25 @@ function Section({ icon, title, content }) {
 function PasswordInput({ label, value, onChange, show, setShow }) {
   return (
     <div className="mb-4 relative">
-      <label className="block text-sm font-medium text-yellow-400 mb-1">
+      <label className="block text-sm mb-1" style={{ color: "#A0AEC3" }}>
         {label}
       </label>
       <input
         type={show ? "text" : "password"}
         value={value}
         onChange={onChange}
-        className="w-full bg-[#0e0e0f] border border-yellow-500/20 rounded-lg px-4 py-2.5 pr-10 text-gray-200 focus:ring-2 focus:ring-yellow-500/40 focus:outline-none transition"
+        className="w-full rounded-lg px-4 py-2.5 pr-10 focus:outline-none"
+        style={{
+          background: "#0F1117",
+          border: "1px solid rgba(255,255,255,0.15)",
+          color: "#FFFFFF",
+        }}
       />
       <button
         type="button"
         onClick={() => setShow(!show)}
-        className="absolute right-3 top-9 text-yellow-400 hover:text-yellow-300"
+        className="absolute right-3 top-9"
+        style={{ color: "#4A6CF7" }}
       >
         {show ? <FaEyeSlash /> : <FaEye />}
       </button>
@@ -247,20 +273,22 @@ function PasswordInput({ label, value, onChange, show, setShow }) {
 }
 
 /* 🔹 Input Component */
-function Input({ label, value, onChange, type = "text", readOnly = false }) {
+function Input({ label, value, readOnly }) {
   return (
     <div className="mb-4">
-      <label className="block text-sm font-medium text-yellow-400 mb-1">
+      <label className="block text-sm mb-1" style={{ color: "#A0AEC3" }}>
         {label}
       </label>
       <input
-        type={type}
         value={value}
         readOnly={readOnly}
-        onChange={onChange}
-        className={`w-full bg-[#0e0e0f] border border-yellow-500/20 rounded-lg px-4 py-2.5 text-gray-200 focus:ring-2 focus:ring-yellow-500/40 focus:outline-none transition ${
-          readOnly ? "opacity-70 cursor-not-allowed" : ""
-        }`}
+        className="w-full rounded-lg px-4 py-2.5 focus:outline-none"
+        style={{
+          background: "#0F1117",
+          border: "1px solid rgba(255,255,255,0.15)",
+          color: "#FFFFFF",
+          opacity: readOnly ? 0.7 : 1,
+        }}
       />
     </div>
   );
@@ -270,12 +298,19 @@ function Input({ label, value, onChange, type = "text", readOnly = false }) {
 function Select({ label, options }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-yellow-400 mb-1">
+      <label className="block text-sm mb-1" style={{ color: "#A0AEC3" }}>
         {label}
       </label>
-      <select className="w-full bg-[#0e0e0f] border border-yellow-500/20 rounded-lg px-4 py-2.5 text-gray-200 focus:ring-2 focus:ring-yellow-500/40 focus:outline-none transition">
+      <select
+        className="w-full rounded-lg px-4 py-2.5 focus:outline-none"
+        style={{
+          background: "#0F1117",
+          border: "1px solid rgba(255,255,255,0.15)",
+          color: "#FFFFFF",
+        }}
+      >
         {options.map((opt, i) => (
-          <option key={i} value={opt}>
+          <option key={i} value={opt} className="text-black">
             {opt}
           </option>
         ))}
@@ -289,7 +324,12 @@ function NeonButton({ text, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full mt-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-semibold py-3 rounded-lg shadow-[0_0_12px_rgba(255,255,0,0.4)] hover:shadow-[0_0_20px_rgba(255,255,0,0.7)] transition-all"
+      className="w-full mt-3 font-semibold py-3 rounded-lg transition-all"
+      style={{
+        background: "linear-gradient(to right, #4A6CF7, #16D1A5)",
+        color: "black",
+        boxShadow: "0 0 12px rgba(74,108,247,0.4)",
+      }}
     >
       {text}
     </button>

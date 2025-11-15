@@ -12,7 +12,7 @@ export default function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState("All");
 
   useEffect(() => {
-    // Simulated data (20 sample orders)
+    // Mock Data
     const mockOrders = [];
     const statuses = ["Processing", "Partial", "Completed", "Pending"];
 
@@ -47,22 +47,28 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="bg-[#0e0e0f] min-h-screen text-gray-100 p-4 md:p-6">
+    <div className="min-h-screen bg-[#0F1117] text-gray-200 p-4 md:p-6">
+
+      {/* 🔵 Filter Bar */}
       <OrderFilter
         statusFilter={statusFilter}
         handleStatusFilter={handleStatusFilter}
       />
 
+      {/* 🔄 Loading */}
       {loading ? (
         <div className="text-center py-10 text-gray-400 font-medium flex flex-col items-center">
-          <FaSpinner className="animate-spin text-3xl mb-2 text-yellow-400" />
+          <FaSpinner className="animate-spin text-3xl mb-2 text-[#4A6CF7]" />
           Loading orders...
         </div>
       ) : filteredOrders.length === 0 ? (
-        <div className="text-center py-10 text-gray-400 font-medium">
-          <FaClipboardList className="inline-block text-2xl mb-2 text-gray-500" />
+        
+        /* ❗ No Orders Found */
+        <div className="text-center py-10 text-gray-400 font-medium flex flex-col items-center">
+          <FaClipboardList className="text-3xl mb-2 text-gray-500" />
           <p>No orders found.</p>
         </div>
+
       ) : (
         <OrderGrid orders={filteredOrders} />
       )}

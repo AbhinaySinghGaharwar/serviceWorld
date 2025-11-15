@@ -22,7 +22,7 @@ export default function Referral() {
 
   const referralLink = "https://website.com/affiliates?ref=2a5afb";
 
-  // 🧠 Load live settings on mount
+  // Fetch settings
   useEffect(() => {
     async function fetchSettings() {
       try {
@@ -50,9 +50,9 @@ export default function Referral() {
 
   return (
     <div className="min-h-screen bg-[#0e0e0f] text-gray-300 px-6 py-10">
-      {/* Page Header */}
+      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-yellow-400 mb-2">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-[#4A6CF7] to-[#16D1A5] bg-clip-text text-transparent mb-2">
           Affiliate Program
         </h1>
         <p className="text-gray-400">
@@ -61,60 +61,76 @@ export default function Referral() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Left Card - Referral Info */}
-        <div className="bg-[#151517] border border-yellow-500/20 rounded-2xl shadow-lg p-6">
+
+        {/* LEFT CARD */}
+        <div className="bg-[#151517] border border-[#4A6CF7]/30 rounded-2xl shadow-[0_0_20px_rgba(74,108,247,0.15)] p-6">
+          
+          {/* Title */}
           <div className="flex items-center gap-2 mb-4">
-            <MdLink className="text-yellow-400 w-5 h-5" />
-            <h2 className="text-lg font-semibold text-yellow-400">
+            <MdLink className="text-[#4A6CF7] w-5 h-5" />
+            <h2 className="text-lg font-semibold text-[#4A6CF7]">
               Referral Link
             </h2>
           </div>
 
+          {/* Copy Section */}
           <div className="space-y-4">
             <input
               type="text"
               readOnly
               value={referralLink}
-              className="w-full bg-[#0e0e0f] border border-yellow-500/20 rounded-lg p-3 text-gray-300 focus:outline-none"
+              className="w-full bg-[#0e0e0f] border border-[#4A6CF7]/30 rounded-lg p-3 text-gray-300 outline-none"
             />
+
             <button
               onClick={copyLink}
-              className="w-full bg-yellow-500 text-black font-semibold py-2 rounded-lg hover:bg-yellow-400 hover:shadow-[0_0_15px_rgba(234,179,8,0.6)] transition"
+              className="
+                w-full 
+                bg-gradient-to-r from-[#4A6CF7] to-[#16D1A5] 
+                text-black font-semibold py-2 
+                rounded-lg 
+                hover:shadow-[0_0_15px_rgba(74,108,247,0.5)] 
+                transition
+              "
             >
               {copied ? "Copied!" : "Copy Link"}
             </button>
           </div>
 
+          {/* Settings */}
           <div className="mt-6 space-y-4">
+
             {/* Commission Rate */}
-            <div className="flex justify-between items-center bg-[#0e0e0f] border border-yellow-500/10 rounded-lg px-4 py-2">
+            <div className="flex justify-between items-center bg-[#0e0e0f] border border-[#4A6CF7]/20 rounded-lg px-4 py-2">
               <div className="flex items-center gap-2 text-gray-300">
-                <MdPercent className="text-yellow-400" />
+                <MdPercent className="text-[#4A6CF7]" />
                 <span>Commission rate</span>
               </div>
-              <span className="text-yellow-400 font-semibold">
+              <span className="text-[#16D1A5] font-semibold">
                 {loading ? "..." : `${commissionRate}%`}
               </span>
             </div>
 
             {/* Minimum Payout */}
-            <div className="flex justify-between items-center bg-[#0e0e0f] border border-yellow-500/10 rounded-lg px-4 py-2">
+            <div className="flex justify-between items-center bg-[#0e0e0f] border border-[#4A6CF7]/20 rounded-lg px-4 py-2">
               <div className="flex items-center gap-2 text-gray-300">
-                <MdAttachMoney className="text-yellow-400" />
+                <MdAttachMoney className="text-[#4A6CF7]" />
                 <span>Minimum payout</span>
               </div>
-              <span className="text-yellow-400 font-semibold">
+              <span className="text-[#16D1A5] font-semibold">
                 {loading ? "..." : `$${minimumPayout}`}
               </span>
             </div>
+
           </div>
         </div>
 
-        {/* Right Card - Affiliate Stats */}
-        <div className="bg-[#151517] border border-yellow-500/20 rounded-2xl shadow-lg p-6">
+        {/* RIGHT CARD */}
+        <div className="bg-[#151517] border border-[#4A6CF7]/30 rounded-2xl shadow-[0_0_20px_rgba(74,108,247,0.15)] p-6">
+
           <div className="flex items-center gap-2 mb-4">
-            <MdLink className="text-yellow-400 w-5 h-5" />
-            <h2 className="text-lg font-semibold text-yellow-400">
+            <MdLink className="text-[#4A6CF7] w-5 h-5" />
+            <h2 className="text-lg font-semibold text-[#4A6CF7]">
               Affiliate Statistics
             </h2>
           </div>
@@ -130,18 +146,25 @@ export default function Referral() {
             ].map((stat, i) => (
               <div
                 key={i}
-                className="flex items-center gap-3 bg-[#0e0e0f] border border-yellow-500/10 rounded-lg p-4"
+                className="
+                  flex items-center gap-3 
+                  bg-[#0e0e0f] 
+                  border border-[#4A6CF7]/20 
+                  rounded-lg 
+                  p-4
+                "
               >
-                <div className="text-yellow-400 text-xl">{stat.icon}</div>
+                <div className="text-[#4A6CF7] text-xl">{stat.icon}</div>
                 <div>
                   <p className="text-sm text-gray-400">{stat.label}</p>
-                  <h4 className="text-lg font-semibold text-yellow-400">
+                  <h4 className="text-lg font-semibold text-[#16D1A5]">
                     {stat.value}
                   </h4>
                 </div>
               </div>
             ))}
           </div>
+
         </div>
       </div>
     </div>

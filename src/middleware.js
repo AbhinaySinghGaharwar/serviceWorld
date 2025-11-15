@@ -12,6 +12,7 @@ const BASE_URL =
     : "http://localhost:3000");
 
 export async function middleware(request) {
+
   const { pathname } = request.nextUrl;
  
 
@@ -31,6 +32,8 @@ export async function middleware(request) {
       maintenanceMode ? "ON" : "OFF"
     } | BaseURL: ${BASE_URL}`
   );
+   const res = NextResponse.next();
+    res.headers.set("x-pathname", request.nextUrl.pathname);
 
   // 🚧 Maintenance Mode (users redirected to /maintenance)
   if (maintenanceMode && !isAdminRoute && !isMaintenancePage) {

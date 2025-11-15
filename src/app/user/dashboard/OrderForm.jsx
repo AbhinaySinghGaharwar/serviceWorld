@@ -5,8 +5,8 @@ import { useState, useEffect, useRef } from "react";
 import { FaSearch, FaSpinner } from "react-icons/fa";
 import { MdReceipt, MdAccessTime } from "react-icons/md";
 import { createOrderAction } from "@/lib/userActions";
-export default function OrderForm({selectedCategory}) {
- 
+
+export default function OrderForm({ selectedCategory }) {
   const [category, setCategory] = useState(selectedCategory);
   const [service, setService] = useState("");
   const [link, setLink] = useState("");
@@ -30,366 +30,440 @@ export default function OrderForm({selectedCategory}) {
   const categoryRef = useRef(null);
   const searchRef = useRef(null);
 
-  // ✅ Fetch all services once
+  // Load all services
   useEffect(() => {
-    async function fetchServices() {
-      try {
-        const data = await getServices();
-        if (data) setServices(data);
-      } catch (err) {
-        console.error("Failed to fetch services:", err);
-      }
-    }
-    fetchServices();
+    (async () => {
+      const data = await getServices();
+      if (data) setServices(data);
+    })();
   }, []);
-useEffect(() => {
-  if (selectedCategory && categories?.length > 0) {
-    const matched = categories.find((cat) =>
-      cat.toLowerCase().includes(selectedCategory.toLowerCase())
-    );
 
-    if (matched) {
-      setCategory(matched); // 👈 setCategory with the matched category
+  // Update category when category filter clicked from Dashboard
+  useEffect(() => {
+    if (selectedCategory && categories?.length > 0) {
+      const matched = categories.find((cat) =>
+        cat.toLowerCase().includes(selectedCategory.toLowerCase())
+      );
+      if (matched) setCategory(matched);
     }
-  }
-}, [selectedCategory]);
-  // ✅ Extract unique categories
+  }, [selectedCategory, categories]);
+
+  // Extract categories
   useEffect(() => {
     if (services.length > 0) {
-      const uniqueCats = [
-        ...new Set(services.map((s) => s.category).filter(Boolean)),
-      ];
-      setCategories(uniqueCats);
-  
-      if (!category) setCategory(uniqueCats[0] || "");
+      const cats = [...new Set(services.map((s) => s.category).filter(Boolean))];
+      setCategories(cats);
+      if (!category) setCategory(cats[0] || "");
     }
   }, [services]);
 
-  // ✅ Debounced global search (not limited by category)
+  // Search services
   useEffect(() => {
     setLoading(true);
     const delay = setTimeout(() => {
-      const filtered = services.filter(
+      const result = services.filter(
         (s) =>
-          (!searchTerm ||
-            s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (s.description &&
-              s.description.toLowerCase().includes(searchTerm.toLowerCase())))
+          s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          s.description?.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      setFilteredServices(filtered);
+      setFilteredServices(result);
       setLoading(false);
     }, 300);
-
     return () => clearTimeout(delay);
   }, [searchTerm, services]);
 
-  // ✅ Close dropdowns when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (categoryRef.current && !categoryRef.current.contains(e.target))
-        setCategoryDropdownOpen(false);
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target))
-        setDropdownOpen(false);
-      if (searchRef.current && !searchRef.current.contains(e.target))
-        setSearchDropdownOpen(false);
+      if (!categoryRef.current?.contains(e.target)) setCategoryDropdownOpen(false);
+      if (!dropdownRef.current?.contains(e.target)) setDropdownOpen(false);
+      if (!searchRef.current?.contains(e.target)) setSearchDropdownOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ Calculate charge dynamically
+  // Calculate charge
   useEffect(() => {
-    if (service && quantity && services.length > 0) {
+    if (service && quantity) {
       const srv = services.find((s) => s.service === service);
-      if (srv && srv.rate) {
+      if (srv) {
         const rate = parseFloat(srv.rate.toString().replace(/,/g, ""));
-        const qty = parseInt(quantity, 10);
-        if (!isNaN(rate) && !isNaN(qty)) {
-          const total = (rate / 1000) * qty;
-          setCharge(total.toFixed(2));
-        } else setCharge("");
-      } else setCharge("");
-    } else setCharge("");
+        const total = (rate / 1000) * Number(quantity);
+        setCharge(total.toFixed(2));
+      }
+    }
   }, [service, quantity, services]);
 
-  // ✅ Validate quantity
+  // Quantity validation
   useEffect(() => {
-    if (!service || services.length === 0) return;
     const srv = services.find((s) => s.service === service);
     if (!srv) return;
-    const qty = parseInt(quantity, 10);
-    if (qty < srv.min) {
-      setQuantityError(`Minimum allowed quantity is ${srv.min}`);
-    } else if (qty > srv.max) {
-      setQuantityError(`Maximum allowed quantity is ${srv.max}`);
-    } else setQuantityError("");
-  }, [quantity, service, services]);
 
-  // ✅ Submit handler
+    const qty = Number(quantity);
+    if (qty < srv.min) setQuantityError(`Minimum allowed quantity is ${srv.min}`);
+    else if (qty > srv.max) setQuantityError(`Maximum allowed quantity is ${srv.max}`);
+    else setQuantityError("");
+  }, [quantity, service]);
+
+  // Submit order
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!service || !link || !quantity || !charge) {
-      setResponseMessage("⚠️ Please fill all fields before submitting.");
+      setResponseMessage("⚠️ Please fill all fields.");
       setResponseType("error");
       return;
     }
+
     if (quantityError) {
-      setResponseMessage("⚠️ Quantity must be within the allowed range.");
+      setResponseMessage(quantityError);
       setResponseType("error");
       return;
     }
 
     setSubmitting(true);
-    setResponseMessage(null);
 
     try {
-      const res = await createOrderAction(service,link,quantity,charge)
+      const res = await createOrderAction(service, link, quantity, charge);
 
-     
       if (!res.success) {
-        setResponseMessage(`❌ ${data.error || "Failed to create order."}`);
+        setResponseMessage("❌ Failed to create order");
         setResponseType("error");
       } else {
-        setResponseMessage(`✅ Order created successfully! ID: ${res?.orderId}`);
+        setResponseMessage(`✅ Order created successfully (ID: ${res.orderId})`);
         setResponseType("success");
         setService("");
         setLink("");
         setQuantity("");
         setCharge("");
         setSearchTerm("");
-        setSelectedService(null);
       }
     } catch (err) {
-      console.error(err);
-      setResponseMessage("❌ Something went wrong while creating the order.");
+      setResponseMessage("❌ Something went wrong.");
       setResponseType("error");
-    } finally {
-      setSubmitting(false);
     }
+
+    setSubmitting(false);
   };
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center sm:px-6 lg:px-8 py-8">
-  <div className="w-full max-w-3xl lg:max-w-4xl bg-[#161617]/95 border border-yellow-500/20 rounded-2xl shadow-[0_0_20px_rgba(250,204,21,0.12)] p-4 sm:p-6 lg:p-8 text-gray-100 backdrop-blur-md transition-all duration-300">
-    
-    {/* 🧾 Title */}
-    <h2 className="flex items-center justify-center gap-2 text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent mb-8 tracking-wide">
-      <MdReceipt size={36} className="text-yellow-500 drop-shadow-[0_0_6px_rgba(250,204,21,0.5)]" />
-      Place Your Order
-    </h2>
+    <div className="w-full min-h-screen flex justify-center py-8 px-3 sm:px-6 lg:px-8">
+      <div
+        className="
+        w-full max-w-4xl 
+        bg-white dark:bg-[#1A1F2B]
+        border border-gray-300 dark:border-[#2B3143] 
+        rounded-2xl shadow-lg
+        p-6 sm:p-8
+        transition-all duration-300
+      "
+      >
+        {/* Title */}
+        <h2
+          className="
+          flex items-center justify-center gap-3 
+          text-3xl sm:text-4xl font-bold 
+          text-[#4A6CF7]
+          drop-shadow-[0_0_8px_rgba(74,108,247,0.5)]
+          mb-8
+        "
+        >
+          <MdReceipt size={38} /> Place Order
+        </h2>
 
-    {/* 📝 Form */}
-    <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6 text-sm sm:text-base">
-      
-      {/* 🔍 Search */}
-      <div className="relative" ref={searchRef}>
-        <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-500 text-base" />
-        <input
-          type="text"
-          placeholder="Search service by name or description..."
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setSearchDropdownOpen(true);
-          }}
-          className="w-full pl-10 pr-3 py-3 lg:py-3.5 rounded-lg bg-[#0e0e0f] border border-yellow-500/30 text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 text-sm sm:text-base"
-        />
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* SEARCH */}
+          <div className="relative" ref={searchRef}>
+            <FaSearch
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4A6CF7]"
+            />
+            <input
+              type="text"
+              placeholder="Search service..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setSearchDropdownOpen(true);
+              }}
+              className="
+              w-full pl-10 pr-3 py-3 rounded-lg 
+              bg-gray-100 dark:bg-[#0F1117]
+              border border-gray-300 dark:border-[#2B3143]
+              text-[#1A1A1A] dark:text-white
+              placeholder-[#4B5563] dark:placeholder-[#A0AEC3]
+              focus:ring-2 focus:ring-[#4A6CF7]
+            "
+            />
 
-        {/* 🔽 Dropdown */}
-        {searchTerm && searchDropdownOpen && (
-          <div className="absolute z-20 mt-2 w-full bg-[#151517] border border-yellow-500/20 rounded-lg shadow-[0_0_12px_rgba(234,179,8,0.15)] max-h-64 overflow-y-auto">
-            {loading ? (
-              <div className="flex justify-center items-center p-4 text-yellow-400">
-                <FaSpinner className="animate-spin mr-2" /> Searching...
+            {searchTerm && searchDropdownOpen && (
+              <div
+                className="
+                absolute mt-2 w-full rounded-lg z-20 
+                bg-white dark:bg-[#1A1F2B]
+                border border-gray-300 dark:border-[#2B3143]
+                shadow-lg max-h-64 overflow-y-auto
+              "
+              >
+                {loading ? (
+                  <div className="p-4 text-center text-[#4A6CF7]">
+                    <FaSpinner className="animate-spin inline-block mr-2" />
+                    Searching...
+                  </div>
+                ) : filteredServices.length > 0 ? (
+                  filteredServices.map((srv) => (
+                    <div
+                      key={srv.service}
+                      onClick={() => {
+                        setSearchTerm(srv.name);
+                        setService(srv.service);
+                        setSelectedService(srv);
+                        setCategory(srv.category);
+                        setSearchDropdownOpen(false);
+                      }}
+                      className="
+                      px-4 py-3 cursor-pointer 
+                      hover:bg-[#4A6CF7]/10 transition
+                    "
+                    >
+                      <p className="text-[#4A6CF7] font-semibold">{srv.name}</p>
+                      <p className="text-sm text-[#A0AEC3]">
+                        {srv.description}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center p-3 text-[#A0AEC3]">
+                    No results found.
+                  </p>
+                )}
               </div>
-            ) : filteredServices.length > 0 ? (
-              <ul>
-                {filteredServices.map((srv, idx) => (
+            )}
+          </div>
+
+          {/* CATEGORY */}
+          <div ref={categoryRef}>
+            <label className="block mb-1 text-sm font-medium text-[#4B5563] dark:text-[#A0AEC3]">
+              Category
+            </label>
+            <div
+              className="
+              bg-gray-100 dark:bg-[#0F1117]
+              border border-gray-300 dark:border-[#2B3143]
+              p-3 rounded-lg cursor-pointer
+            "
+              onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+            >
+              {category || "Select category"}
+            </div>
+
+            {categoryDropdownOpen && (
+              <ul
+                className="
+                absolute mt-2 w-full rounded-lg z-20 
+                bg-white dark:bg-[#1A1F2B]
+                border border-gray-300 dark:border-[#2B3143]
+                max-h-56 overflow-y-auto shadow-lg
+              "
+              >
+                {categories.map((cat) => (
                   <li
-                    key={idx}
+                    key={cat}
                     onClick={() => {
-                      setSearchTerm(srv.name);
-                      setSelectedService(srv);
-                      setService(srv.service);
-                      setCategory(srv.category || "");
-                      setFilteredServices([]);
-                      setSearchDropdownOpen(false);
-                      setLoading(false);
+                      setCategory(cat);
+                      setCategoryDropdownOpen(false);
                     }}
-                    className="px-4 py-2 text-gray-200 hover:bg-yellow-500/20 cursor-pointer text-sm sm:text-base transition"
+                    className="
+                    px-4 py-2 hover:bg-[#4A6CF7]/10 cursor-pointer
+                    text-[#1A1A1A] dark:text-white
+                  "
                   >
-                    <p className="font-medium text-yellow-400">{srv.name}</p>
-                    <p className="text-gray-400 text-xs truncate">{srv.description}</p>
+                    {cat}
                   </li>
                 ))}
               </ul>
-            ) : (
-              <div className="p-3 text-gray-400 text-sm text-center">No results found.</div>
             )}
           </div>
-        )}
-      </div>
 
-      {/* 📁 Category Dropdown */}
-      <div ref={categoryRef}>
-        <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">
-          Category
-        </label>
-        <div
-          className="relative"
-          onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-        >
-          <div className="w-full border border-yellow-500/30 rounded-lg p-3 lg:p-3.5 bg-[#0e0e0f] flex justify-between items-center cursor-pointer hover:border-yellow-500/50 transition text-sm sm:text-base">
-            {category || "Select category"}
-            <span className="ml-2 text-gray-400">▼</span>
+          {/* SERVICE */}
+          <div ref={dropdownRef}>
+            <label className="block mb-1 text-sm font-medium text-[#4B5563] dark:text-[#A0AEC3]">
+              Service
+            </label>
+
+            <div
+              className="
+              bg-gray-100 dark:bg-[#0F1117]
+              border border-gray-300 dark:border-[#2B3143]
+              p-3 rounded-lg cursor-pointer
+            "
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
+              {service
+                ? `${selectedService?.service} | ${selectedService?.name} | ₹${selectedService?.rate}`
+                : "Select a service"}
+            </div>
+
+            {dropdownOpen && filteredServices.length > 0 && (
+              <ul
+                className="
+                absolute mt-2 w-full rounded-lg z-20 
+                bg-white dark:bg-[#1A1F2B]
+                border border-gray-300 dark:border-[#2B3143]
+                max-h-56 overflow-y-auto shadow-lg
+              "
+              >
+                {filteredServices.map((srv) => (
+                  <li
+                    key={srv.service}
+                    onClick={() => {
+                      setService(srv.service);
+                      setSelectedService(srv);
+                      setDropdownOpen(false);
+                    }}
+                    className="
+                    px-4 py-2 hover:bg-[#4A6CF7]/10 cursor-pointer
+                    text-[#1A1A1A] dark:text-white
+                  "
+                  >
+                    {srv.service} — {srv.name} — ₹{srv.rate}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-          {categoryDropdownOpen && categories.length > 0 && (
-            <ul className="absolute z-50 w-full max-h-56 overflow-auto bg-[#161617] border border-yellow-500/30 rounded-xl mt-2 shadow-lg text-sm">
-              {categories.map((cat, idx) => (
-                <li
-                  key={idx}
-                  onClick={() => {
-                    setCategory(cat);
-                    setCategoryDropdownOpen(false);
-                  }}
-                  className="p-2.5 hover:bg-yellow-500/10 cursor-pointer truncate text-gray-100 transition"
-                >
-                  {cat}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
 
-      {/* 🧩 Service Dropdown */}
-      <div ref={dropdownRef}>
-        <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">
-          Service
-        </label>
-        <div
-          className="relative"
-          onClick={() => setDropdownOpen(!dropdownOpen)}
-        >
-          <div className="w-full border border-yellow-500/30 rounded-lg p-3 lg:p-3.5 bg-[#0e0e0f] flex justify-between items-center cursor-pointer hover:border-yellow-500/50 transition text-sm sm:text-base">
-            {service
-              ? `${services.find((s) => s.service === service)?.service} | ${
-                  services.find((s) => s.service === service)?.name
-                } | ₹${services.find((s) => s.service === service)?.rate}`
-              : "Select a service"}
-            <span className="ml-2 text-gray-400">▼</span>
+          {/* SERVICE INFO */}
+          {selectedService && (
+            <div
+              className="
+              bg-gray-100 dark:bg-[#0F1117]
+              border border-gray-300 dark:border-[#2B3143]
+              p-4 rounded-lg shadow-sm
+            "
+            >
+              <p className="font-semibold text-[#4A6CF7] mb-1">
+                {selectedService.service} {selectedService.name}
+              </p>
+
+              <p className="text-sm text-[#A0AEC3] mb-2">
+                {selectedService?.description || "No description available."}
+              </p>
+
+              <p className="flex items-center gap-2 text-[#4A6CF7]">
+                <MdAccessTime />
+                {selectedService.average_time || "No data available"}
+              </p>
+            </div>
+          )}
+
+          {/* LINK */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-[#4B5563] dark:text-[#A0AEC3]">
+              Link
+            </label>
+            <input
+              type="text"
+              className="
+              w-full p-3 rounded-lg
+              bg-gray-100 dark:bg-[#0F1117]
+              border border-gray-300 dark:border-[#2B3143]
+              text-[#1A1A1A] dark:text-white
+              placeholder-[#4B5563] dark:placeholder-[#A0AEC3]
+              focus:ring-2 focus:ring-[#4A6CF7]
+            "
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
+              placeholder="Enter post or video link"
+            />
           </div>
-          {dropdownOpen && filteredServices.length > 0 && (
-            <ul className="absolute z-50 w-full max-h-60 overflow-auto bg-[#161617] border border-yellow-500/30 rounded-xl mt-2 shadow-lg text-sm">
-              {filteredServices.map((srv) => (
-                <li
-                  key={srv.service}
-                  onClick={() => {
-                    setService(srv.service);
-                    setSelectedService(srv);
-                    setDropdownOpen(false);
-                  }}
-                  className="p-2.5 hover:bg-yellow-500/10 cursor-pointer truncate text-gray-100 transition"
-                >
-                  {srv.service} {srv.name} | ₹{srv.rate}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
 
-      {/* ℹ️ Dynamic Info */}
-      {selectedService && (
-        <div className="bg-[#0e0e0f] border border-yellow-500/30 rounded-lg p-4 lg:p-5 text-gray-300 text-sm sm:text-base shadow-[0_0_10px_rgba(255,255,0,0.05)]">
-          <p className="text-yellow-400 font-semibold mb-1">
-            {selectedService.service} {selectedService.name}
+          {/* QUANTITY */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-[#4B5563] dark:text-[#A0AEC3]">
+              Quantity
+            </label>
+            <input
+              type="number"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              placeholder="Enter quantity"
+              className={`
+              w-full p-3 rounded-lg
+              bg-gray-100 dark:bg-[#0F1117]
+              border 
+              ${
+                quantityError
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-[#2B3143]"
+              }
+              text-[#1A1A1A] dark:text-white
+              focus:ring-2 focus:ring-[#4A6CF7]
+            `}
+            />
+            {quantityError && (
+              <p className="text-red-400 text-sm">{quantityError}</p>
+            )}
+          </div>
+
+          {/* CHARGE */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-[#4B5563] dark:text-[#A0AEC3]">
+              Charge
+            </label>
+            <input
+              type="text"
+              value={charge ? `₹${charge}` : ""}
+              readOnly
+              className="
+              w-full p-3 rounded-lg
+              bg-gray-100 dark:bg-[#0F1117]
+              border border-gray-300 dark:border-[#2B3143]
+              text-[#1A1A1A] dark:text-white
+            "
+            />
+          </div>
+
+          {/* SUBMIT */}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="
+            w-full py-3 rounded-lg font-semibold 
+            bg-[#4A6CF7] text-white 
+            hover:bg-[#3b5be8] transition
+            shadow-md shadow-[#4A6CF7]/30
+            disabled:opacity-50
+          "
+          >
+            {submitting ? (
+              <div className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                Processing...
+              </div>
+            ) : (
+              "Place Order"
+            )}
+          </button>
+        </form>
+
+        {/* RESPONSE MESSAGE */}
+        {responseMessage && (
+          <p
+            className={`
+            mt-5 text-center font-medium text-sm
+            ${
+              responseType === "error"
+                ? "text-red-400"
+                : "text-green-400"
+            }
+          `}
+          >
+            {responseMessage}
           </p>
-          <p className="text-gray-400 mb-2">{selectedService.desc || "No description available."}</p>
-          <p className="flex items-center gap-2 text-xs sm:text-sm text-yellow-500">
-            <MdAccessTime />
-            {selectedService.time
-              ? `Avg Time: ${selectedService.average_time}`
-              : "No enough data available"}
-          </p>
-        </div>
-      )}
-
-      {/* 🔗 Link */}
-      <div>
-        <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">
-          Link
-        </label>
-        <input
-          type="text"
-          className="w-full border border-yellow-500/30 rounded-lg p-3 lg:p-3.5 bg-[#0e0e0f] text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 text-sm sm:text-base"
-          value={link}
-          onChange={(e) => setLink(e.target.value)}
-          placeholder="Enter post or video link"
-        />
-      </div>
-
-      {/* 🔢 Quantity */}
-      <div>
-        <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">
-          Quantity
-        </label>
-        <input
-          type="number"
-          className={`w-full rounded-lg p-3 lg:p-3.5 bg-[#0e0e0f] text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 text-sm sm:text-base ${
-            quantityError ? "border-red-500" : "border-yellow-500/30"
-          }`}
-          value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
-          placeholder="Enter quantity"
-        />
-        {quantityError && (
-          <small className="text-red-400 font-medium text-xs sm:text-sm">{quantityError}</small>
         )}
       </div>
-
-      {/* 💰 Charge */}
-      <div>
-        <label className="block mb-1 text-xs sm:text-sm font-semibold text-gray-300">
-          Charge
-        </label>
-        <input
-          type="text"
-          className="w-full border border-yellow-500/30 rounded-lg p-3 lg:p-3.5 bg-[#0e0e0f] text-gray-100 text-sm sm:text-base"
-          value={charge ? `₹${charge}` : ""}
-          readOnly
-        />
-      </div>
-
-      {/* 🚀 Submit */}
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-black py-3 lg:py-4 rounded-lg font-semibold hover:shadow-[0_0_18px_rgba(250,204,21,0.3)] transition-all disabled:opacity-50 text-sm sm:text-base"
-      >
-        {submitting ? (
-          <span className="flex items-center justify-center gap-2">
-            <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
-            Loading...
-          </span>
-        ) : (
-          "Place Order"
-        )}
-      </button>
-    </form>
-
-    {/* 🧩 Response Message */}
-    {responseMessage && (
-      <p
-        className={`mt-5 text-center font-medium text-sm sm:text-base ${
-          responseType === "error" ? "text-red-400" : "text-green-400"
-        }`}
-      >
-        {responseMessage}
-      </p>
-    )}
-  </div>
-</div>
-
+    </div>
   );
 }

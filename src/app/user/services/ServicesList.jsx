@@ -76,33 +76,37 @@ export default function ServicesList({ services = [] }) {
   const getIconForService = (name = "") => {
     const lower = name.toLowerCase();
     if (lower.includes("instagram"))
-      return <FaInstagram className="text-pink-500 text-2xl" />;
+      return <FaInstagram className="text-[#E1306C] text-2xl" />;
     if (lower.includes("youtube"))
       return <FaYoutube className="text-red-500 text-2xl" />;
     if (lower.includes("facebook"))
       return <FaFacebook className="text-blue-500 text-2xl" />;
     if (lower.includes("tiktok"))
-      return <FaTiktok className="text-gray-300 text-2xl" />;
+      return <FaTiktok className="text-white text-2xl" />;
     if (lower.includes("telegram"))
-      return <FaTelegramPlane className="text-sky-500 text-2xl" />;
-    return <FaGlobe className="text-emerald-400 text-2xl" />;
+      return <FaTelegramPlane className="text-sky-400 text-2xl" />;
+    return <FaGlobe className="text-[#16D1A5] text-2xl" />;
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0f] text-gray-100 flex justify-center px-3 md:px-8 py-10">
+    <div className="min-h-screen bg-[#0F1117] text-gray-100 flex justify-center px-3 md:px-8 py-10">
       <div className="w-full max-w-[1200px]">
-        <h1 className="text-3xl md:text-4xl font-bold text-center mb-10 text-yellow-400">
+
+        {/* Page Title */}
+        <h1 className="text-3xl md:text-4xl font-bold text-center mb-10 text-[#4A6CF7] drop-shadow-[0_0_8px_rgba(74,108,247,0.6)]">
           💎 Available Services
         </h1>
 
+        {/* Search */}
         <SearchBar
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           loadingSearch={loadingSearch}
         />
 
+        {/* If no results */}
         {Object.keys(filteredGroupedServices).length === 0 ? (
-          <p className="text-center text-gray-400">
+          <p className="text-center text-[#A0AEC3] mt-6">
             No matching services found.
           </p>
         ) : (
@@ -114,14 +118,16 @@ export default function ServicesList({ services = [] }) {
               transition={{ duration: 0.3 }}
               className="mb-10"
             >
+              {/* Section Heading */}
               <div className="flex items-center gap-2 mb-4">
                 {getIconForService(category)}
-                <h2 className="text-xl md:text-2xl font-semibold text-yellow-400">
+                <h2 className="text-xl md:text-2xl font-semibold text-[#4A6CF7] drop-shadow-[0_0_6px_rgba(74,108,247,0.5)]">
                   {category}
                 </h2>
-                <span className="text-sm text-gray-500">({list.length})</span>
+                <span className="text-sm text-[#A0AEC3]">({list.length})</span>
               </div>
 
+              {/* Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {list.map((service, index) => (
                   <ServiceCard
@@ -136,6 +142,7 @@ export default function ServicesList({ services = [] }) {
           ))
         )}
 
+        {/* Buy Popup */}
         <AnimatePresence>
           {selectedService && (
             <BuyPopup

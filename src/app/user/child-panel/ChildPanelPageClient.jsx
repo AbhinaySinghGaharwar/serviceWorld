@@ -4,23 +4,22 @@ import { useState, useEffect, useTransition } from "react";
 import { FaGlobe, FaCoins, FaUsers, FaUserLock } from "react-icons/fa";
 import { createChildPanel } from "@/lib/adminServices";
 
-export default function ChildPanelPageClient({ settings,paymentMethods }) {
+export default function ChildPanelPageClient({ settings, paymentMethods }) {
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const price = settings?.price || "₹ 800";
   const adminDomain = settings?.domain || "yourpaneldomain.com";
 
-  // 🧠 Subdomain state
+  // Subdomain
   const [subdomain, setSubdomain] = useState("");
 
-
-  // 🧾 Payment input
+  // Payment
   const [paymentType, setPaymentType] = useState("");
   const [paymentAmount, setPaymentAmount] = useState("");
   const [utr, setUtr] = useState("");
 
-  // 🧠 Handle domain input
+  // Handle domain
   const handleDomainChange = (e) => {
     let value = e.target.value.trim();
 
@@ -32,7 +31,7 @@ export default function ChildPanelPageClient({ settings,paymentMethods }) {
     setSubdomain(value);
   };
 
-  // 🧾 Handle form submit
+  // Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -55,9 +54,10 @@ export default function ChildPanelPageClient({ settings,paymentMethods }) {
   return (
     <div className="min-h-screen bg-[#0e0e0f] p-6 text-gray-300">
       <div className="max-w-7xl mx-auto space-y-8">
+        
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-yellow-400 mb-2">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#4A6CF7] to-[#16D1A5] bg-clip-text text-transparent mb-2">
             Create Your Child Panel
           </h1>
           <p className="text-gray-400">
@@ -65,13 +65,17 @@ export default function ChildPanelPageClient({ settings,paymentMethods }) {
           </p>
         </div>
 
-        {/* Form */}
-        <div className="bg-[#151517] border border-yellow-500/20 rounded-2xl p-6 shadow-lg">
-          <h2 className="text-xl font-bold text-yellow-400 mb-4">
+        {/* Form Container */}
+        <div className="bg-[#151517] border border-[#4A6CF7]/30 rounded-2xl p-6 shadow-[0_0_20px_rgba(74,108,247,0.15)]">
+          <h2 className="text-xl font-bold text-[#4A6CF7] mb-4">
             Fill Out Details
           </h2>
 
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
+
             {/* Domain */}
             <div>
               <label className="block mb-1 font-semibold">Domain</label>
@@ -81,7 +85,7 @@ export default function ChildPanelPageClient({ settings,paymentMethods }) {
                   name="subdomain"
                   value={subdomain}
                   onChange={handleDomainChange}
-                  className="w-full bg-[#0e0e0f] border border-yellow-500/20 rounded-lg px-3 py-2 pr-32 text-gray-200 focus:border-yellow-400 outline-none"
+                  className="w-full bg-[#0e0e0f] border border-[#4A6CF7]/30 rounded-lg px-3 py-2 pr-32 text-gray-200 focus:border-[#4A6CF7] outline-none"
                   placeholder="Enter subdomain (e.g. mypanel)"
                   required
                 />
@@ -91,8 +95,10 @@ export default function ChildPanelPageClient({ settings,paymentMethods }) {
               </div>
               <p className="text-xs text-gray-500 mt-2">
                 Full domain:{" "}
-                <span className="text-yellow-400 font-semibold">
-                  {subdomain ? `${subdomain}.${adminDomain}` : `yourpanel.${adminDomain}`}
+                <span className="text-[#16D1A5] font-semibold">
+                  {subdomain
+                    ? `${subdomain}.${adminDomain}`
+                    : `yourpanel.${adminDomain}`}
                 </span>
               </p>
             </div>
@@ -102,7 +108,7 @@ export default function ChildPanelPageClient({ settings,paymentMethods }) {
               <label className="block mb-1 font-semibold">Currency</label>
               <select
                 name="currency"
-                className="w-full bg-[#0e0e0f] border border-yellow-500/20 rounded-lg px-3 py-2 text-gray-200 focus:border-yellow-400 outline-none"
+                className="w-full bg-[#0e0e0f] border border-[#4A6CF7]/30 rounded-lg px-3 py-2 text-gray-200 focus:border-[#4A6CF7] outline-none"
               >
                 <option value="INR">Indian Rupee (INR)</option>
                 <option value="USD">U.S. Dollar (USD)</option>
@@ -117,7 +123,7 @@ export default function ChildPanelPageClient({ settings,paymentMethods }) {
               <input
                 type="text"
                 name="username"
-                className="w-full bg-[#0e0e0f] border border-yellow-500/20 rounded-lg px-3 py-2 text-gray-200 focus:border-yellow-400 outline-none"
+                className="w-full bg-[#0e0e0f] border border-[#4A6CF7]/30 rounded-lg px-3 py-2 text-gray-200 focus:border-[#4A6CF7]"
                 placeholder="admin123"
                 required
               />
@@ -129,7 +135,7 @@ export default function ChildPanelPageClient({ settings,paymentMethods }) {
               <input
                 type="password"
                 name="password"
-                className="w-full bg-[#0e0e0f] border border-yellow-500/20 rounded-lg px-3 py-2 text-gray-200 focus:border-yellow-400 outline-none"
+                className="w-full bg-[#0e0e0f] border border-[#4A6CF7]/30 rounded-lg px-3 py-2 text-gray-200 focus:border-[#4A6CF7]"
                 placeholder="••••••••"
                 required
               />
@@ -137,11 +143,13 @@ export default function ChildPanelPageClient({ settings,paymentMethods }) {
 
             {/* Confirm Password */}
             <div>
-              <label className="block mb-1 font-semibold">Confirm Password</label>
+              <label className="block mb-1 font-semibold">
+                Confirm Password
+              </label>
               <input
                 type="password"
                 name="confirmPassword"
-                className="w-full bg-[#0e0e0f] border border-yellow-500/20 rounded-lg px-3 py-2 text-gray-200 focus:border-yellow-400 outline-none"
+                className="w-full bg-[#0e0e0f] border border-[#4A6CF7]/30 rounded-lg px-3 py-2 text-gray-200 focus:border-[#4A6CF7]"
                 placeholder="••••••••"
                 required
               />
@@ -155,56 +163,60 @@ export default function ChildPanelPageClient({ settings,paymentMethods }) {
                 name="price"
                 value={price}
                 readOnly
-                className="w-full bg-[#0e0e0f] border border-yellow-500/20 rounded-lg px-3 py-2 text-gray-200"
+                className="w-full bg-[#0e0e0f] border border-[#4A6CF7]/30 rounded-lg px-3 py-2 text-gray-200"
               />
               <p className="text-xs text-gray-400 mt-1">
                 Current price set by admin
               </p>
             </div>
 
-            {/* 💳 Payment Section */}
+            {/* Payment Methods */}
             <div className="md:col-span-2">
-              <h3 className="font-semibold text-yellow-400 mb-2">Select Payment Method</h3>
-              { (
-                paymentMethods.methods.map((m) => (
-                  <div
-                    key={m._id}
-                    onClick={() => setPaymentType(m.type)}
-                    className={`flex items-center gap-3 border rounded-lg p-3 mb-3 cursor-pointer transition ${
-                      paymentType === m.type
-                        ? "border-yellow-400 bg-yellow-500/10"
-                        : "border-yellow-500/20 hover:border-yellow-400/40"
-                    }`}
-                  >
-                    <FaCoins className="text-yellow-400 text-xl" />
-                    <div>
-                      <p className="font-semibold text-gray-200">{m.type}</p>
-                      {m.qrImage && (
-                        <img
-                          src={`data:image/png;base64,${m.qrImage}`}
-                          alt={`${m.type} QR`}
-                          className="mt-2 w-32 border border-yellow-500/20 rounded-lg"
-                        />
-                      )}
-                    </div>
+              <h3 className="font-semibold text-[#4A6CF7] mb-2">
+                Select Payment Method
+              </h3>
+
+              {paymentMethods.methods.map((m) => (
+                <div
+                  key={m._id}
+                  onClick={() => setPaymentType(m.type)}
+                  className={`flex items-center gap-3 border rounded-lg p-3 mb-3 cursor-pointer transition ${
+                    paymentType === m.type
+                      ? "border-[#4A6CF7] bg-[#4A6CF7]/10"
+                      : "border-[#4A6CF7]/30 hover:border-[#4A6CF7]/60"
+                  }`}
+                >
+                  <FaCoins className="text-[#4A6CF7] text-xl" />
+                  <div>
+                    <p className="font-semibold text-gray-200">{m.type}</p>
+                    {m.qrImage && (
+                      <img
+                        src={`data:image/png;base64,${m.qrImage}`}
+                        alt={`${m.type} QR`}
+                        className="mt-2 w-32 border border-[#4A6CF7]/30 rounded-lg"
+                      />
+                    )}
                   </div>
-                ))
-              )}
+                </div>
+              ))}
             </div>
 
-            {/* UTR & Amount */}
+            {/* UTR */}
             <div>
-              <label className="block mb-1 font-semibold">UTR / Transaction ID</label>
+              <label className="block mb-1 font-semibold">
+                UTR / Transaction ID
+              </label>
               <input
                 type="text"
                 value={utr}
                 onChange={(e) => setUtr(e.target.value)}
-                placeholder="Enter UTR or transaction reference"
-                className="w-full bg-[#0e0e0f] border border-yellow-500/20 rounded-lg px-3 py-2 text-gray-200 focus:border-yellow-400 outline-none"
+                placeholder="Enter UTR or reference"
+                className="w-full bg-[#0e0e0f] border border-[#4A6CF7]/30 rounded-lg px-3 py-2 text-gray-200 focus:border-[#4A6CF7] outline-none"
                 required
               />
             </div>
 
+            {/* Amount */}
             <div>
               <label className="block mb-1 font-semibold">Payment Amount</label>
               <input
@@ -212,7 +224,7 @@ export default function ChildPanelPageClient({ settings,paymentMethods }) {
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
                 placeholder="Enter paid amount"
-                className="w-full bg-[#0e0e0f] border border-yellow-500/20 rounded-lg px-3 py-2 text-gray-200 focus:border-yellow-400 outline-none"
+                className="w-full bg-[#0e0e0f] border border-[#4A6CF7]/30 rounded-lg px-3 py-2 text-gray-200 focus:border-[#4A6CF7] outline-none"
                 required
               />
             </div>
@@ -222,7 +234,15 @@ export default function ChildPanelPageClient({ settings,paymentMethods }) {
               <button
                 type="submit"
                 disabled={isPending}
-                className="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-semibold py-2 rounded-lg shadow-lg hover:shadow-yellow-500/40 transition-all"
+                className="
+                  w-full
+                  bg-gradient-to-r from-[#4A6CF7] to-[#16D1A5]
+                  text-black font-semibold 
+                  py-2 rounded-lg 
+                  shadow-[0_0_15px_rgba(74,108,247,0.4)]
+                  hover:shadow-[0_0_25px_rgba(74,108,247,0.6)]
+                  transition
+                "
               >
                 {isPending ? "Submitting..." : "Submit Order"}
               </button>
@@ -239,6 +259,7 @@ export default function ChildPanelPageClient({ settings,paymentMethods }) {
                 </p>
               )}
             </div>
+
           </form>
         </div>
       </div>

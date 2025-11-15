@@ -1,6 +1,7 @@
 "use client";
 import QRSection from "./QRSection";
 import { useRouter } from "next/navigation";
+
 export default function AddFundForm({
   paymentType,
   setPaymentType,
@@ -13,17 +14,17 @@ export default function AddFundForm({
   loading,
   setLoading,
   setPopup,
-
   darkMode,
   Instructions,
 }) {
-    const router=useRouter()
-  const bgMain = darkMode ? "bg-[#0e0e0f]" : "bg-gray-50";
-  const bgCard = darkMode ? "bg-[#151517]" : "bg-white";
-  const borderColor = darkMode ? "border-yellow-500/20" : "border-gray-300";
-  const textColor = darkMode ? "text-gray-300" : "text-gray-800";
-  const headingColor = darkMode ? "text-yellow-400" : "text-yellow-600";
- 
+  const router = useRouter();
+
+  // 🎨 THEME COLORS
+  const bgMain = darkMode ? "bg-[#0C0F17]" : "bg-gray-100";
+  const bgCard = darkMode ? "bg-[#1A1F2B]" : "bg-white";
+  const borderColor = darkMode ? "border-[#4A6CF7]/20" : "border-gray-300";
+  const textColor = darkMode ? "text-gray-200" : "text-gray-900";
+  const headingColor = darkMode ? "text-[#4A6CF7]" : "text-[#4A6CF7]";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,13 +34,16 @@ export default function AddFundForm({
       const res = await fetch("/api/services/addFunds", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ payment_type: paymentType, utr, payment_amount: amount }),
+        body: JSON.stringify({
+          payment_type: paymentType,
+          utr,
+          payment_amount: amount,
+        }),
       });
 
       const data = await res.json();
 
       if (res.ok && data.success) {
-       
         setPopup({
           visible: true,
           success: true,
@@ -49,7 +53,8 @@ export default function AddFundForm({
 
         setUtr("");
         setAmount("");
-        router.reload()
+        router.reload();
+
       } else {
         setPopup({
           visible: true,
@@ -59,7 +64,6 @@ export default function AddFundForm({
         });
       }
     } catch (err) {
-      console.error(err);
       setPopup({
         visible: true,
         success: false,
@@ -72,24 +76,34 @@ export default function AddFundForm({
   };
 
   return (
-    <div className={`${bgCard} border ${borderColor} rounded-2xl shadow-lg p-5 md:p-8`}>
-      <h3 className={`text-2xl font-bold ${headingColor} mb-6`}>Add Funds</h3>
+    <div
+      className={`${bgCard} border ${borderColor} rounded-2xl shadow-[0_0_20px_rgba(74,108,247,0.1)] p-5 md:p-8`}
+    >
+      <h3 className={`text-2xl font-bold ${headingColor} mb-6`}>
+        Add Funds
+      </h3>
+
       <form onSubmit={handleSubmit} className="space-y-6">
+
+        {/* Payment Method */}
         <div>
           <label className="block font-semibold mb-2">Payment Method</label>
           <select
-            className={`w-full ${bgMain} border ${borderColor} rounded-lg px-3 py-2 ${textColor}`}
+            className={`w-full ${bgMain} border ${borderColor} rounded-lg px-3 py-2 ${textColor} 
+            focus:ring-2 focus:ring-[#4A6CF7] outline-none`}
             value={paymentType}
             onChange={(e) => setPaymentType(e.target.value)}
           >
-            {paymentMethods&&paymentMethods.map((item) => (
-              <option key={item._id} value={item.Name}>
-                {item.Name || item.type}
-              </option>
-            ))}
+            {paymentMethods &&
+              paymentMethods.map((item) => (
+                <option key={item._id} value={item.Name}>
+                  {item.Name || item.type}
+                </option>
+              ))}
           </select>
         </div>
 
+        {/* QR Section */}
         <QRSection
           darkMode={darkMode}
           filteredPaymentMethod={filteredPaymentMethod}
@@ -99,6 +113,7 @@ export default function AddFundForm({
           Instructions={Instructions}
         />
 
+        {/* UTR Input */}
         <div>
           <label className="block font-semibold mb-2">Enter UTR</label>
           <input
@@ -106,10 +121,12 @@ export default function AddFundForm({
             value={utr}
             onChange={(e) => setUtr(e.target.value)}
             required
-            className={`w-full ${bgMain} border ${borderColor} rounded-lg px-3 py-2 ${textColor}`}
+            className={`w-full ${bgMain} border ${borderColor} rounded-lg px-3 py-2 ${textColor}
+            focus:ring-2 focus:ring-[#4A6CF7] outline-none`}
           />
         </div>
 
+        {/* Amount */}
         <div>
           <label className="block font-semibold mb-2">Amount</label>
           <input
@@ -118,16 +135,21 @@ export default function AddFundForm({
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             required
-            className={`w-full ${bgMain} border ${borderColor} rounded-lg px-3 py-2 ${textColor}`}
+            className={`w-full ${bgMain} border ${borderColor} rounded-lg px-3 py-2 ${textColor}
+            focus:ring-2 focus:ring-[#4A6CF7] outline-none`}
           />
         </div>
 
+        {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-3 rounded-xl font-bold text-black bg-yellow-400 hover:bg-yellow-500 transition ${
-            loading ? "opacity-60 cursor-not-allowed" : ""
-          }`}
+          className={`
+            w-full py-3 rounded-xl font-bold text-white 
+            bg-[#4A6CF7] hover:bg-[#3C59D4] 
+            transition shadow-[0_0_12px_rgba(74,108,247,0.3)]
+            ${loading ? "opacity-60 cursor-not-allowed" : ""}
+          `}
         >
           {loading ? "Verifying..." : "Verify Transaction"}
         </button>

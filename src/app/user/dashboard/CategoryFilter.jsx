@@ -41,7 +41,6 @@ export default function CategoryFilter({ selectedCategory, onCategorySelect }) {
           md:grid-cols-4 
           lg:grid-cols-6 
           xl:grid-cols-6 
-          2xl:grid-cols-6 
           gap-3 
           w-full 
           max-w-6xl 
@@ -50,29 +49,52 @@ export default function CategoryFilter({ selectedCategory, onCategorySelect }) {
       >
         {icons.map((item, i) => {
           const isSelected = selectedCategory === item.name;
+
           return (
             <div
               key={i}
               onClick={() => onCategorySelect(item.name)}
               className={`
-                bg-[#151517]
-                border ${isSelected ? "border-yellow-500" : "border-yellow-500/20"}
+                bg-white dark:bg-[#1A1F2B]
+                border 
+                ${
+                  isSelected
+                    ? "border-[#4A6CF7] shadow-lg shadow-[#4A6CF7]/30"
+                    : "border-gray-300 dark:border-[#2B3143]"
+                }
                 flex flex-col items-center justify-center 
-                rounded-2xl 
-                py-3 
+                rounded-2xl py-3 
                 transition-all duration-300 
                 hover:scale-105 
-                hover:shadow-[0_0_18px_rgba(234,179,8,0.25)]
+                hover:border-[#4A6CF7]
+                hover:shadow-md hover:shadow-[#4A6CF7]/20
                 cursor-pointer
               `}
             >
-              <span className={`mb-1 ${isSelected ? "text-yellow-300" : "text-yellow-400"}`}>
+              {/* Icon */}
+              <span
+                className={`
+                  mb-1 
+                  ${
+                    isSelected
+                      ? "text-[#4A6CF7]"
+                      : "text-[#4B5563] dark:text-[#A0AEC3]"
+                  }
+                `}
+              >
                 {item.icon}
               </span>
+
+              {/* Label */}
               <span
-                className={`text-sm mt-2 font-medium hidden md:block text-center ${
-                  isSelected ? "text-yellow-300" : "text-gray-300"
-                }`}
+                className={`
+                  text-sm mt-2 font-medium hidden md:block text-center 
+                  ${
+                    isSelected
+                      ? "text-[#4A6CF7]"
+                      : "text-[#4B5563] dark:text-[#A0AEC3]"
+                  }
+                `}
               >
                 {item.name}
               </span>

@@ -13,34 +13,71 @@ export default function TicketSupport({ tickets = [] }) {
   const closeTicket = () => setSelectedTicket(null);
 
   return (
-    <div className="min-h-screen text-gray-100 py-10 px-4 flex justify-center">
+    <div className="min-h-screen text-gray-100 py-10 px-4 flex justify-center bg-[#0e0e0f]">
       <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8">
+        
         {/* 📝 New Ticket Form */}
         <TicketForm setTicketList={setTicketList} />
 
         {/* 📜 Ticket History */}
         <TicketHistory tickets={ticketList} openTicket={openTicket} />
 
-        {/* 💬 Ticket Popup (details only) */}
+        {/* 💬 Ticket Popup */}
         {selectedTicket && (
           <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-md z-50 p-4">
-            <div className="bg-[#161617] border border-yellow-500/30 rounded-3xl shadow-[0_0_25px_rgba(250,204,21,0.15)] w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+            <div
+              className="
+                bg-[#161617] 
+                border border-[#4A6CF7]/40 
+                rounded-3xl 
+                shadow-[0_0_30px_rgba(74,108,247,0.35)] 
+                w-full max-w-lg 
+                max-h-[90vh] 
+                flex flex-col 
+                overflow-hidden
+              "
+            >
               
               {/* Header */}
-              <div className="flex justify-between items-center p-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black rounded-t-3xl">
-                <h2 className="text-lg font-bold">{selectedTicket.subject}</h2>
+              <div
+                className="
+                  flex justify-between items-center 
+                  p-4 
+                  bg-gradient-to-r from-[#4A6CF7] to-[#16D1A5] 
+                  text-black 
+                  rounded-t-3xl 
+                  shadow-[0_0_12px_rgba(74,108,247,0.6)]
+                "
+              >
+                <h2 className="text-lg font-bold">
+                  {selectedTicket.subject}
+                </h2>
                 <button
                   onClick={closeTicket}
-                  className="text-2xl font-bold hover:scale-110 transition-transform"
+                  className="
+                    text-2xl font-bold 
+                    hover:scale-110 
+                    transition-transform 
+                    text-black
+                  "
                 >
                   &times;
                 </button>
               </div>
 
-              {/* Ticket Details + Replies */}
+              {/* Ticket Details */}
               <div className="p-5 overflow-y-auto space-y-4 flex-1">
-                {/* Main Message */}
-                <div className="bg-[#0e0e0f] p-3 rounded-xl border border-yellow-500/20 shadow-sm">
+                
+                {/* Main User Message */}
+                <div
+                  className="
+                    bg-[#0e0e0f] 
+                    p-3 
+                    rounded-xl 
+                    border border-[#4A6CF7]/30 
+                    shadow-sm
+                  "
+                >
                   <p className="text-gray-100">{selectedTicket.message}</p>
                   <p className="text-xs text-gray-500 mt-1">
                     {new Date(
@@ -49,15 +86,25 @@ export default function TicketSupport({ tickets = [] }) {
                   </p>
                 </div>
 
-                {/* Replies (if any) */}
+                {/* Replies */}
                 {selectedTicket.replies?.length > 0 ? (
                   selectedTicket.replies.map((r, i) => (
                     <div
                       key={i}
                       className={`p-3 rounded-xl border shadow-sm ${
                         r.sender === "user"
-                          ? "bg-gradient-to-r from-yellow-500 to-yellow-600 text-black ml-auto"
-                          : "bg-[#0e0e0f] text-gray-100 border-yellow-500/20"
+                          ? `
+                            bg-gradient-to-r from-[#4A6CF7] to-[#16D1A5]
+                            text-black 
+                            ml-auto 
+                            border-[#4A6CF7]/40 
+                            shadow-[0_0_10px_rgba(74,108,247,0.4)]
+                          `
+                          : `
+                            bg-[#0e0e0f] 
+                            text-gray-100 
+                            border-[#4A6CF7]/30
+                          `
                       }`}
                     >
                       <p>{r.message}</p>
@@ -81,11 +128,25 @@ export default function TicketSupport({ tickets = [] }) {
                 <div ref={repliesEndRef} />
               </div>
 
-              {/* ✅ Only Close Button at Bottom */}
-              <div className="border-t border-yellow-500/20 p-3 flex justify-center bg-[#0e0e0f]">
+              {/* Bottom Close Button */}
+              <div
+                className="
+                  border-t border-[#4A6CF7]/30 
+                  p-3 
+                  flex justify-center 
+                  bg-[#0e0e0f]
+                "
+              >
                 <button
                   onClick={closeTicket}
-                  className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black px-6 py-2 rounded-lg font-semibold hover:shadow-[0_0_10px_rgba(250,204,21,0.3)] transition"
+                  className="
+                    bg-gradient-to-r from-[#4A6CF7] to-[#16D1A5]
+                    text-black 
+                    px-6 py-2 
+                    rounded-lg font-semibold 
+                    hover:shadow-[0_0_12px_rgba(74,108,247,0.35)]
+                    transition active:scale-95
+                  "
                 >
                   Close
                 </button>
