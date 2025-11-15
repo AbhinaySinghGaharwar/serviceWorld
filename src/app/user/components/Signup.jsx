@@ -31,16 +31,21 @@ export default function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const { register, handleSubmit, watch, formState: { errors } } =
-    useForm({ resolver: yupResolver(schema) });
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(schema) });
 
   const usernameValue = watch("username");
   const emailValue = watch("email");
   const passwordValue = watch("password");
 
-  // Username availability check
+  // Username check
   useEffect(() => {
-    if (!usernameValue || usernameValue.length < 3) return setUsernameExists(false);
+    if (!usernameValue || usernameValue.length < 3)
+      return setUsernameExists(false);
     const delay = setTimeout(async () => {
       const res = await checkUsername(usernameValue);
       setUsernameExists(res.status);
@@ -48,7 +53,7 @@ export default function SignupForm() {
     return () => clearTimeout(delay);
   }, [usernameValue]);
 
-  // Email availability check
+  // Email check
   useEffect(() => {
     if (!emailValue) return setEmailExists(false);
     const delay = setTimeout(async () => {
@@ -87,30 +92,39 @@ export default function SignupForm() {
   };
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center px-4 bg-[#0e0e0f]">
+    <div className="
+      w-full min-h-screen flex items-center justify-center px-4 
+      bg-[#F5F7FA] text-[#1A1A1A] 
+      dark:bg-[#0F1117] dark:text-white
+    ">
 
-      {/* 📌 WRAPPER: Vertical on mobile, Horizontal on large screen */}
       <div className="flex flex-col lg:flex-row items-center justify-center w-full max-w-6xl gap-12">
 
-        {/* ⭐ LEFT PANEL (visible only on large screens) */}
-        <div className="hidden lg:flex flex-col items-start justify-center w-1/2">
-          <h2 className="text-4xl font-bold text-yellow-400 mb-4">
+        {/* LEFT PANEL */}
+        <div className="hidden lg:flex flex-col w-1/2">
+          <h2 className="text-4xl font-bold text-[#4A6CF7] dark:text-[#4A6CF7] mb-4">
             Welcome to the Future 🚀
           </h2>
-          <p className="text-gray-400 text-lg leading-relaxed">
-            Create your account and access our blazing-fast SMM dashboard,
-            top-tier panel, exclusive services, and premium features.
+          <p className="text-gray-600 dark:text-[#A0AEC3] text-lg leading-relaxed">
+            Create your account and access our advanced SMM dashboard,
+            premium tools, exclusive services, and automation features.
           </p>
         </div>
 
-        {/* ⭐ SIGNUP FORM (right side on large screens) */}
+        {/* FORM CARD */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-md w-full p-8 bg-[#151517] border border-yellow-500/20 rounded-3xl shadow-[0_0_35px_rgba(255,221,64,0.15)] flex flex-col gap-4"
+          className="
+            max-w-md w-full p-8 
+            bg-white dark:bg-[#1A1F2B]
+            border border-gray-200 dark:border-[#2B3143]
+            rounded-3xl shadow-lg shadow-black/5 dark:shadow-black/20
+            flex flex-col gap-4
+          "
         >
-          <h1 className="text-3xl font-bold text-center text-yellow-400">
+          <h1 className="text-3xl font-bold text-center text-[#4A6CF7]">
             Create Account
           </h1>
 
@@ -119,28 +133,36 @@ export default function SignupForm() {
             type="text"
             placeholder="Username"
             {...register("username")}
-            className={`w-full px-4 py-3 bg-[#0e0e0f] border ${
-              errors.username || usernameExists
+            className={`
+              w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-[#0F1117]
+              border ${errors.username || usernameExists
                 ? "border-red-500"
-                : "border-yellow-500/20"
-            } text-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 outline-none`}
+                : "border-gray-300 dark:border-[#2B3143]"
+              }
+              text-[#1A1A1A] dark:text-white
+              focus:ring-2 focus:ring-[#4A6CF7] outline-none
+            `}
           />
-          {errors.username && <p className="text-red-400 text-sm">{errors.username.message}</p>}
-          {usernameExists && <p className="text-red-400 text-sm">Username already taken</p>}
+          {errors.username && <p className="text-red-500 text-sm">{errors.username.message}</p>}
+          {usernameExists && <p className="text-red-500 text-sm">Username already taken</p>}
 
           {/* Email */}
           <input
             type="email"
             placeholder="Email"
             {...register("email")}
-            className={`w-full px-4 py-3 bg-[#0e0e0f] border ${
-              errors.email || emailExists
+            className={`
+              w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-[#0F1117]
+              border ${errors.email || emailExists
                 ? "border-red-500"
-                : "border-yellow-500/20"
-            } text-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 outline-none`}
+                : "border-gray-300 dark:border-[#2B3143]"
+              }
+              text-[#1A1A1A] dark:text-white
+              focus:ring-2 focus:ring-[#4A6CF7] outline-none
+            `}
           />
-          {errors.email && <p className="text-red-400 text-sm">{errors.email.message}</p>}
-          {emailExists && <p className="text-red-400 text-sm">Email already exists</p>}
+          {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+          {emailExists && <p className="text-red-500 text-sm">Email already exists</p>}
 
           {/* Password */}
           <div className="relative">
@@ -148,26 +170,29 @@ export default function SignupForm() {
               type={showPassword ? "text" : "password"}
               placeholder="Password"
               {...register("password")}
-              className={`w-full px-4 py-3 bg-[#0e0e0f] border ${
-                errors.password
+              className={`
+                w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-[#0F1117]
+                border ${errors.password
                   ? "border-red-500"
-                  : "border-yellow-500/20"
-              } text-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 outline-none`}
+                  : "border-gray-300 dark:border-[#2B3143]"
+                }
+                text-[#1A1AAB] dark:text-white
+                focus:ring-2 focus:ring-[#4A6CF7]
+              `}
             />
             <span
-              className="absolute right-3 top-3 cursor-pointer text-gray-400 hover:text-yellow-400"
+              className="absolute right-3 top-3 cursor-pointer text-gray-500 dark:text-gray-300"
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
-          {errors.password && <p className="text-red-400 text-sm">{errors.password.message}</p>}
 
-          {/* Password Strength */}
-          <div className="h-2 w-full bg-[#0e0e0f] rounded border border-yellow-500/20">
+          {/* Strength */}
+          <div className="h-2 w-full bg-gray-200 dark:bg-[#0F1117] rounded">
             <div
               style={{ width: `${(getStrength() / 4) * 100}%` }}
-              className="h-2 bg-yellow-400 rounded transition-all"
+              className="h-2 bg-[#16D1A5] rounded transition-all"
             />
           </div>
 
@@ -177,46 +202,52 @@ export default function SignupForm() {
               type={showConfirmPassword ? "text" : "password"}
               placeholder="Confirm Password"
               {...register("confirmPassword")}
-              className={`w-full px-4 py-3 bg-[#0e0e0f] border ${
-                errors.confirmPassword
+              className={`
+                w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-[#0F1117]
+                border ${errors.confirmPassword
                   ? "border-red-500"
-                  : "border-yellow-500/20"
-              } text-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 outline-none`}
+                  : "border-gray-300 dark:border-[#2B3143]"
+                }
+                text-[#1A1A1A] dark:text-white
+                focus:ring-2 focus:ring-[#4A6CF7]
+              `}
             />
             <span
-              className="absolute right-3 top-3 cursor-pointer text-gray-400 hover:text-yellow-400"
+              className="absolute right-3 top-3 cursor-pointer text-gray-500 dark:text-gray-300"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             >
               {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
           {errors.confirmPassword && (
-            <p className="text-red-400 text-sm">{errors.confirmPassword.message}</p>
+            <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>
           )}
 
-        {/* ReCAPTCHA */}
-<div className="w-full flex justify-center">
-  <div className="recaptcha-wrapper">
-    <ReCAPTCHA
-      sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-      onChange={setCaptchaValue}
-    />
-  </div>
-</div>
+          {/* CAPTCHA */}
+          <div className="flex justify-center">
+            <ReCAPTCHA
+              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+              onChange={setCaptchaValue}
+            />
+          </div>
 
-
-          {/* Submit Button */}
+          {/* BUTTON */}
           <button
             onClick={handleSubmit(onSubmit)}
-            className="w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-semibold shadow-[0_0_20px_rgba(255,221,64,0.4)] hover:shadow-[0_0_25px_rgba(255,221,64,0.6)] transition"
+            className="
+              w-full py-3 mt-2 rounded-xl 
+              bg-[#4A6CF7] hover:bg-[#3D5DE0]
+              text-white font-semibold 
+              transition shadow-md
+            "
           >
             {loading ? "Signing up..." : "Sign Up"}
           </button>
 
-          {/* Already have account */}
-          <p className="text-center text-gray-400 mt-4">
+          {/* Login link */}
+          <p className="text-center text-gray-600 dark:text-[#A0AEC3] mt-4">
             Already have an account?{" "}
-            <a href="/auth/login" className="text-yellow-400 font-semibold">
+            <a href="/auth/login" className="text-[#4A6CF7] font-semibold hover:underline">
               Login
             </a>
           </p>
@@ -226,7 +257,7 @@ export default function SignupForm() {
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center text-yellow-400"
+              className="text-center text-[#16D1A5]"
             >
               {message}
             </motion.p>

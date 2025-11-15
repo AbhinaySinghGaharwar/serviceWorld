@@ -3,8 +3,7 @@
 'use server'
 
 import React from 'react'
-import Header from './components/Header'
-import Footer from './components/Footer'
+
 import WhyChooseUs from './components/WhyChooseUs'
 import MainTop from './components/MainTop'
 import PaymentMethods from './components/PaymentMethods'
@@ -21,12 +20,13 @@ const websiteName=result.sietName
 
   return (
 <>
- <Header logo={logo}/>
+
       <MainTop websiteName={websiteName}/>
       <WhyChooseUs/>
       <HowItWorks/>
       <FaqSection/>
       <PaymentMethods/>
+
 </>
      
 

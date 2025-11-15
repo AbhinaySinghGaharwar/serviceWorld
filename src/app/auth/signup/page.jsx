@@ -1,7 +1,5 @@
 "use client";
 
-import Navbar from "@/app/components/Header";
-import Footer from "../../components/Footer";
 import SignupForm from "@/app/user/components/Signup";
 export default function SignupPage() {
   return (
@@ -10,9 +8,9 @@ export default function SignupPage() {
     <div className="w-[450px] h-[450px] bg-gradient-to-br from-yellow-600 via-yellow-400 to-yellow-700 blur-3xl rounded-full opacity-20 absolute top-1/3 left-1/3" />
   </div>
 
-  <Navbar/>
+ 
       <SignupForm />
-      <Footer/>
+
 </div>
 
      

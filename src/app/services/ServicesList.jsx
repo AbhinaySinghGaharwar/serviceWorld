@@ -10,9 +10,11 @@ import {
   FaTelegramPlane,
   FaGlobe,
 } from "react-icons/fa";
+
 import SearchBar from "./SearchBar";
 import ServiceCard from "./ServiceCard";
 import BuyPopup from "./BuyPopup";
+
 
 export default function ServicesList({ services = [] }) {
   const [selectedService, setSelectedService] = useState(null);
@@ -20,7 +22,7 @@ export default function ServicesList({ services = [] }) {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [loadingSearch, setLoadingSearch] = useState(false);
 
-  // 🔹 Group services by platform
+  // Group by platform
   const groupedServices = useMemo(() => {
     const groups = {
       Instagram: [],
@@ -46,7 +48,7 @@ export default function ServicesList({ services = [] }) {
     );
   }, [services]);
 
-  // 🔹 Debounce search
+  // Debounce
   useEffect(() => {
     setLoadingSearch(true);
     const timer = setTimeout(() => {
@@ -56,7 +58,7 @@ export default function ServicesList({ services = [] }) {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // 🔹 Filter services
+  // Filter services
   const filteredGroupedServices = useMemo(() => {
     const filtered = {};
     for (const [category, list] of Object.entries(groupedServices)) {
@@ -72,79 +74,112 @@ export default function ServicesList({ services = [] }) {
     return filtered;
   }, [groupedServices, debouncedSearch]);
 
-  // 🔹 Icons
+  // Icons (recolored to new theme)
   const getIconForService = (name = "") => {
     const lower = name.toLowerCase();
+
     if (lower.includes("instagram"))
-      return <FaInstagram className="text-pink-500 text-2xl" />;
+      return <FaInstagram className="text-[#E1306C] text-2xl" />;
+
     if (lower.includes("youtube"))
-      return <FaYoutube className="text-red-500 text-2xl" />;
+      return <FaYoutube className="text-[#FF0000] text-2xl" />;
+
     if (lower.includes("facebook"))
-      return <FaFacebook className="text-blue-500 text-2xl" />;
+      return <FaFacebook className="text-[#1877F2] text-2xl" />;
+
     if (lower.includes("tiktok"))
-      return <FaTiktok className="text-gray-300 text-2xl" />;
+      return <FaTiktok className="text-white text-2xl" />;
+
     if (lower.includes("telegram"))
-      return <FaTelegramPlane className="text-sky-500 text-2xl" />;
-    return <FaGlobe className="text-emerald-400 text-2xl" />;
+      return <FaTelegramPlane className="text-[#2AABEE] text-2xl" />;
+
+    return <FaGlobe className="text-[#16D1A5] text-2xl" />;
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0f] text-gray-100 flex justify-center px-3 md:px-8 py-10">
-      <div className="w-full max-w-[1200px]">
-        <h1 className="text-3xl md:text-4xl font-bold text-center mb-10 text-yellow-400">
-          💎 Available Services
-        </h1>
+    <>
+ 
 
-        <SearchBar
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          loadingSearch={loadingSearch}
-        />
+      <div className="
+        min-h-screen flex justify-center px-3 md:px-8 py-10
+        bg-[#F5F7FA] text-[#1A1A1A]
+        dark:bg-[#0F1117] dark:text-white
+      ">
+        <div className="w-full max-w-[1200px]">
 
-        {Object.keys(filteredGroupedServices).length === 0 ? (
-          <p className="text-center text-gray-400">
-            No matching services found.
-          </p>
-        ) : (
-          Object.entries(filteredGroupedServices).map(([category, list]) => (
-            <motion.div
-              key={category}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mb-10"
-            >
-              <div className="flex items-center gap-2 mb-4">
-                {getIconForService(category)}
-                <h2 className="text-xl md:text-2xl font-semibold text-yellow-400">
-                  {category}
-                </h2>
-                <span className="text-sm text-gray-500">({list.length})</span>
-              </div>
+          {/* Heading */}
+          <h1
+            className="
+              text-3xl md:text-4xl font-bold text-center mb-10
+              text-[#4A6CF7]
+              dark:text-[#4A6CF7]
+            "
+          >
+            💎 Available Services
+          </h1>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {list.map((service, index) => (
-                  <ServiceCard
-                    key={service.service || index}
-                    service={service}
-                    getIconForService={getIconForService}
-                    onSelect={setSelectedService}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          ))
-        )}
+          {/* Search bar */}
+          <SearchBar
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            loadingSearch={loadingSearch}
+          />
 
-        <AnimatePresence>
-          {selectedService && (
-            <BuyPopup
-              selectedService={selectedService}
-              setSelectedService={setSelectedService}
-            />
+          {/* No results */}
+          {Object.keys(filteredGroupedServices).length === 0 ? (
+            <p className="text-center text-[#4B5563] dark:text-[#A0AEC3]">
+              No matching services found.
+            </p>
+          ) : (
+            Object.entries(filteredGroupedServices).map(
+              ([category, list]) => (
+                <motion.div
+                  key={category}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="mb-10"
+                >
+                  {/* Category label */}
+                  <div className="flex items-center gap-2 mb-4">
+                    {getIconForService(category)}
+
+                    <h2 className="text-xl md:text-2xl font-semibold text-[#4A6CF7]">
+                      {category}
+                    </h2>
+
+                    <span className="text-sm text-[#4B5563] dark:text-[#A0AEC3]">
+                      ({list.length})
+                    </span>
+                  </div>
+
+                  {/* Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {list.map((service, index) => (
+                      <ServiceCard
+                        key={service.service || index}
+                        service={service}
+                        getIconForService={getIconForService}
+                        onSelect={setSelectedService}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              )
+            )
           )}
-        </AnimatePresence>
+
+          {/* Popup */}
+          <AnimatePresence>
+            {selectedService && (
+              <BuyPopup
+                selectedService={selectedService}
+                setSelectedService={setSelectedService}
+              />
+            )}
+          </AnimatePresence>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

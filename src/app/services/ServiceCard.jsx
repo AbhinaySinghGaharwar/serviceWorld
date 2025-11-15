@@ -1,30 +1,55 @@
 export default function ServiceCard({ service, getIconForService, onSelect }) {
   return (
-    <div className="bg-[#151517] border border-yellow-500/20 rounded-2xl p-5 transition-all duration-300 hover:border-yellow-400 hover:shadow-[0_0_10px_rgba(234,179,8,0.2)]">
+    <div
+      className="
+        bg-white dark:bg-[#1A1F2B]
+        border border-gray-200 dark:border-[#2B3143]
+        rounded-2xl p-5 
+        transition-all duration-300 
+        hover:border-[#4A6CF7] 
+        hover:shadow-lg hover:shadow-[#4A6CF7]/20
+      "
+    >
       <div>
+        {/* Title + Icon */}
         <div className="flex items-center gap-3 mb-3">
           {getIconForService(service.name)}
-          <h3 className="text-lg font-semibold text-gray-100">
+          <h3 className="text-lg font-semibold text-[#1A1A1A] dark:text-white">
             {service.name}
           </h3>
         </div>
-        <p className="text-sm text-gray-400 mb-1">
-          <strong className="text-yellow-400">ID:</strong> {service.service}
+
+        {/* ID */}
+        <p className="text-sm text-[#4B5563] dark:text-[#A0AEC3] mb-1">
+          <strong className="text-[#4A6CF7]">ID:</strong> {service.service}
         </p>
-        <p className="text-sm text-gray-400 mb-1">
-          <strong className="text-yellow-400">Rate / 1K:</strong> ${service.rate}
+
+        {/* Rate */}
+        <p className="text-sm text-[#4B5563] dark:text-[#A0AEC3] mb-1">
+          <strong className="text-[#16D1A5]">Rate / 1K:</strong> ${service.rate}
         </p>
-        <p className="text-sm text-gray-400 mb-1">
-          <strong className="text-yellow-400">Min:</strong> {service.min}
+
+        {/* Min */}
+        <p className="text-sm text-[#4B5563] dark:text-[#A0AEC3] mb-1">
+          <strong className="text-[#16D1A5]">Min:</strong> {service.min}
         </p>
-        <p className="text-sm text-gray-400 mb-1">
-          <strong className="text-yellow-400">Max:</strong> {service.max}
+
+        {/* Max */}
+        <p className="text-sm text-[#4B5563] dark:text-[#A0AEC3] mb-1">
+          <strong className="text-[#16D1A5]">Max:</strong> {service.max}
         </p>
       </div>
 
+      {/* Buy Button */}
       <button
         onClick={() => onSelect(service)}
-        className="mt-4 w-full px-4 py-2 rounded-md bg-yellow-500/10 border border-yellow-500/40 text-yellow-400 font-semibold hover:bg-yellow-500/20 hover:border-yellow-400 transition"
+        className="
+          mt-4 w-full px-4 py-2 rounded-md 
+          bg-[#4A6CF7] text-white 
+          font-semibold
+          hover:bg-[#3D5DE0]
+          transition shadow-md
+        "
       >
         Buy
       </button>

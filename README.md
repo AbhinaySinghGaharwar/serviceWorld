@@ -12,17 +12,18 @@
 
 
 
-Background → bg-[#0e0e0f]
-
-Card background → bg-[#151517]
-
-Border → border-yellow-500/20
-
-Accent text → text-yellow-400
-
-Typography → consistent bold section titles, text-gray-300 body text
-
-Buttons → dark yellow hover glow
+🌞 Light Mode ()
+Background: #F5F7FA (very light grey)
+Primary Color: #4A6CF7 (premium blue)
+Accent: #16D1A5 (green)
+Text: #1A1A1A (dark black)
+Cards: #FFFFFF (with soft shadow)
+🌙 Dark Mode (optional sexy look)
+Background: #0F1117
+Card: #1A1F2B
+Primary: #4A6CF7
+Accent: #16D1A5
+Text: #FFFFFF / #A0AEC3 (secondary)
 
 
 
