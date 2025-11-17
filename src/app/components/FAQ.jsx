@@ -1,10 +1,7 @@
-// Updated FAQ Section with Light/Dark Theme System
 "use client";
-
-import { motion } from "framer-motion";
 import Link from "next/link";
 
-export default function FaqSection() {
+export default function FaqSection({dark=false}) {
   const faqs = [
     {
       q: "What is SMM PANEL?",
@@ -48,45 +45,13 @@ export default function FaqSection() {
   return (
     <section
       id="faqSection"
-      className="relative py-20 px-6 bg-[#F5F7FA] dark:bg-[#0F1117] text-[#1A1A1A] dark:text-white"
+      className="py-20 px-6 bg-[#F5F7FA] dark:bg-[#0F1117] text-[#1A1A1A] dark:text-white transition-colors"
     >
-      {/* Floating Blue Particles */}
-      <div className="absolute inset-0 -z-10 pointer-events-none">
-        {[...Array(50)].map((_, i) => {
-          const size = Math.random() * 3 + 2;
-          const startX = Math.random() * 100;
-          const startY = Math.random() * 100;
-          const endX = Math.random() * 100;
-          const endY = Math.random() * 100;
-
-          return (
-            <motion.span
-              key={i}
-              initial={{ opacity: 0, x: `${startX}vw`, y: `${startY}vh` }}
-              animate={{
-                opacity: [0.15, 0.8, 0.15],
-                x: [`${startX}vw`, `${endX}vw`, `${startX}vw`],
-                y: [`${startY}vh`, `${endY}vh`, `${startY}vh`],
-              }}
-              transition={{ duration: 12 + Math.random() * 6, repeat: Infinity, ease: "linear" }}
-              className="absolute bg-[#4A6CF7] rounded-full blur-[2px]"
-              style={{ width: size, height: size }}
-            />
-          );
-        })}
-      </div>
-
-      {/* Blue Glow Background */}
-      <div className="absolute -top-32 -right-32 w-[400px] h-[400px] bg-[#4A6CF7]/20 rounded-full blur-[130px] opacity-30 -z-10"></div>
-
+      {/* Heading */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+
         {/* Left Content */}
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7 }}
-          className="space-y-6"
-        >
+        <div className="space-y-6">
           <h2 className="text-3xl md:text-4xl font-bold text-[#4A6CF7] leading-snug">
             Frequently Asked Questions
           </h2>
@@ -94,7 +59,7 @@ export default function FaqSection() {
           <p className="text-[#4A5568] dark:text-[#A0AEC3] text-base leading-relaxed">
             Our SMM Panel allows you to purchase real engagement including
             followers, likes, views, and more.
-            Here are answers to the most common questions to help you understand how the {" "}
+            Here are answers to the most common questions to help you understand how the{" "}
             <span className="font-semibold text-[#4A6CF7]">Cheapest SMM Panel</span> works.
           </p>
 
@@ -104,16 +69,16 @@ export default function FaqSection() {
           >
             View All FAQ
           </Link>
-        </motion.div>
+        </div>
 
         {/* Right Accordion */}
-        <motion.div initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
+        <div>
           <div className="space-y-4">
             {faqs.map((item, i) => (
               <Accordion key={i} question={item.q} answer={item.a} />
             ))}
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
@@ -126,7 +91,9 @@ function Accordion({ question, answer }) {
       {/* Header */}
       <summary className="flex justify-between items-center cursor-pointer bg-white dark:bg-[#1A1F2B] hover:bg-[#F5F7FA] dark:hover:bg-[#161A23] px-5 py-4 font-semibold text-[#1A1A1A] dark:text-white transition-all">
         {question}
-        <span className="transition-transform group-open:rotate-180 text-[#4A6CF7]">▼</span>
+        <span className="transition-transform group-open:rotate-180 text-[#4A6CF7]">
+          ▼
+        </span>
       </summary>
 
       {/* Body */}

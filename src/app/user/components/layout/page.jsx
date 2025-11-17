@@ -91,6 +91,7 @@ export default function Page({
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
         user={user}
+        darkMode={darkMode}
       />
 
       {/* 🔹 MAIN CONTENT */}

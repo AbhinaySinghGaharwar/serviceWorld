@@ -320,7 +320,8 @@ function Select({ label, options }) {
 }
 
 /* 🔹 Neon Button */
-function NeonButton({ text, onClick }) {
+function NeonButton({ text, 
+  onClick }) {
   return (
     <button
       onClick={onClick}

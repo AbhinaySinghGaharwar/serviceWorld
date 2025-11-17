@@ -13,8 +13,10 @@ export default function Sidebar({
   setIsSidebarOpen,
   user,
   menuItems,
-  darkMode = true,
+  darkMode = false,
 }) {
+ 
+
   const router = useRouter();
   const pathname = usePathname();
   const fileInputRef = useRef(null);

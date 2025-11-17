@@ -6,6 +6,7 @@ import Footer from "./Footer";
 
 export default function LayoutWrapper({ children, logo, siteName }) {
   const pathname = usePathname();
+ 
 
   // hide on /user/* and /admin/*
   const hide =
@@ -13,7 +14,7 @@ export default function LayoutWrapper({ children, logo, siteName }) {
 
   return (
     <>
-      {!hide && <Navbar logo={logo} />}
+      {!hide && <Navbar logo={logo}  />}
       {children}
       {!hide && <Footer siteName={siteName} />}
     </>

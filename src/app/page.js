@@ -11,12 +11,14 @@ import FaqSection from './components/FAQ'
 import HowItWorks from './components/HowItWork'
 import { getWebsiteSettings } from '@/lib/adminServices'
 
+
 export default async function Home() {
 
 const data= await getWebsiteSettings()
 const result = JSON.parse(data.plainsettings)
 const logo=result.logo
 const websiteName=result.sietName
+
 
   return (
 <>

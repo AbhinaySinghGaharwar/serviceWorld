@@ -23,10 +23,8 @@ export default async function RootLayout({ children }) {
   const settings = JSON.parse(res.plainsettings);
 
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="en" className="" suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <LayoutWrapper logo={settings.logo} siteName={settings.siteName}>
           {children}
         </LayoutWrapper>
