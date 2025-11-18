@@ -2,7 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getWebsiteSettings } from "@/lib/adminServices";
 import LayoutWrapper from "./components/LayoutWrapper";
-
+import { CurrencyProvider } from "@/context/CurrencyContext";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -25,9 +25,11 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en" className="" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <LayoutWrapper logo={settings.logo} siteName={settings.siteName}>
+       <CurrencyProvider>
+         <LayoutWrapper logo={settings.logo} siteName={settings.siteName}>
           {children}
         </LayoutWrapper>
+       </CurrencyProvider>
       </body>
     </html>
   );

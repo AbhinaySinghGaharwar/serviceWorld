@@ -4,7 +4,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
+import BalanceDisplay from "./BalanceDisplay";
 import { FaBars, FaSun, FaMoon, FaUserCircle } from "react-icons/fa";
 import { FiSettings, FiLogOut } from "react-icons/fi";
 
@@ -99,17 +99,8 @@ export default function Header({
         </button>
 
         {/* Balance */}
-        {user?.balance != null && (
-          <div className="hidden sm:flex flex-col items-end">
-            <span className="text-sm dark:text-gray-300 text-gray-500">
-              Balance
-            </span>
-            <span className="text-lg font-bold text-green-500">
-              {currency === "USD" ? "$" : "₹"}
-              {Number(user.balance).toFixed(2)}
-            </span>
-          </div>
-        )}
+       
+       <BalanceDisplay balance={user?.balance} />
 
         {/* Profile Button */}
         <button

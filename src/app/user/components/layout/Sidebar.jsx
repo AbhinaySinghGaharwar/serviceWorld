@@ -7,18 +7,20 @@ import { logoutUser } from "@/lib/authentication";
 import { uploadProfilePicture } from "@/lib/userActions";
 import { usePathname, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-
+import useCurrency from "@/hooks/useCurrency";
+import UserBalance from "./UserBalance";
 export default function Sidebar({
   isSidebarOpen,
   setIsSidebarOpen,
   user,
   menuItems,
 }) {
+  const { currency, updateCurrency } = useCurrency();
   const router = useRouter();
   const pathname = usePathname();
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
-  const [currency, setCurrency] = useState("INR");
+ 
 
   // Upload profile pic
   const handleImageChange = async (e) => {
@@ -112,30 +114,8 @@ export default function Sidebar({
           {user?.username || "Guest"}
         </h2>
 
-        {/* Balance + Currency */}
-        <div className="flex items-center gap-3">
-          {user?.balance != null && (
-            <p className="text-sm text-gray-500 dark:text-gray-300">
-              Balance: {currency === "USD" ? "$" : "₹"}
-              {Number(user.balance).toFixed(2)}
-            </p>
-          )}
-
-          {/* Currency Selector */}
-          <select
-            value={currency}
-            onChange={(e) => setCurrency(e.target.value)}
-            className="
-              rounded-lg px-3 py-1 text-sm focus:outline-none
-              bg-white text-gray-700 border border-gray-300 focus:border-gray-500
-              dark:bg-[#1A1F2B] dark:text-gray-300 dark:border-gray-700 dark:focus:border-gray-500
-            "
-          >
-            <option value="INR">INR ₹</option>
-            <option value="USD">USD $</option>
-            <option value="EUR">EUR €</option>
-          </select>
-        </div>
+      {/* Balance + Currency */}
+<UserBalance user={user}/>
       </div>
 
       {/* Menu Items */}
