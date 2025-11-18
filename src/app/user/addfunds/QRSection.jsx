@@ -11,7 +11,7 @@ export default function QRSection({
 }) {
   const [expanded, setExpanded] = useState(false);
 
-  // Helper: truncate instructions
+  // Truncate text helper
   const renderInstructionText = (text) => {
     const limit = 120;
     if (text.length <= limit) return text;
@@ -20,16 +20,10 @@ export default function QRSection({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-      
+
       {/* 📌 QR SECTION */}
-      <div
-        className={`
-          ${bgMain} border ${borderColor} p-4 rounded-2xl 
-          shadow-[0_0_12px_rgba(74,108,247,0.25)] 
-          flex flex-col items-center
-        `}
-      >
-        <h6 className={`font-semibold text-[#4A6CF7] mb-3 drop-shadow-[0_0_6px_rgba(74,108,247,0.5)]`}>
+      <div className="flex flex-col items-center">
+        <h6 className="font-semibold text-gray-700 dark:text-gray-200 mb-3">
           Scan QR
         </h6>
 
@@ -37,35 +31,49 @@ export default function QRSection({
           <img
             src={`data:image/png;base64,${filteredPaymentMethod}`}
             alt="QR Code"
-            className="w-40 sm:w-52 h-auto rounded-lg shadow-[0_0_15px_rgba(74,108,247,0.25)]"
+            className="
+              w-80 sm:w-52 h-auto rounded-lg
+              shadow-md shadow-gray-400/30
+              dark:shadow-gray-900/40
+            "
           />
         ) : (
-          <p className="text-center text-gray-500 text-sm">No QR available</p>
+          <p className="text-center text-gray-500 text-sm dark:text-gray-400">
+            No QR available
+          </p>
         )}
       </div>
 
       {/* 📘 INSTRUCTIONS */}
       <div
         className={`
-          ${bgMain} border ${borderColor} rounded-xl 
-          p-4 text-sm shadow-[0_0_10px_rgba(74,108,247,0.15)]
+          ${bgMain || "bg-gray-50 dark:bg-[#1A1F2B]"} 
+          border ${borderColor || "border-gray-300 dark:border-[#2B3143]"} 
+          rounded-xl p-4 text-sm
+          shadow-md shadow-gray-400/20 dark:shadow-black/20
         `}
       >
-        <h6 className="font-semibold text-[#4A6CF7] mb-2 drop-shadow-[0_0_6px_rgba(74,108,247,0.5)]">
+        <h6 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">
           Instructions
         </h6>
 
-        <ol className="list-decimal list-inside space-y-1 text-gray-400">
+        <ol className="list-decimal list-inside space-y-1 text-gray-700 dark:text-gray-300">
+
           {Instructions ? (
             Array.isArray(Instructions) ? (
               Instructions.map((inst, i) => (
-                <li key={i} className="font-medium text-gray-300">
+                <li key={i} className="font-medium">
                   {inst.length > 120 ? (
                     <>
                       {renderInstructionText(inst)}
                       <button
                         onClick={() => setExpanded((prev) => !prev)}
-                        className="text-[#4A6CF7] ml-1 underline hover:text-[#3C59D4] transition"
+                        className="
+                          ml-1 underline underline-offset-2
+                          text-gray-600 dark:text-gray-300
+                          hover:text-gray-800 dark:hover:text-gray-100
+                          transition
+                        "
                       >
                         {expanded ? "Show less" : "Read more"}
                       </button>
@@ -76,12 +84,18 @@ export default function QRSection({
                 </li>
               ))
             ) : (
-              <li className="font-medium text-gray-300">
+              <li className="font-medium">
                 {renderInstructionText(Instructions)}
+
                 {Instructions.length > 120 && (
                   <button
                     onClick={() => setExpanded((prev) => !prev)}
-                    className="text-[#4A6CF7] ml-1 underline hover:text-[#3C59D4]"
+                    className="
+                      ml-1 underline underline-offset-2
+                      text-gray-600 dark:text-gray-300
+                      hover:text-gray-800 dark:hover:text-gray-100
+                      transition
+                    "
                   >
                     {expanded ? "Show less" : "Read more"}
                   </button>
@@ -95,6 +109,7 @@ export default function QRSection({
               <li>Enter the UTR number below after payment.</li>
             </>
           )}
+
         </ol>
       </div>
     </div>

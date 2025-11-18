@@ -1,57 +1,93 @@
+import { MdShoppingCart, MdInfoOutline } from "react-icons/md";
+import { useState } from "react";
+import ServiceDetailsPopup from "./ServiceDetailsPopup";
+
 export default function ServiceCard({ service, getIconForService, onSelect }) {
+  const [showDetails, setShowDetails] = useState(false);
+
   return (
     <div
       className="
-        bg-[#1A1F2B]
-        border border-[#2B3143]
+        bg-white dark:bg-[#1A1F2B]
+        border border-gray-300 dark:border-[#2B3143]
         rounded-2xl 
         p-5 
         transition-all duration-300
-        hover:border-[#4A6CF7]
-        hover:shadow-[0_0_18px_rgba(74,108,247,0.25)]
+        hover:border-gray-400 dark:hover:border-gray-500
+        hover:shadow-md
       "
     >
-      <div>
-        {/* Icon + Name */}
-        <div className="flex items-center gap-3 mb-3">
-          {getIconForService(service.name)}
-          <h3 className="text-lg font-semibold text-gray-100">
-            {service.name}
-          </h3>
-        </div>
+      {/* Popup */}
+      {showDetails && (
+        <ServiceDetailsPopup
+          service={service}
+          onClose={() => setShowDetails(false)}
+        />
+      )}
 
-        {/* Details */}
-        <p className="text-sm text-gray-400 mb-1">
-          <strong className="text-[#4A6CF7]">ID:</strong> {service.service}
-        </p>
-
-        <p className="text-sm text-gray-400 mb-1">
-          <strong className="text-[#4A6CF7]">Rate / 1K:</strong> ${service.rate}
-        </p>
-
-        <p className="text-sm text-gray-400 mb-1">
-          <strong className="text-[#4A6CF7]">Min:</strong> {service.min}
-        </p>
-
-        <p className="text-sm text-gray-400 mb-1">
-          <strong className="text-[#4A6CF7]">Max:</strong> {service.max}
-        </p>
+      {/* Top Section */}
+      <div className="flex items-center gap-3 mb-3">
+        {getIconForService(service.name)}
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+          {service.name}
+        </h3>
       </div>
 
-      {/* Buy Button */}
-      <button
-        onClick={() => onSelect(service)}
-        className="
-          mt-4 w-full px-4 py-2 rounded-md 
-          bg-gradient-to-r from-[#4A6CF7] to-[#16D1A5]
-          text-black font-semibold
-          transition-all duration-300
-          hover:opacity-90
-          hover:shadow-[0_0_15px_rgba(74,108,247,0.45)]
-        "
-      >
-        Buy
-      </button>
+      {/* Details */}
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+        <strong className="text-gray-800 dark:text-gray-200">ID:</strong> {service.service}
+      </p>
+
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+        <strong className="text-gray-800 dark:text-gray-200">Rate / 1K:</strong> ₹{service.rate}
+      </p>
+
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+        <strong className="text-gray-800 dark:text-gray-200">Min:</strong> {service.min}
+      </p>
+
+      <p className="text-sm text-gray-600 dark:text-gray-400">
+        <strong className="text-gray-800 dark:text-gray-200">Max:</strong> {service.max}
+      </p>
+
+      {/* FULL-WIDTH BUTTONS */}
+      <div className="flex flex-row gap-3 mt-4">
+
+        {/* DETAILS BUTTON */}
+        <button
+          onClick={() => setShowDetails(true)}
+          className="
+            w-full py-2 px-2 rounded-lg
+            bg-gray-200 dark:bg-gray-700
+            text-gray-800 dark:text-gray-200
+            font-semibold
+            hover:bg-gray-300 dark:hover:bg-gray-600
+            transition shadow-sm
+            flex items-center justify-center gap-2
+          "
+        >
+          <MdInfoOutline size={18} />
+          Details
+        </button>
+
+        {/* BUY NOW BUTTON */}
+        <button
+          onClick={() => onSelect(service)}
+          className="
+            w-full py-2 px-2 rounded-lg
+            bg-gray-800 dark:bg-gray-700
+            text-white 
+            font-semibold
+            hover:bg-gray-700 dark:hover:bg-gray-600
+            transition shadow-sm
+            flex items-center justify-center gap-2
+          "
+        >
+          <MdShoppingCart size={20} />
+          Buy Now
+        </button>
+
+      </div>
     </div>
   );
 }

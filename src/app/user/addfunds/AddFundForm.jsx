@@ -14,17 +14,9 @@ export default function AddFundForm({
   loading,
   setLoading,
   setPopup,
-  darkMode,
   Instructions,
 }) {
   const router = useRouter();
-
-  // 🎨 THEME COLORS
-  const bgMain = darkMode ? "bg-[#0C0F17]" : "bg-gray-100";
-  const bgCard = darkMode ? "bg-[#1A1F2B]" : "bg-white";
-  const borderColor = darkMode ? "border-[#4A6CF7]/20" : "border-gray-300";
-  const textColor = darkMode ? "text-gray-200" : "text-gray-900";
-  const headingColor = darkMode ? "text-[#4A6CF7]" : "text-[#4A6CF7]";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -54,7 +46,6 @@ export default function AddFundForm({
         setUtr("");
         setAmount("");
         router.reload();
-
       } else {
         setPopup({
           visible: true,
@@ -63,7 +54,7 @@ export default function AddFundForm({
           transaction: null,
         });
       }
-    } catch (err) {
+    } catch {
       setPopup({
         visible: true,
         success: false,
@@ -77,9 +68,14 @@ export default function AddFundForm({
 
   return (
     <div
-      className={`${bgCard} border ${borderColor} rounded-2xl shadow-[0_0_20px_rgba(74,108,247,0.1)] p-5 md:p-8`}
+      className="
+        bg-white dark:bg-[#1A1F2B]
+        border border-gray-300 dark:border-[#2B3143]
+        rounded-2xl shadow-md
+        p-5 md:p-8
+      "
     >
-      <h3 className={`text-2xl font-bold ${headingColor} mb-6`}>
+      <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-6">
         Add Funds
       </h3>
 
@@ -87,69 +83,93 @@ export default function AddFundForm({
 
         {/* Payment Method */}
         <div>
-          <label className="block font-semibold mb-2">Payment Method</label>
+          <label className="block font-semibold mb-2 text-gray-700 dark:text-gray-300">
+            Payment Method
+          </label>
+
           <select
-            className={`w-full ${bgMain} border ${borderColor} rounded-lg px-3 py-2 ${textColor} 
-            focus:ring-2 focus:ring-[#4A6CF7] outline-none`}
+            className="
+              w-full bg-gray-100 dark:bg-[#0C0F17]
+              border border-gray-300 dark:border-[#2B3143]
+              rounded-lg px-3 py-2
+              text-gray-800 dark:text-gray-200
+              outline-none
+              focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600
+            "
             value={paymentType}
             onChange={(e) => setPaymentType(e.target.value)}
           >
-            {paymentMethods &&
-              paymentMethods.map((item) => (
-                <option key={item._id} value={item.Name}>
-                  {item.Name || item.type}
-                </option>
-              ))}
+            {paymentMethods?.map((item) => (
+              <option key={item._id} value={item.Name}>
+                {item.Name || item.type}
+              </option>
+            ))}
           </select>
         </div>
 
         {/* QR Section */}
         <QRSection
-          darkMode={darkMode}
           filteredPaymentMethod={filteredPaymentMethod}
-          headingColor={headingColor}
-          borderColor={borderColor}
-          bgMain={bgMain}
           Instructions={Instructions}
         />
 
-        {/* UTR Input */}
+        {/* UTR */}
         <div>
-          <label className="block font-semibold mb-2">Enter UTR</label>
+          <label className="block font-semibold mb-2 text-gray-700 dark:text-gray-300">
+            Enter UTR
+          </label>
           <input
             type="text"
             value={utr}
             onChange={(e) => setUtr(e.target.value)}
             required
-            className={`w-full ${bgMain} border ${borderColor} rounded-lg px-3 py-2 ${textColor}
-            focus:ring-2 focus:ring-[#4A6CF7] outline-none`}
+            className="
+              w-full bg-gray-100 dark:bg-[#0C0F17]
+              border border-gray-300 dark:border-[#2B3143]
+              rounded-lg px-3 py-2
+              text-gray-800 dark:text-gray-200
+              outline-none
+              focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600
+            "
           />
         </div>
 
         {/* Amount */}
         <div>
-          <label className="block font-semibold mb-2">Amount</label>
+          <label className="block font-semibold mb-2 text-gray-700 dark:text-gray-300">
+            Amount
+          </label>
           <input
             type="number"
             step="0.01"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             required
-            className={`w-full ${bgMain} border ${borderColor} rounded-lg px-3 py-2 ${textColor}
-            focus:ring-2 focus:ring-[#4A6CF7] outline-none`}
+            className="
+              w-full bg-gray-100 dark:bg-[#0C0F17]
+              border border-gray-300 dark:border-[#2B3143]
+              rounded-lg px-3 py-2
+              text-gray-800 dark:text-gray-200
+              outline-none
+              focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600
+            "
           />
         </div>
 
-        {/* Submit Button */}
+        {/* Submit */}
         <button
           type="submit"
           disabled={loading}
-          className={`
-            w-full py-3 rounded-xl font-bold text-white 
-            bg-[#4A6CF7] hover:bg-[#3C59D4] 
-            transition shadow-[0_0_12px_rgba(74,108,247,0.3)]
-            ${loading ? "opacity-60 cursor-not-allowed" : ""}
-          `}
+          className="
+            w-full py-3 rounded-xl font-bold
+            text-white
+            bg-gray-800 dark:bg-gray-200 
+            dark:text-black
+            hover:bg-gray-700 dark:hover:bg-gray-300
+            transition
+            shadow-md
+            disabled:opacity-60 disabled:cursor-not-allowed
+          "
         >
           {loading ? "Verifying..." : "Verify Transaction"}
         </button>
