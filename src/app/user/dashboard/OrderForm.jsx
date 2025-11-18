@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { FaSearch, FaSpinner } from "react-icons/fa";
 import { MdReceipt, MdAccessTime } from "react-icons/md";
 import { createOrderAction } from "@/lib/userActions";
+import QuickActions from "./QuickActions";
 
 export default function OrderForm({ selectedCategory }) {
   const [category, setCategory] = useState(selectedCategory);
@@ -29,6 +30,7 @@ export default function OrderForm({ selectedCategory }) {
   const dropdownRef = useRef(null);
   const categoryRef = useRef(null);
   const searchRef = useRef(null);
+  
 
   // Load all services
   useEffect(() => {
@@ -148,17 +150,20 @@ export default function OrderForm({ selectedCategory }) {
   };
 
   return (
-    <div className="w-full min-h-screen flex justify-center py-8 px-3 sm:px-6 lg:px-8">
+    <div className="w-full min-h-screen flex justify-center py-8  sm:px-6 lg:px-8">
+      
       <div
         className="
         w-full max-w-4xl 
         bg-white dark:bg-[#1A1F2B]
         border border-gray-300 dark:border-[#2B3143] 
         rounded-2xl shadow-lg
-        p-6 sm:p-8
+        py-6 sm:p-8
+        px-2
         transition-all duration-300
       "
       >
+      
         {/* Title */}
         <h2
           className="
@@ -171,9 +176,10 @@ export default function OrderForm({ selectedCategory }) {
         >
           <MdReceipt size={38} /> Place Order
         </h2>
+         <QuickActions/>
 
         {/* FORM */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* SEARCH */}
           <div className="relative" ref={searchRef}>
             <FaSearch
@@ -188,7 +194,7 @@ export default function OrderForm({ selectedCategory }) {
                 setSearchDropdownOpen(true);
               }}
               className="
-              w-full pl-10 pr-3 py-3 rounded-lg 
+              w-full pl-10 pr-3 py-2 rounded-lg 
               bg-gray-100 dark:bg-[#0F1117]
               border border-gray-300 dark:border-[#2B3143]
               text-[#1A1A1A] dark:text-white
@@ -251,7 +257,7 @@ export default function OrderForm({ selectedCategory }) {
               className="
               bg-gray-100 dark:bg-[#0F1117]
               border border-gray-300 dark:border-[#2B3143]
-              p-3 rounded-lg cursor-pointer
+              px-3 py-2 rounded-lg cursor-pointer
             "
               onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
             >
@@ -296,7 +302,7 @@ export default function OrderForm({ selectedCategory }) {
               className="
               bg-gray-100 dark:bg-[#0F1117]
               border border-gray-300 dark:border-[#2B3143]
-              p-3 rounded-lg cursor-pointer
+              px-3 py-2  rounded-lg cursor-pointer
             "
               onClick={() => setDropdownOpen(!dropdownOpen)}
             >
@@ -366,7 +372,7 @@ export default function OrderForm({ selectedCategory }) {
             <input
               type="text"
               className="
-              w-full p-3 rounded-lg
+              w-full px-3 py-2  rounded-lg
               bg-gray-100 dark:bg-[#0F1117]
               border border-gray-300 dark:border-[#2B3143]
               text-[#1A1A1A] dark:text-white
@@ -390,7 +396,7 @@ export default function OrderForm({ selectedCategory }) {
               onChange={(e) => setQuantity(e.target.value)}
               placeholder="Enter quantity"
               className={`
-              w-full p-3 rounded-lg
+              w-full px-3 py-2  rounded-lg
               bg-gray-100 dark:bg-[#0F1117]
               border 
               ${
@@ -417,7 +423,7 @@ export default function OrderForm({ selectedCategory }) {
               value={charge ? `₹${charge}` : ""}
               readOnly
               className="
-              w-full p-3 rounded-lg
+              w-full px-3 py-2  rounded-lg
               bg-gray-100 dark:bg-[#0F1117]
               border border-gray-300 dark:border-[#2B3143]
               text-[#1A1A1A] dark:text-white

@@ -14,26 +14,8 @@ import LatestOrders from "./LatestOrders";
 import OrderForm from "./OrderForm";
 import SupportSection from "./SupportSection";
 import CategoryFilter from "./CategoryFilter";
+import Card from "./Card";
 
-// -------------------------
-// Card Component
-// -------------------------
-const Card = ({ children, className = "", onClick }) => (
-  <div
-    onClick={onClick}
-    className={`
-      bg-white dark:bg-[#1A1F2B]
-      border border-gray-300 dark:border-[#2B3143]
-      rounded-2xl shadow-md p-3 sm:p-4 lg:p-5
-      hover:border-[#4A6CF7]
-      hover:shadow-lg hover:shadow-[#4A6CF7]/20
-      transition-all cursor-pointer
-      ${className}
-    `}
-  >
-    {children}
-  </div>
-);
 
 export default function DashboardLayout({ user, serviceEnabled }) {
   const [spent, setSpent] = useState(0);
@@ -45,10 +27,7 @@ export default function DashboardLayout({ user, serviceEnabled }) {
     setOrders(689);
   }, []);
 
-  const quickActions = [
-    { icon: <MdAddShoppingCart size={22} />, label: "New Order", href: "/user/dashboard" },
-    { icon: <MdAccountBalanceWallet size={22} />, label: "Add Funds", href: "/user/addfunds" },
-  ];
+ 
 
   return (
     <div className="
@@ -129,31 +108,7 @@ export default function DashboardLayout({ user, serviceEnabled }) {
           onCategorySelect={setSelectedCategory}
         />
 
-        {/* QUICK ACTIONS */}
-        <section className="w-full">
-          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#4A6CF7] tracking-wide text-center lg:text-left">
-            Quick Actions
-          </h3>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
-            {quickActions.map((action, idx) => (
-              <Card
-                key={idx}
-                onClick={() => (window.location.href = action.href)}
-                className="
-                  flex flex-col sm:flex-row items-center justify-center 
-                  gap-2 sm:gap-3 py-3 sm:py-4 lg:py-5 
-                  hover:bg-[#4A6CF7]/10 hover:shadow-[#4A6CF7]/20 hover:scale-105
-                "
-              >
-                <div className="text-[#4A6CF7]">{action.icon}</div>
-                <span className="text-sm sm:text-base font-medium">
-                  {action.label}
-                </span>
-              </Card>
-            ))}
-          </div>
-        </section>
 
         {/* ORDER FORM SECTION */}
         {serviceEnabled ? (
