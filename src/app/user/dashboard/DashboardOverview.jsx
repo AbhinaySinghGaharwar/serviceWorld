@@ -36,23 +36,23 @@ export default function DashboardLayout({ user, serviceEnabled }) {
     "
     >
       <div className="w-full max-w-6xl px-3 sm:px-6 space-y-8">
-<section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+<section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 px-2">
 
   {/* Username */}
-  <Card className="p-1.5 sm:p-2">
-    <div className="flex items-center gap-1.5 sm:gap-2">
+  <Card className="py-3 sm:py-4 px-2">
+    <div className="flex items-center gap-2 sm:gap-3">
       <div className="
-        p-1 sm:p-1.5 rounded-full 
+        p-2 sm:p-3 rounded-full 
         bg-gray-200 text-gray-700 
         dark:bg-white/10 dark:text-white
       ">
-        <FaUserCircle size={18} />
+        <FaUserCircle size={20} />
       </div>
-      <div className="leading-none">
-        <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 leading-none">
+      <div className="leading-tight">
+        <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
           Username
         </p>
-        <h4 className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white truncate leading-none mt-0.5">
+        <h4 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate mt-0.5">
           {user?.username || "Guest"}
         </h4>
       </div>
@@ -60,20 +60,20 @@ export default function DashboardLayout({ user, serviceEnabled }) {
   </Card>
 
   {/* Balance */}
-  <Card className="p-1.5 sm:p-2">
-    <div className="flex items-center gap-1.5 sm:gap-2">
+  <Card className="py-3 sm:py-4 px-2">
+    <div className="flex items-center gap-2 sm:gap-3">
       <div className="
-        p-1 sm:p-1.5 rounded-full 
+        p-2 sm:p-3 rounded-full 
         bg-gray-200 text-gray-700
         dark:bg-white/10 dark:text-white
       ">
-        <MdAccountBalanceWallet size={18} />
+        <MdAccountBalanceWallet size={20} />
       </div>
-      <div className="leading-none">
-        <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400">
+      <div className="leading-tight">
+        <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
           Balance
         </p>
-        <h4 className="text-xs sm:text-sm font-semibold text-green-600 dark:text-green-400 leading-none mt-0.5">
+        <h4 className="text-sm sm:text-base font-semibold text-green-600 dark:text-green-400 mt-0.5">
           ₹{user?.balance ? Number(user.balance).toFixed(2) : "0.00"}
         </h4>
       </div>
@@ -81,41 +81,41 @@ export default function DashboardLayout({ user, serviceEnabled }) {
   </Card>
 
   {/* Total Spent */}
-  <Card className="p-1.5 sm:p-2">
-    <div className="flex items-center gap-1.5 sm:gap-2">
+  <Card className="py-3 sm:py-4 px-2">
+    <div className="flex items-center gap-2 sm:gap-3">
       <div className="
-        p-1 sm:p-1.5 rounded-full 
+        p-2 sm:p-3 rounded-full 
         bg-gray-200 text-gray-700
         dark:bg-white/10 dark:text-white
       ">
-        <MdTrendingUp size={18} />
+        <MdTrendingUp size={20} />
       </div>
-      <div className="leading-none">
-        <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400">
+      <div className="leading-tight">
+        <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
           Total Spent
         </p>
-        <h4 className="text-xs sm:text-sm font-semibold text-green-600 dark:text-green-400 leading-none mt-0.5">
+        <h4 className="text-sm sm:text-base font-semibold text-green-600 dark:text-green-400 mt-0.5">
           ₹{spent.toFixed(2)}
         </h4>
       </div>
     </div>
   </Card>
 
-  {/* Orders */}
-  <Card className="p-1.5 sm:p-2">
-    <div className="flex items-center gap-1.5 sm:gap-2">
+  {/* Total Orders */}
+  <Card className="py-3 sm:py-4 px-2">
+    <div className="flex items-center gap-2 sm:gap-3">
       <div className="
-        p-1 sm:p-1.5 rounded-full 
+        p-2 sm:p-3 rounded-full 
         bg-gray-200 text-gray-700
         dark:bg-white/10 dark:text-white
       ">
-        <MdAddShoppingCart size={18} />
+        <MdAddShoppingCart size={20} />
       </div>
-      <div className="leading-none">
-        <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400">
+      <div className="leading-tight">
+        <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
           Total Orders
         </p>
-        <h4 className="text-xs sm:text-sm font-semibold text-green-600 dark:text-green-400 leading-none mt-0.5">
+        <h4 className="text-sm sm:text-base font-semibold text-green-600 dark:text-green-400 mt-0.5">
           {orders}
         </h4>
       </div>

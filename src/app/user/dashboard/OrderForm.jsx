@@ -150,7 +150,7 @@ export default function OrderForm({ selectedCategory }) {
   };
 
 return (
-  <div className="w-full min-h-screen flex justify-center bg-gray-100 text-gray-700 dark:bg-[#0F1117] dark:text-white sm:px-6 lg:px-8">
+  <div className="w-full min-h-screen flex justify-start bg-gray-100 text-gray-700 dark:bg-[#0F1117] dark:text-white">
 
     <div
       className="
