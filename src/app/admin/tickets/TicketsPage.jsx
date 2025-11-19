@@ -28,7 +28,6 @@ export default function TicketsPage({ tickets }) {
     setFilteredTickets(filtered);
   }, [search, tickets]);
 
-  // 📨 Send first reply (only once)
   const sendReply = async () => {
     if (!message.trim() || !selectedTicket) return;
 
@@ -40,7 +39,6 @@ export default function TicketsPage({ tickets }) {
 
       if (res.error) return alert(res.error);
 
-      // ✅ Update local state instantly
       const newReply = res.reply;
 
       setSelectedTicket((prev) => ({
@@ -62,11 +60,10 @@ export default function TicketsPage({ tickets }) {
       );
 
       setMessage("");
-      alert("✅ Reply sent successfully!");
+      alert("Reply sent successfully!");
     });
   };
 
-  // ✏️ Edit existing admin reply
   const updateReply = async (existingReply, newMessage) => {
     if (!newMessage.trim() || !selectedTicket) return;
 
@@ -78,7 +75,6 @@ export default function TicketsPage({ tickets }) {
 
       if (res.error) return alert(res.error);
 
-      // ✅ Update reply in state
       setSelectedTicket((prev) => ({
         ...prev,
         replies: prev.replies.map((r) =>
@@ -101,20 +97,17 @@ export default function TicketsPage({ tickets }) {
         )
       );
 
-      alert("✅ Reply updated successfully!");
+      alert("Reply updated successfully!");
     });
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0f] text-gray-300 p-6 space-y-8">
+    <div className="min-h-screen p-6 space-y-8 bg-gray-100 text-gray-800 dark:bg-[#0e0e0f] dark:text-gray-300 transition-colors">
+
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-yellow-400 mb-1">
-          Support Tickets
-        </h1>
-        <p className="text-gray-400">
-          Manage and respond to user support requests efficiently.
-        </p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Support Tickets</h1>
+        <p className="text-gray-600 dark:text-gray-400">Manage and respond to user support requests efficiently.</p>
       </div>
 
       {/* Search */}
@@ -124,7 +117,7 @@ export default function TicketsPage({ tickets }) {
           placeholder="Search tickets..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-[#151517] border border-yellow-500/20 text-gray-200 placeholder-gray-500 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-yellow-400/30 transition"
+          className="w-full bg-white dark:bg-[#151517] border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-500 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600 transition"
         />
       </div>
 
@@ -136,27 +129,31 @@ export default function TicketsPage({ tickets }) {
           filteredTickets.map((t) => (
             <div
               key={t._id}
-              className="bg-[#151517]/80 border border-yellow-500/20 rounded-2xl p-5 shadow-[0_0_15px_rgba(255,215,0,0.05)] hover:shadow-[0_0_25px_rgba(255,215,0,0.1)] transition duration-300 flex flex-col justify-between"
+              className="bg-white dark:bg-[#151517] border border-gray-300 dark:border-gray-700 rounded-2xl p-5 shadow-sm hover:shadow-md dark:shadow-[0_0_20px_rgba(255,255,255,0.05)] transition duration-300 flex flex-col justify-between"
             >
               {/* Header */}
               <div className="mb-3">
                 <div className="flex justify-between items-center">
-                  <h2 className="text-lg font-semibold text-yellow-400 truncate">
+                  <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 truncate">
                     Ticket #{t._id.slice(-6)}
                   </h2>
+
                   <span
-                    className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                      t.status === "answered"
-                        ? "bg-green-600/30 text-green-300 border border-green-500/30"
-                        : t.status === "open"
-                        ? "bg-red-600/30 text-red-300 border border-red-500/30"
-                        : "bg-gray-600/30 text-gray-300 border border-gray-500/30"
-                    }`}
+                    className={`text-xs font-semibold px-2 py-1 rounded-full
+                      ${
+                        t.status === "answered"
+                          ? "bg-green-100 text-green-700 border border-green-300 dark:bg-green-900/40 dark:text-green-300"
+                          : t.status === "open"
+                          ? "bg-red-100 text-red-700 border border-red-300 dark:bg-red-900/40 dark:text-red-300"
+                          : "bg-gray-200 text-gray-700 border border-gray-400 dark:bg-gray-700/40 dark:text-gray-300"
+                      }
+                    `}
                   >
                     {t.status || "unknown"}
                   </span>
                 </div>
-                <p className="text-xs text-gray-400 mt-1">
+
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Created:{" "}
                   {t.createdAt
                     ? new Date(t.createdAt).toLocaleString()
@@ -165,28 +162,31 @@ export default function TicketsPage({ tickets }) {
               </div>
 
               {/* Info */}
-              <div className="space-y-1 text-sm text-gray-300">
+              <div className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
                 <p>
-                  <span className="text-yellow-400 font-medium">User:</span>{" "}
+                  <span className="font-medium text-gray-900 dark:text-gray-100">User:</span>{" "}
                   {t.username || "Unknown"}
                 </p>
+
                 <p>
-                  <span className="text-yellow-400 font-medium">Subject:</span>{" "}
+                  <span className="font-medium text-gray-900 dark:text-gray-100">Subject:</span>{" "}
                   {t.subject}
                 </p>
-                <p className="text-gray-400 text-sm truncate">
-                  <span className="text-yellow-400 font-medium">Message:</span>{" "}
+
+                <p className="text-gray-600 dark:text-gray-400 text-sm truncate">
+                  <span className="font-medium text-gray-900 dark:text-gray-100">Message:</span>{" "}
                   {t.message}
                 </p>
               </div>
 
               {/* Footer */}
-              <div className="flex justify-between items-center mt-4 pt-3 border-t border-yellow-500/10">
-                <p className="text-xs text-gray-500">
+              <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   Replies: {(t.replies || []).length}
                 </p>
+
                 <button
-                  className="bg-yellow-500/20 border border-yellow-500/30 text-yellow-300 hover:bg-yellow-500/40 px-3 py-1.5 rounded-lg font-medium transition"
+                  className="bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 px-3 py-1.5 rounded-lg font-medium transition"
                   onClick={() => setSelectedTicket(t)}
                 >
                   View
@@ -197,7 +197,7 @@ export default function TicketsPage({ tickets }) {
         )}
       </div>
 
-      {/* Chat Modal (Reply / Edit) */}
+      {/* Chat Modal */}
       <TicketChatModal
         ticket={selectedTicket}
         onClose={() => setSelectedTicket(null)}

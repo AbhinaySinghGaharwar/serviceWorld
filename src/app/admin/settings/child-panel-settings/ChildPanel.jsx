@@ -7,13 +7,11 @@ export default function ChildPanel({ initialSettings }) {
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  // ✅ Local state for form fields
   const [siteSettings, setSiteSettings] = useState({
     domain: initialSettings?.domain || "",
     price: initialSettings?.price || "",
   });
 
-  // 🧭 Update input values
   const handleChange = (e) => {
     const { name, value } = e.target;
     setSiteSettings((prev) => ({ ...prev, [name]: value }));
@@ -31,51 +29,66 @@ export default function ChildPanel({ initialSettings }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0f] p-6 text-gray-300">
-      <div className="max-w-2xl mx-auto bg-[#151517] border border-yellow-500/20 rounded-2xl p-6 shadow-lg">
-        <h1 className="text-2xl font-bold text-yellow-400 mb-4">
+    <div className="min-h-screen bg-gray-100 dark:bg-[#0e0e0f] p-6 text-gray-900 dark:text-gray-200 transition-colors">
+      <div className="max-w-2xl mx-auto bg-white dark:bg-[#151517] border border-gray-300 dark:border-gray-700 rounded-2xl p-6 shadow-lg">
+
+        {/* Header */}
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           Admin — Set Child Panel Details
         </h1>
 
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
+
+          {/* Domain */}
           <div>
-            <label className="block mb-1 font-semibold">Domain</label>
+            <label className="block mb-1 font-semibold text-gray-800 dark:text-gray-300">
+              Domain
+            </label>
             <input
               type="text"
               name="domain"
               placeholder="yourchildpanel.com"
               value={siteSettings.domain}
               onChange={handleChange}
-              className="w-full bg-[#0e0e0f] border border-yellow-500/20 rounded-lg px-3 py-2 text-gray-200 focus:border-yellow-400 outline-none"
               required
+              className="w-full bg-gray-100 dark:bg-[#0e0e0f] border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600 outline-none transition"
             />
           </div>
 
+          {/* Price */}
           <div>
-            <label className="block mb-1 font-semibold">Price</label>
+            <label className="block mb-1 font-semibold text-gray-800 dark:text-gray-300">
+              Price
+            </label>
             <input
               type="text"
               name="price"
               placeholder="₹ 800"
               value={siteSettings.price}
               onChange={handleChange}
-              className="w-full bg-[#0e0e0f] border border-yellow-500/20 rounded-lg px-3 py-2 text-gray-200 focus:border-yellow-400 outline-none"
               required
+              className="w-full bg-gray-100 dark:bg-[#0e0e0f] border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600 outline-none transition"
             />
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={isPending}
-            className="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-semibold py-2 rounded-lg shadow-lg hover:shadow-yellow-500/40 transition-all"
+            className={`w-full py-2 rounded-lg font-semibold text-white bg-gray-800 dark:bg-gray-700 hover:bg-gray-900 dark:hover:bg-gray-600 transition ${
+              isPending ? "opacity-60 cursor-not-allowed" : ""
+            }`}
           >
             {isPending ? "Saving..." : "Save Settings"}
           </button>
 
+          {/* Message Output */}
           {message && (
             <p
               className={`text-center mt-3 text-sm ${
-                message.startsWith("✅") ? "text-green-400" : "text-red-400"
+                message.startsWith("✅") ? "text-green-600 dark:text-green-400" 
+                                          : "text-red-600 dark:text-red-400"
               }`}
             >
               {message}

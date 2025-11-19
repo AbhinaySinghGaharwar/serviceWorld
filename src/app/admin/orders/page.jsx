@@ -14,7 +14,7 @@ export default async function Page() {
       </div>
     );
   }
-
+const ordersJson=JSON.stringify(data?.orders)
   // ✅ Orders exist → render page
-  return <OrdersPage orders={data.orders} />;
+  return <OrdersPage sorders={ordersJson} />;
 }

@@ -11,17 +11,17 @@ export default function SettingsPage() {
   const sections = [
     {
       title: "General",
-      icon: <UserCog className="text-yellow-400" size={20} />,
+      icon: <UserCog className="text-gray-700 dark:text-gray-200" size={20} />,
       desc: "Manage your basic admin preferences and profile information.",
       actions: [
         { name: "Profile Settings", icon: <UserCog size={18} />, link: "/admin/settings/profile" },
         { name: "Edit Website", icon: <Globe size={18} />, link: "/admin/settings/edit-website" },
-        { name: "Refferal", icon: <PlugZap size={18} />, link: "/admin/settings/affiliate" },
+        { name: "Referral", icon: <PlugZap size={18} />, link: "/admin/settings/affiliate" },
       ],
     },
     {
       title: "Integrations",
-      icon: <Globe className="text-yellow-400" size={20} />,
+      icon: <Globe className="text-gray-700 dark:text-gray-200" size={20} />,
       desc: "Connect payment systems and external APIs.",
       actions: [
         { name: "Manage Payment Methods", icon: <Wallet size={18} />, link: "/admin/settings/payment-methods" },
@@ -33,26 +33,32 @@ export default function SettingsPage() {
   const activeData = sections.find((s) => s.title === activeSection);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0b0b0c] to-[#111112] text-gray-200 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-gray-100 dark:bg-[#0d0d0d] text-gray-800 dark:text-gray-200 flex flex-col md:flex-row transition-colors">
+
       {/* Sidebar */}
-      <div className="md:w-64 w-full md:min-h-screen border-r border-yellow-500/20 bg-white/5 backdrop-blur-2xl p-6 space-y-6">
+      <div className="md:w-64 w-full md:min-h-screen border-r border-gray-300 dark:border-gray-800 bg-white dark:bg-[#151517] p-6 space-y-6">
+        
+        {/* Sidebar Header */}
         <div className="flex items-center gap-2 mb-6">
-          <Settings className="text-yellow-400" size={22} />
-          <h1 className="text-xl font-semibold text-yellow-400">Settings</h1>
+          <Settings className="text-gray-900 dark:text-gray-200" size={22} />
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Settings</h1>
         </div>
 
+        {/* Sidebar Navigation */}
         <div className="space-y-2">
           {sections.map((section, i) => (
             <motion.button
               key={i}
               onClick={() => setActiveSection(section.title)}
               whileHover={{ scale: 1.02, x: 3 }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all 
-              ${
-                activeSection === section.title
-                  ? "bg-yellow-500/20 border border-yellow-500/30 text-yellow-300"
-                  : "hover:bg-yellow-500/10 text-gray-300 border border-transparent"
-              }`}
+              className={`
+                w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm border transition-all
+                ${
+                  activeSection === section.title
+                    ? "bg-gray-200 dark:bg-gray-700 border-gray-400 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+                    : "border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                }
+              `}
             >
               {section.icon}
               {section.title}
@@ -75,11 +81,16 @@ export default function SettingsPage() {
             {/* Section Header */}
             <div className="flex items-center gap-3 mb-4">
               {activeData.icon}
-              <h2 className="text-2xl font-semibold text-yellow-400">{activeData.title}</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                {activeData.title}
+              </h2>
             </div>
-            <p className="text-gray-400 mb-8">{activeData.desc}</p>
 
-            {/* Actions as Cards */}
+            <p className="text-gray-700 dark:text-gray-400 mb-8">
+              {activeData.desc}
+            </p>
+
+            {/* Actions (Cards) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
               {activeData.actions.map((action, idx) => (
                 <motion.div
@@ -87,19 +98,22 @@ export default function SettingsPage() {
                   whileHover={{ scale: 1.03, y: -3 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => router.push(action.link)}
-                  className="bg-white/5 border border-yellow-500/20 hover:border-yellow-400/40 
-                             hover:bg-yellow-500/10 p-5 rounded-2xl transition-all duration-300 
-                             backdrop-blur-sm cursor-pointer group"
+                  className="bg-white dark:bg-[#151517] border border-gray-300 dark:border-gray-700 hover:border-gray-500 dark:hover:border-gray-500 
+                             p-5 rounded-2xl transition-all duration-300 cursor-pointer group"
                 >
-                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-yellow-500/10 mb-4 group-hover:bg-yellow-500/20 transition">
+                  {/* Icon */}
+                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700 mb-4 transition">
                     {action.icon}
                   </div>
-                  <h3 className="text-yellow-300 font-medium text-base group-hover:text-yellow-200 transition">
+
+                  {/* Title */}
+                  <h3 className="text-gray-900 dark:text-gray-100 font-medium text-base group-hover:text-gray-700 dark:group-hover:text-gray-300 transition">
                     {action.name}
                   </h3>
                 </motion.div>
               ))}
             </div>
+
           </motion.div>
         </AnimatePresence>
       </div>
