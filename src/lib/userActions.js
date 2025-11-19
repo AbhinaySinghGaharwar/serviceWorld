@@ -67,92 +67,92 @@ const balance=user?.balance
 }
 
 
-// -------------------- Upload Profile Picture --------------------
-export async function uploadProfilePicture(formData) {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+// // -------------------- Upload Profile Picture --------------------
+// export async function uploadProfilePicture(formData) {
+//   try {
+//     const cookieStore = await cookies();
+//     const token = cookieStore.get("token")?.value;
 
-    if (!token) {
-      return { error: "Not authenticated" };
-    }
+//     if (!token) {
+//       return { error: "Not authenticated" };
+//     }
 
-    // Verify token
-    let payload;
-    try {
-      payload = jwt.verify(token, JWT_SECRET);
-    } catch {
-      return { error: "Invalid token" };
-    }
+//     // Verify token
+//     let payload;
+//     try {
+//       payload = jwt.verify(token, JWT_SECRET);
+//     } catch {
+//       return { error: "Invalid token" };
+//     }
 
-    // Get file from formData
-    const file = formData.get("image");
-    if (!file) {
-      return { error: "No file uploaded" };
-    }
+//     // Get file from formData
+//     const file = formData.get("image");
+//     if (!file) {
+//       return { error: "No file uploaded" };
+//     }
 
-    // Convert file to buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+//     // Convert file to buffer
+//     const arrayBuffer = await file.arrayBuffer();
+//     const buffer = Buffer.from(arrayBuffer);
 
-    // Save file to public/uploads
-    const uploadDir = path.join(process.cwd(), "/public/uploads");
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+//     // Save file to public/uploads
+//     const uploadDir = path.join(process.cwd(), "/public/uploads");
+//     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-    const fileName = `${Date.now()}_${file.name}`;
-    const filePath = path.join(uploadDir, fileName);
-    fs.writeFileSync(filePath, buffer);
+//     const fileName = `${Date.now()}_${file.name}`;
+//     const filePath = path.join(uploadDir, fileName);
+//     fs.writeFileSync(filePath, buffer);
 
-    // Save avatar URL in MongoDB
-    const client = await clientPromise;
-    const db = client.db("smmpanel");
-    const imageUrl = "/uploads/" + fileName;
+//     // Save avatar URL in MongoDB
+//     const client = await clientPromise;
+//     const db = client.db("smmpanel");
+//     const imageUrl = "/uploads/" + fileName;
 
-    await db.collection("users").updateOne(
-      { email: payload.email },
-      { $set: { avatar: imageUrl } }
-    );
+//     await db.collection("users").updateOne(
+//       { email: payload.email },
+//       { $set: { avatar: imageUrl } }
+//     );
 
-    return { success: true, message: "Image uploaded", avatar: imageUrl };
-  } catch (err) {
-    return { error: err.message };
-  }
-}
+//     return { success: true, message: "Image uploaded", avatar: imageUrl };
+//   } catch (err) {
+//     return { error: err.message };
+//   }
+// }
 
-// -------------------- Get Profile Picture / Details --------------------
-export async function getProfilePicture() {
-  try {
-    const cookieStore = cookies();
-    const token = cookieStore.get("token")?.value;
+// // -------------------- Get Profile Picture / Details --------------------
+// export async function getProfilePicture() {
+//   try {
+//     const cookieStore = cookies();
+//     const token = cookieStore.get("token")?.value;
 
-    if (!token) {
-      return { error: "Not authenticated" };
-    }
+//     if (!token) {
+//       return { error: "Not authenticated" };
+//     }
 
-    // Verify token
-    let payload;
-    try {
-      payload = jwt.verify(token, JWT_SECRET);
-    } catch {
-      return { error: "Invalid token" };
-    }
+//     // Verify token
+//     let payload;
+//     try {
+//       payload = jwt.verify(token, JWT_SECRET);
+//     } catch {
+//       return { error: "Invalid token" };
+//     }
 
-    // Fetch user data
-    const client = await clientPromise;
-    const db = client.db("smmpanel");
+//     // Fetch user data
+//     const client = await clientPromise;
+//     const db = client.db("smmpanel");
 
-    const user = await db.collection("users").findOne(
-      { email: payload.email },
-      { projection: { username: 1, email: 1, balance: 1, avatar: 1 } }
-    );
+//     const user = await db.collection("users").findOne(
+//       { email: payload.email },
+//       { projection: { username: 1, email: 1, balance: 1, avatar: 1 } }
+//     );
 
-    if (!user) return { error: "User not found" };
+//     if (!user) return { error: "User not found" };
 
-    return { success: true, avatar:user.avatar };
-  } catch (err) {
-    return { error: err.message };
-  }
-}
+//     return { success: true, avatar:user.avatar };
+//   } catch (err) {
+//     return { error: err.message };
+//   }
+// }
 
 
 
@@ -370,5 +370,153 @@ export async function getUserTransactions() {
   } catch (err) {
     console.error("Get history error:", err);
     return { success: false, error: "Unauthorized" };
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export async function uploadProfilePicture(formData) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) return { error: "Not authenticated" };
+
+    // Verify token
+    let payload;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch {
+      return { error: "Invalid token" };
+    }
+
+    const file = formData.get("image");
+    if (!file) return { error: "No file uploaded" };
+
+    // Read file as array buffer
+    const arrayBuffer = await file.arrayBuffer();
+
+    // Convert to base64
+    const base64Image = Buffer.from(arrayBuffer).toString("base64");
+
+    // Add MIME type prefix e.g. data:image/png;base64,...
+    const mimeType = file.type;
+    const imageData = `data:${mimeType};base64,${base64Image}`;
+
+    // Save in DB
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    await db.collection("users").updateOne(
+      { email: payload.email },
+      { $set: { avatar: imageData } }
+    );
+
+    return { success: true, avatar: imageData };
+  } catch (err) {
+    return { error: err.message };
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+export async function getProfilePicture() {
+  try {
+    const cookieStore = cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) return { error: "Not authenticated" };
+
+    let payload;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch {
+      return { error: "Invalid token" };
+    }
+
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    const user = await db.collection("users").findOne(
+      { email: payload.email },
+      { projection: { avatar: 1 } }
+    );
+
+    if (!user) return { error: "User not found" };
+
+    return { success: true, avatar: user.avatar };
+  } catch (err) {
+    return { error: err.message };
+  }
+}
+
+
+
+
+
+
+
+
+
+export async function deleteProfilePicture() {
+  try {
+    const cookieStore = cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) return { error: "Not authenticated" };
+
+    let payload;
+    try {
+      payload = jwt.verify(token, JWT_SECRET);
+    } catch {
+      return { error: "Invalid token" };
+    }
+
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    await db.collection("users").updateOne(
+      { email: payload.email },
+      { $set: { avatar: null } }
+    );
+
+    return { success: true };
+  } catch (err) {
+    return { error: err.message };
   }
 }

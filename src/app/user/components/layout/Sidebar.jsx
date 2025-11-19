@@ -9,6 +9,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import useCurrency from "@/hooks/useCurrency";
 import UserBalance from "./UserBalance";
+import ProfileSection from "./ProfileSection";
 export default function Sidebar({
   isSidebarOpen,
   setIsSidebarOpen,
@@ -53,70 +54,7 @@ export default function Sidebar({
       )}
     >
       {/* Profile Section */}
-      <div
-        className={clsx(
-          "flex flex-col items-center gap-2 px-4 py-6 border-b",
-          "border-gray-300 dark:border-gray-800"
-        )}
-      >
-        {/* Avatar */}
-        <div
-          onClick={() => fileInputRef.current?.click()}
-          className={clsx(
-            "w-20 h-20 rounded-full flex items-center justify-center cursor-pointer group relative overflow-hidden",
-
-            /* Light */
-            "bg-gray-200 text-gray-700",
-
-            /* Dark */
-            "dark:bg-white/10 dark:text-white"
-          )}
-        >
-          {user?.avatar ? (
-            <img
-              src={user.avatar}
-              alt="Avatar"
-              className={`w-full h-full object-cover ${
-                uploading ? "opacity-40" : ""
-              }`}
-            />
-          ) : (
-            <FaUserCircle size={60} className={uploading ? "opacity-40" : ""} />
-          )}
-
-          <div
-            className="
-              absolute inset-0 bg-black/40 text-xs 
-              text-white flex items-center justify-center 
-              opacity-0 group-hover:opacity-100 
-              transition-opacity
-            "
-          >
-            {uploading ? "Uploading..." : "Change Photo"}
-          </div>
-
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            onChange={handleImageChange}
-            className="hidden"
-          />
-        </div>
-
-        {/* Username */}
-        <h2
-          className="
-            text-lg font-semibold
-            text-gray-800 dark:text-white
-          "
-        >
-          {user?.username || "Guest"}
-        </h2>
-
-      {/* Balance + Currency */}
-<UserBalance user={user}/>
-      </div>
+    <ProfileSection user={user}/>
 
       {/* Menu Items */}
       <nav className="flex-1 p-3 overflow-y-auto">
