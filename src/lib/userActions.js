@@ -3,8 +3,7 @@ import clientPromise from "@/lib/mongodb";
 
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
-import fs from "fs";
-import path from "path";
+
 import { revalidatePath } from "next/cache";
 import { createOrder } from "./services";
 import crypto from "crypto";
@@ -30,6 +29,7 @@ export async function getUserDetails() {
       .findOne({ email: decoded.email }, { projection: { password: 0 } });
 
     if (!user) return { error: "User not found" };
+   
     return {
   success:true,
     avatar:user.avatar,
@@ -42,6 +42,8 @@ export async function getUserDetails() {
     return { error: err.message };
   }
 }
+
+// ========================= GET USER Balance =========================
 export async function getUserBalance() {
   try {
     const cookieStore = await cookies();
@@ -67,98 +69,7 @@ const balance=user?.balance
 }
 
 
-// // -------------------- Upload Profile Picture --------------------
-// export async function uploadProfilePicture(formData) {
-//   try {
-//     const cookieStore = await cookies();
-//     const token = cookieStore.get("token")?.value;
-
-//     if (!token) {
-//       return { error: "Not authenticated" };
-//     }
-
-//     // Verify token
-//     let payload;
-//     try {
-//       payload = jwt.verify(token, JWT_SECRET);
-//     } catch {
-//       return { error: "Invalid token" };
-//     }
-
-//     // Get file from formData
-//     const file = formData.get("image");
-//     if (!file) {
-//       return { error: "No file uploaded" };
-//     }
-
-//     // Convert file to buffer
-//     const arrayBuffer = await file.arrayBuffer();
-//     const buffer = Buffer.from(arrayBuffer);
-
-//     // Save file to public/uploads
-//     const uploadDir = path.join(process.cwd(), "/public/uploads");
-//     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-//     const fileName = `${Date.now()}_${file.name}`;
-//     const filePath = path.join(uploadDir, fileName);
-//     fs.writeFileSync(filePath, buffer);
-
-//     // Save avatar URL in MongoDB
-//     const client = await clientPromise;
-//     const db = client.db("smmpanel");
-//     const imageUrl = "/uploads/" + fileName;
-
-//     await db.collection("users").updateOne(
-//       { email: payload.email },
-//       { $set: { avatar: imageUrl } }
-//     );
-
-//     return { success: true, message: "Image uploaded", avatar: imageUrl };
-//   } catch (err) {
-//     return { error: err.message };
-//   }
-// }
-
-// // -------------------- Get Profile Picture / Details --------------------
-// export async function getProfilePicture() {
-//   try {
-//     const cookieStore = cookies();
-//     const token = cookieStore.get("token")?.value;
-
-//     if (!token) {
-//       return { error: "Not authenticated" };
-//     }
-
-//     // Verify token
-//     let payload;
-//     try {
-//       payload = jwt.verify(token, JWT_SECRET);
-//     } catch {
-//       return { error: "Invalid token" };
-//     }
-
-//     // Fetch user data
-//     const client = await clientPromise;
-//     const db = client.db("smmpanel");
-
-//     const user = await db.collection("users").findOne(
-//       { email: payload.email },
-//       { projection: { username: 1, email: 1, balance: 1, avatar: 1 } }
-//     );
-
-//     if (!user) return { error: "User not found" };
-
-//     return { success: true, avatar:user.avatar };
-//   } catch (err) {
-//     return { error: err.message };
-//   }
-// }
-
-
-
-
-
-
+// ========================= Generate Api Key =========================
 export async function generateApiKey() {
   try {
     const client = await clientPromise;
@@ -192,22 +103,7 @@ export async function generateApiKey() {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// ========================= Create Order Action =========================
 export async function createOrderAction(service, link, qua, paying ) {
   try {
     // 🧩 1️⃣ Get user token from cookies
@@ -292,7 +188,7 @@ const user = await usersCollection.findOne({ _id: new ObjectId(userData.id) });
       link,
       quantity,
       charge,
-      status: "confrim",
+      status: "Pending",
       startCount: 0,
       remains: 0,
       providerOrderId: response.order,
@@ -327,6 +223,56 @@ const user = await usersCollection.findOne({ _id: new ObjectId(userData.id) });
 
 
 
+export async function getUserOrders() {
+  try {
+    // 🍪 1. Get user token
+    const cookieStore = cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+      return { error: "Unauthorized. Please login." };
+    }
+
+    // 🔐 2. Verify JWT
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return { error: "Invalid or expired token." };
+    }
+
+    const userId = new ObjectId(decoded.id);
+
+    // 🗃 3. Connect to database
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    // 📦 4. Fetch user orders sorted newest→oldest
+    const orders = await db
+      .collection("orders")
+      .find({ userId })
+      .sort({ createdAt: -1 })
+      .toArray();
+// Convert _id + make whole document JSON-safe
+const formattedOrders = orders.map(order =>
+  JSON.parse(
+    JSON.stringify({
+      ...order,
+      _id: order._id.toString(),
+    })
+  )
+);
+
+return {
+  success: true,
+  orders: formattedOrders,
+};
+
+  } catch (err) {
+    console.error("❌ Error fetching user orders:", err);
+    return { error: "Server error: " + err.message };
+  }
+}
 
 
 
@@ -336,7 +282,7 @@ const user = await usersCollection.findOne({ _id: new ObjectId(userData.id) });
 
 
 
-
+// ========================= GET USER Transactions =========================
 export async function getUserTransactions() {
   try {
     // 🔐 Read user token from cookies
@@ -374,34 +320,7 @@ export async function getUserTransactions() {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// ========================= Upload Profile Picutre =========================
 export async function uploadProfilePicture(formData) {
   try {
     const cookieStore = await cookies();
@@ -447,14 +366,6 @@ export async function uploadProfilePicture(formData) {
 
 
 
-
-
-
-
-
-
-
-
 export async function getProfilePicture() {
   try {
     const cookieStore = cookies();
@@ -487,12 +398,6 @@ export async function getProfilePicture() {
 
 
 
-
-
-
-
-
-
 export async function deleteProfilePicture() {
   try {
     const cookieStore = cookies();
@@ -518,5 +423,113 @@ export async function deleteProfilePicture() {
     return { success: true };
   } catch (err) {
     return { error: err.message };
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export async function createRandomOrders() {
+  try {
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    const userId = new ObjectId("68fdbcc2cbc279f65b0116df"); // fixed user ID
+
+    // 🔥 Realistic SMM services
+    const services = [
+      "Instagram Followers",
+      "Instagram Likes",
+      "Instagram Reels Views",
+      "Instagram Story Views",
+      "YouTube Views",
+      "YouTube Subscribers",
+      "YouTube Likes",
+      "TikTok Followers",
+      "TikTok Likes",
+      "TikTok Views",
+      "Facebook Page Likes",
+      "Facebook Followers",
+      "Twitter Followers",
+      "Twitter Likes",
+      "Telegram Group Members",
+      "Telegram Post Views",
+      "Spotify Plays",
+      "LinkedIn Followers",
+      "Website Traffic",
+      "Threads Followers",
+    ];
+
+    // 🔥 Possible statuses
+    const statuses = [
+      "Pending",
+      "Processing",
+      "In Progress",
+      "Completed",
+      "Partial",
+      "Canceled",
+    ];
+
+    // Function to generate random date from last 30 days
+    const randomDate = () => {
+      const daysAgo = Math.floor(Math.random() * 30); // 0–29 days
+      const hoursAgo = Math.floor(Math.random() * 24);
+      const d = new Date();
+      d.setDate(d.getDate() - daysAgo);
+      d.setHours(d.getHours() - hoursAgo);
+      return d;
+    };
+
+    const orders = [];
+
+    for (let i = 0; i < 20; i++) {
+      const newOrder = {
+        userId,
+        service: services[Math.floor(Math.random() * services.length)],
+        link: `https://example.com/post/${Math.floor(Math.random() * 999999)}`,
+        quantity: Math.floor(Math.random() * 5000) + 50, // 50–5050
+        charge: Number((Math.random() * 80 + 5).toFixed(2)), // ₹5–₹85
+        status: statuses[Math.floor(Math.random() * statuses.length)],
+        startCount: Math.floor(Math.random() * 100),
+        remains: Math.floor(Math.random() * 50),
+        providerOrderId: String(Math.floor(20000 + Math.random() * 90000)),
+        createdAt: randomDate(), // last 30 days
+      };
+
+      orders.push(newOrder);
+    }
+
+    await db.collection("orders").insertMany(orders);
+
+    return {
+      success: true,
+      message: "20 realistic SMM orders created!",
+    };
+  } catch (err) {
+    console.error("Error generating orders:", err);
+    return { error: "Server error: " + err.message };
   }
 }

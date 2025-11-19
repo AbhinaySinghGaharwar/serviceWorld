@@ -1195,29 +1195,20 @@ export async function getChildPanelSettings() {
 
 
 
-export async function createChildPanel({ formData, payment_amount, utr, payment_type }) {
-  console.log(payment_type)
+export async function createChildPanel({ formData }) {
   try {
-    // 🧮 Parse and validate numeric payment amount
+    // 🧮 Price (always in number format)
     const formPrice = parseFloat(formData.get("price").replace(/[^\d.]/g, ""));
-    const paidAmount = parseFloat(payment_amount);
 
-    // ⚠️ Step 1: Amount validation
-    if (isNaN(paidAmount) || paidAmount <= 0) {
-      return { error: "Invalid payment amount." };
-    }
-    if (paidAmount < formPrice) {
-      return { error: `Payment amount is less than required price (${formPrice}).` };
-    }
+    // 🍪 Step 1: Get token from cookies
+    const cookie = await cookies();
+    const token = cookie.get("token")?.value;
 
-    // 🍪 Step 2: Get token from cookies
-    const cookie = await cookies()
-    const token=cookie.get("token")?.value;
     if (!token) {
       return { error: "Unauthorized. Please login first." };
     }
 
-    // 🔍 Step 3: Verify JWT
+    // 🔍 Step 2: Verify JWT
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -1225,52 +1216,35 @@ export async function createChildPanel({ formData, payment_amount, utr, payment_
       return { error: "Invalid or expired token." };
     }
 
-    // 🧠 Step 4: Extract user info
-    const { id, username, email } = decoded;
+    const { id, email, username } = decoded;
 
-    // 🗃️ Step 5: Connect to MongoDB
+    // 🗃️ Step 3: Connect DB
     const client = await clientPromise;
     const db = client.db("smmpanel");
 
-    // 🚫 Step 6: Prevent reused UTR
-    const existingUTR = await db.collection("used_utr").findOne({ utr });
-    if (existingUTR) {
-      return { error: "This UTR has already been used. Please use a new one." };
-    }
-
-   // 💳 Step 7: Verify Transaction from BharatPe (if payment_type = "BharatPe")
-let matchedTx = null;
-
-if (payment_type?.toLowerCase() === "bharatpe") {
-  try {
-    matchedTx = await ValidateTransactionBharatPe(utr, paidAmount);
-
-    // 🧩 If the function failed
-    if (!matchedTx || matchedTx.success === false) {
-      const errorMsg =
-        matchedTx?.error ||
-        "Transaction not found or payment verification failed.";
-      return { error: errorMsg };
-    }
-  } catch (err) {
-    console.error("❌ BharatPe validation error:", err);
-    return { error: "BharatPe verification failed — please try again later." };
-  }
-}
-
-    
-    console.log(matchedTx,utr,payment_amount) 
-
-    // 🧾 Step 8: Mark UTR as used
-    await db.collection("used_utr").insertOne({
-      utr,
-      payment_type,
-      payment_amount: paidAmount,
-      used_by: email,
-      used_at: new Date(),
+    // 👤 Step 4: Get user
+    const user = await db.collection("users").findOne({
+      _id: new ObjectId(id)
     });
 
-    // 📝 Step 9: Prepare and store the child panel request
+    if (!user) return { error: "User not found." };
+
+    const userBalance = Number(user.balance || 0);
+
+    // 💰 Step 5: Check user balance
+    if (userBalance < formPrice) {
+      return {
+        error: `Insufficient balance. Required: ${formPrice}, Available: ${userBalance}`
+      };
+    }
+
+    // 💳 Step 6: Deduct balance
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(id) },
+      { $inc: { balance: -formPrice } }
+    );
+
+    // 📝 Step 7: Create child panel request
     const request = {
       userId: id,
       username,
@@ -1279,11 +1253,7 @@ if (payment_type?.toLowerCase() === "bharatpe") {
       currency: formData.get("currency"),
       panel_username: formData.get("username"),
       panel_password: formData.get("password"),
-      payment_type,
-      payment_amount: paidAmount,
-      utr,
-      bharatPeId: matchedTx?.id || null,
-      price: formData.get("price"),
+      price: formPrice,
       createdAt: new Date(),
       status: "confirmed",
       verified: true,
@@ -1291,17 +1261,19 @@ if (payment_type?.toLowerCase() === "bharatpe") {
 
     await db.collection("child_panel_requests").insertOne(request);
 
-    // ✅ Step 10: Return success response
+    // 🎉 SUCCESS
     return {
       success: true,
-      message: "Child panel request submitted and payment verified successfully.",
-      data: { utr, payment_type, amount: paidAmount },
+      message: "Child panel created successfully!",
+      newBalance: userBalance - formPrice,
     };
+
   } catch (err) {
-    console.error("❌ Error submitting child panel:", err);
+    console.error("❌ Error creating child panel:", err);
     return { error: "Server error: " + err.message };
   }
 }
+
 
 
 
