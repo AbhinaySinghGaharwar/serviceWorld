@@ -8,7 +8,7 @@ import {
   MdSupportAgent,
 } from "react-icons/md";
 import { FaUserCircle, FaTools } from "react-icons/fa";
-
+import SocialButtons from "./SocialMediaButton";
 import Announcements from "./Announcements";
 import LatestOrders from "./LatestOrders";
 import OrderForm from "./OrderForm";
@@ -129,6 +129,10 @@ export default function DashboardLayout({ user, serviceEnabled }) {
 
         {/* ADDITIONAL SECTIONS */}
         <SupportSection />
+        <SocialButtons 
+  whatsappNumber="9182736455" 
+  telegramUsername="myTelegramUser" 
+/>
         <Announcements />
       </div>
     </div>
