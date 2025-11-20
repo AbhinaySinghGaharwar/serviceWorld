@@ -16,16 +16,25 @@ export default function Navbar({ logo }) {
       border-b border-[#E5E7EB] dark:border-[#1F2633]
       transition-all duration-300
     ">
-      <div className="flex justify-between items-center px-6 py-3 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center pl-2 pr-4 py-3 max-w-7xl mx-auto">
 
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
-          <img
-            src={logo}
-            alt="SMM World Panel Logo"
-            className="h-14 sm:h-16 w-auto hover:scale-105 transition-transform duration-300"
-          />
-        </Link>
+        <Link
+  href="/"
+  className="flex items-center space-x-2 select-none"
+>
+  <span className="
+    text-3xl sm:text-4xl 
+    font-bold 
+    text-gray-700 dark:text-gray-300 
+    tracking-tight 
+    hover:text-gray-900 dark:hover:text-white 
+    transition-colors duration-300
+  ">
+    {logo}
+  </span>
+</Link>
+
 
         {/* Desktop Menu */}
         <ul className="hidden md:flex items-center space-x-8 

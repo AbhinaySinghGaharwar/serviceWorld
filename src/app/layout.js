@@ -26,7 +26,7 @@ export default async function RootLayout({ children }) {
     <html lang="en" className="" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
        <CurrencyProvider>
-         <LayoutWrapper logo={settings.logo} siteName={settings.siteName}>
+         <LayoutWrapper logo={settings.siteName} siteName={settings.siteName}>
           {children}
         </LayoutWrapper>
        </CurrencyProvider>
