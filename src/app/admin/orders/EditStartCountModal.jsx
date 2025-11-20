@@ -4,6 +4,7 @@ import { useState } from "react";
 import { updateStartCountAction } from "@/lib/adminServices";
 
 export default function EditStartCountModal({ order, close }) {
+
   const [startCount, setStartCount] = useState(order.startCount);
   const [loading, setLoading] = useState(false);
 
