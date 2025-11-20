@@ -9,7 +9,8 @@ export default function ChildPanel({ initialSettings }) {
 
   const [siteSettings, setSiteSettings] = useState({
     domain: initialSettings?.domain || "",
-    price: initialSettings?.price || "",
+    subdomainprice: initialSettings?.subdomainprice || "",
+    owndomainprice:initialSettings?.owndomainprice || '',
   });
 
   const handleChange = (e) => {
@@ -59,13 +60,27 @@ export default function ChildPanel({ initialSettings }) {
           {/* Price */}
           <div>
             <label className="block mb-1 font-semibold text-gray-800 dark:text-gray-300">
-              Price
+              Sub Domain Price
             </label>
             <input
               type="text"
-              name="price"
-              placeholder="₹ 800"
-              value={siteSettings.price}
+              name="subdomainprice"
+              placeholder="₹ xxx"
+              value={siteSettings?.subdomainprice}
+              onChange={handleChange}
+              required
+              className="w-full bg-gray-100 dark:bg-[#0e0e0f] border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600 outline-none transition"
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-semibold text-gray-800 dark:text-gray-300">
+              Own Domain Price
+            </label>
+            <input
+              type="text"
+              name="owndomainprice"
+              placeholder="₹ xxx"
+              value={siteSettings?.owndomainprice}
               onChange={handleChange}
               required
               className="w-full bg-gray-100 dark:bg-[#0e0e0f] border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600 outline-none transition"

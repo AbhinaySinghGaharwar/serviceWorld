@@ -1123,14 +1123,15 @@ export async function setChildPanelSettings(formData) {
     if (decoded.role !== "admin") return { error: "Access denied." };
 
     const domain = formData.get("domain");
-    const price = formData.get("price");
+    const subdomainprice = formData.get("subdomainprice");
+    const owndomainprice = formData.get("owndomainprice");
 
     const client = await clientPromise;
     const db = client.db("smmpanel");
 
     await db.collection("settings").updateOne(
       { key: "child_panel_settings" },
-      { $set: { domain, price, updatedAt: new Date() } },
+      { $set: { domain, subdomainprice,owndomainprice, updatedAt: new Date() } },
       { upsert: true }
     );
 
@@ -1149,7 +1150,6 @@ export async function getChildPanelSettings() {
     const client = await clientPromise;
     const db = client.db("smmpanel");
 
-    // Fetch existing settings from DB
     const settings = await db.collection("settings").findOne({
       key: "child_panel_settings",
     });
@@ -1157,14 +1157,16 @@ export async function getChildPanelSettings() {
     if (!settings) {
       return {
         domain: "yourpaneldomain.com",
-        price: "₹ 800",
+        subdomainprice: 499,
+        owndomainprice: 199,
         message: "Default values (not yet set by admin)",
       };
     }
 
     return {
       domain: settings.domain,
-      price: settings.price,
+      subdomainprice: settings.subdomainprice,
+      owndomainprice: settings.owndomainprice,
       updatedAt: settings.updatedAt,
     };
   } catch (err) {
@@ -1172,6 +1174,7 @@ export async function getChildPanelSettings() {
     return { error: err.message };
   }
 }
+
 
 
 

@@ -43,7 +43,7 @@ export default function Footer({ siteName }) {
           transition={{ duration: 0.6, delay: 0.15 }}
           className="flex flex-wrap justify-center md:justify-end gap-4 md:gap-6 text-xs md:text-sm font-medium"
         >
-          {[{ name: "Privacy Policy", href: "/privacy-policy" }, { name: "Terms of Service", href: "/terms" }, { name: "Refund Policy", href: "/refund-policy" }, { name: "Contact Us", href: "/contact" }].map((link, i) => (
+          {[{ name: "Privacy Policy", href: "/privacy-policy" }, { name: "Terms of Service", href: "/terms-of-service" }, { name: "Refund Policy", href: "/refund-policy" }, { name: "Contact Us", href: "/contact" }].map((link, i) => (
             <motion.li key={i} whileHover={{ scale: 1.06 }} transition={{ type: "spring", stiffness: 250 }}>
               <Link
                 href={link.href}

@@ -12,20 +12,29 @@ export default function ChildPanelPageClient({ settings, balance }) {
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  // Convert price
-  const basePrice = Number(String(settings?.price || "800").replace(/\D/g, ""));
-  const convertedPrice = Math.round(convert(basePrice));
+  // NEW STATES
+  const [domainType, setDomainType] = useState("subdomain"); 
+  const [subdomain, setSubdomain] = useState("");
+  const [ownDomain, setOwnDomain] = useState("");
+
+  // Password toggle
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const adminDomain = settings?.domain || "yourpaneldomain.com";
+
+  // PRICE BASED ON DOMAIN TYPE
+  const basePriceRaw =
+    domainType === "subdomain"
+      ? Number(settings?.subdomainprice || 800)
+      : Number(settings?.owndomainprice || 1200);
+
+  const convertedPrice = Math.round(convert(basePriceRaw));
   const convertedBalance = Math.round(convert(balance));
 
   const isLowBalance = convertedBalance < convertedPrice;
 
-  const adminDomain = settings?.domain || "yourpaneldomain.com";
-  const [subdomain, setSubdomain] = useState("");
-
-  // Password show/hide states
-  const [showPass, setShowPass] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-
+  // Handle subdomain input
   const handleDomainChange = (e) => {
     let value = e.target.value.trim();
     if (value.endsWith("." + adminDomain)) {
@@ -40,7 +49,15 @@ export default function ChildPanelPageClient({ settings, balance }) {
     if (isLowBalance) return;
 
     const formData = new FormData(e.target);
-    formData.set("domain", `${subdomain}.${adminDomain}`);
+
+    // SET CORRECT DOMAIN
+    if (domainType === "subdomain") {
+      formData.set("domain", `${subdomain}.${adminDomain}`);
+    } else {
+      formData.set("domain", ownDomain);
+    }
+
+    formData.set("domaintype", domainType);
 
     startTransition(async () => {
       const res = await createChildPanel({ formData });
@@ -54,7 +71,7 @@ export default function ChildPanelPageClient({ settings, balance }) {
     <div className="min-h-screen bg-gray-100 dark:bg-[#0F1117] text-gray-900 dark:text-gray-200 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
 
-        {/* Header */}
+        {/* HEADER */}
         <div>
           <h1 className="text-3xl font-bold">Create Your Child Panel</h1>
           <p className="text-gray-600 dark:text-gray-400">
@@ -62,11 +79,11 @@ export default function ChildPanelPageClient({ settings, balance }) {
           </p>
         </div>
 
-        {/* Container */}
+        {/* CONTAINER */}
         <div className="bg-white dark:bg-[#1A1F2B] border border-gray-300 dark:border-[#2B3143] rounded-2xl p-6 shadow-md dark:shadow-lg">
           <h2 className="text-xl font-bold mb-4">Panel Details</h2>
 
-          {/* Low Balance Warning */}
+          {/* LOW BALANCE ALERT */}
           {isLowBalance && (
             <div className="md:col-span-2 mb-4 p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-lg text-sm">
               <p>
@@ -90,29 +107,72 @@ export default function ChildPanelPageClient({ settings, balance }) {
             </div>
           )}
 
-          {/* Form */}
+          {/* FORM */}
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            {/* Subdomain */}
-            <div>
-              <label className="block mb-1 font-semibold">Subdomain</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="subdomain"
-                  value={subdomain}
-                  onChange={handleDomainChange}
-                  placeholder="mypanel"
-                  className="w-full bg-gray-100 dark:bg-[#0F1117] border border-gray-300 dark:border-[#2B3143] rounded-lg px-3 py-2 pr-32"
-                  required
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
-                  .{adminDomain}
-                </span>
+            {/* 🌐 DOMAIN TYPE SELECTOR */}
+            <div className="md:col-span-2">
+              <label className="block font-semibold mb-1">Choose Domain Type</label>
+
+              <div className="flex gap-6">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value="subdomain"
+                    checked={domainType === "subdomain"}
+                    onChange={() => setDomainType("subdomain")}
+                  />
+                  Use Free Subdomain
+                </label>
+
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value="owndomain"
+                    checked={domainType === "owndomain"}
+                    onChange={() => setDomainType("owndomain")}
+                  />
+                  Use Own Domain
+                </label>
               </div>
             </div>
 
-            {/* Currency */}
+            {/* SUBDOMAIN INPUT */}
+            {domainType === "subdomain" && (
+              <div>
+                <label className="block mb-1 font-semibold">Subdomain</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={subdomain}
+                    onChange={handleDomainChange}
+                    placeholder="mypanel"
+                    className="w-full bg-gray-100 dark:bg-[#0F1117] border border-gray-300 dark:border-[#2B3143] rounded-lg px-3 py-2 pr-32"
+                    required
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+                    .{adminDomain}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* OWN DOMAIN INPUT */}
+            {domainType === "owndomain" && (
+              <div>
+                <label className="block mb-1 font-semibold">Your Own Domain</label>
+                <input
+                  type="text"
+                  value={ownDomain}
+                  onChange={(e) => setOwnDomain(e.target.value.trim())}
+                  placeholder="example.com"
+                  className="w-full bg-gray-100 dark:bg-[#0F1117] border border-gray-300 dark:border-[#2B3143] rounded-lg px-3 py-2"
+                  required
+                />
+              </div>
+            )}
+
+            {/* CURRENCY */}
             <div>
               <label className="block mb-1 font-semibold">Currency</label>
               <select
@@ -126,7 +186,7 @@ export default function ChildPanelPageClient({ settings, balance }) {
               </select>
             </div>
 
-            {/* Username */}
+            {/* USERNAME */}
             <div>
               <label className="block mb-1 font-semibold">Username</label>
               <input
@@ -138,7 +198,7 @@ export default function ChildPanelPageClient({ settings, balance }) {
               />
             </div>
 
-            {/* Password */}
+            {/* PASSWORD */}
             <div>
               <label className="block mb-1 font-semibold">Password</label>
               <div className="relative">
@@ -158,7 +218,7 @@ export default function ChildPanelPageClient({ settings, balance }) {
               </div>
             </div>
 
-            {/* Confirm Password */}
+            {/* CONFIRM PASSWORD */}
             <div>
               <label className="block mb-1 font-semibold">Confirm Password</label>
               <div className="relative">
@@ -178,7 +238,7 @@ export default function ChildPanelPageClient({ settings, balance }) {
               </div>
             </div>
 
-            {/* Price */}
+            {/* PRICE */}
             <div>
               <label className="block mb-1 font-semibold">Price</label>
               <input
@@ -189,7 +249,7 @@ export default function ChildPanelPageClient({ settings, balance }) {
               />
             </div>
 
-            {/* Submit */}
+            {/* SUBMIT BUTTON */}
             <div className="md:col-span-2">
               <button
                 type="submit"
