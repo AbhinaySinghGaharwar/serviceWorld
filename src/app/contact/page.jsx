@@ -76,7 +76,7 @@ export default function ContactSupportPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
 
             <div>
-              <label classname="block font-semibold">Full Name</label>
+              <label className="block font-semibold">Full Name</label>
               <input
                 type="text"
                 name="name"
