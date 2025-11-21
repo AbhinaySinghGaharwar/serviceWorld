@@ -4,7 +4,8 @@ import { useCurrency } from "@/context/CurrencyContext";
 export default function BalanceDisplay({ balance }) {
   const { symbol, convert } = useCurrency();
 
-  if (balance == null) return null;
+  // If balance is null/undefined → treat as 0
+  const safeBalance = balance ?? 0;
 
   return (
     <div className="hidden sm:flex flex-col items-end">
@@ -13,7 +14,7 @@ export default function BalanceDisplay({ balance }) {
       </span>
 
       <span className="text-lg font-bold text-green-500">
-        {symbol}{convert(balance).toFixed(2)}
+        {symbol}{convert(safeBalance).toFixed(2)}
       </span>
     </div>
   );

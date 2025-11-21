@@ -3,19 +3,16 @@ import { useCurrency } from "@/context/CurrencyContext";
 export default function UserBalance({ user }) {
   const { currency, updateCurrency, symbol, convert } = useCurrency();
 
+  // Safely handle missing or null balance
+  const balance = user?.balance ?? 0;
+
   return (
     <div className="flex items-center gap-3">
 
       {/* Balance */}
-      {user?.balance != null ? (
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          Balance: {symbol}{convert(user.balance).toFixed(2)}
-        </p>
-      ):(
-         <p className="text-sm text-gray-600 dark:text-gray-300">
-          Balance: {symbol}{convert(user.balance).toFixed(2)}
-        </p>
-      )}
+      <p className="text-sm text-gray-600 dark:text-gray-300">
+        Balance: {symbol}{convert(balance).toFixed(2)}
+      </p>
 
       {/* Currency Selector */}
       <select
