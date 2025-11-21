@@ -1,6 +1,6 @@
-export const dynamic = "force-dynamic";   // ⬅️ FIX #1
-"use server";
 
+"use server";
+export const dynamic = "force-dynamic";   // ⬅️ FIX #1
 import AddFund from "./AddFund";
 import { getAllPaymentMethods } from "@/lib/adminServices";
 import { getUserTransactions } from "@/lib/userActions";
