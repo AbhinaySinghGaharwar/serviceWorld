@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";   // ⬅️ FIX #1
 "use server";
 
 import AddFund from "./AddFund";
@@ -6,7 +7,9 @@ import { getUserTransactions } from "@/lib/userActions";
 
 export default async function AddFundsPage() {
   const paymentMethods = await getAllPaymentMethods();
-  const { transactions = [] } = await getUserTransactions();
+
+  // FIX #2 — always guard against null
+  const { transactions = [] } = (await getUserTransactions()) || {};
 
   return (
     <AddFund
