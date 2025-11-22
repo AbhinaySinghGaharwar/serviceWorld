@@ -1,4 +1,10 @@
+"use client";
+
+import { useCurrency } from "@/context/CurrencyContext";
+
 export default function TransactionHistory({ transactions }) {
+  const { symbol, convert } = useCurrency();
+
   return (
     <div
       className="
@@ -53,20 +59,24 @@ export default function TransactionHistory({ transactions }) {
                     transition-all duration-200
                   "
                 >
+                  {/* UTR or ID */}
                   <td className="py-2 px-3 text-gray-800 dark:text-gray-200">
-                    {tx.utr}
+                    {tx.utr || tx.id}
                   </td>
 
+                  {/* Date */}
                   <td className="py-2 px-3 text-gray-700 dark:text-gray-300">
-                    {new Date(tx.createdAt).toLocaleString()}
+                    {new Date(tx.createdAt || tx.date).toLocaleString()}
                   </td>
 
+                  {/* Payment Method */}
                   <td className="py-2 px-3 capitalize text-gray-700 dark:text-gray-300">
-                    {tx.payment_type}
+                    {tx.payment_type || tx.method || "N/A"}
                   </td>
 
+                  {/* Amount (with currency conversion + symbol) */}
                   <td className="py-2 px-3 font-semibold text-gray-800 dark:text-gray-100">
-                    ₹{tx.payment_amount}
+                    {symbol}{convert(tx.payment_amount || tx.amount).toFixed(2)}
                   </td>
                 </tr>
               ))

@@ -1,6 +1,8 @@
 "use client";
+
 import QRSection from "./QRSection";
 import { useRouter } from "next/navigation";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function AddFundForm({
   paymentType,
@@ -17,6 +19,7 @@ export default function AddFundForm({
   Instructions,
 }) {
   const router = useRouter();
+  const { symbol } = useCurrency(); // symbol only, no convert used here
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -118,6 +121,7 @@ export default function AddFundForm({
           <label className="block font-semibold mb-2 text-gray-700 dark:text-gray-300">
             Enter UTR
           </label>
+
           <input
             type="text"
             value={utr}
@@ -139,24 +143,57 @@ export default function AddFundForm({
           <label className="block font-semibold mb-2 text-gray-700 dark:text-gray-300">
             Amount
           </label>
-          <input
-            type="number"
-            step="0.01"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            required
-            className="
-              w-full bg-gray-100 dark:bg-[#0C0F17]
-              border border-gray-300 dark:border-[#2B3143]
-              rounded-lg px-3 py-2
-              text-gray-800 dark:text-gray-200
-              outline-none
-              focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600
-            "
-          />
+
+          <div className="relative">
+            {/* Currency Symbol */}
+            <span
+              className="
+                absolute left-3 top-1/2 -translate-y-1/2
+                text-gray-600 dark:text-gray-400
+                pointer-events-none
+              "
+            >
+              {symbol}
+            </span>
+
+          <div className="relative">
+  <span
+    className="
+      absolute left-3 top-1/2 -translate-y-1/2
+      text-gray-600 dark:text-gray-400 pointer-events-none
+    "
+  >
+    {symbol}
+  </span>
+
+  <input
+    type="number"
+    step="0.01"
+    value={amount}
+    onChange={(e) => {
+      setAmount(e.target.value); // ← Allow free typing
+    }}
+    onBlur={() => {
+      if (amount !== "" && !isNaN(amount)) {
+        setAmount(Number(amount).toFixed(2)); // ← Format only when leaving input
+      }
+    }}
+    required
+    className="
+      w-full bg-gray-100 dark:bg-[#0C0F17]
+      border border-gray-300 dark:border-[#2B3143]
+      rounded-lg px-8 py-2
+      text-gray-800 dark:text-gray-200
+      outline-none
+      focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600
+    "
+  />
+</div>
+
+          </div>
         </div>
 
-        {/* Submit */}
+        {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}

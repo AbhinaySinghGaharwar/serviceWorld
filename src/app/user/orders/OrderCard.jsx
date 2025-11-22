@@ -10,8 +10,9 @@ import {
   FaSpinner,
   FaTimesCircle,
 } from "react-icons/fa";
+import { useCurrency } from "@/context/CurrencyContext";
 
-/* ▸ Status Style (Gray Theme) */
+/* ▸ Status Background Colors */
 const STATUS_STYLES = {
   Pending: "bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300",
   Completed: "bg-green-500/20 text-green-500",
@@ -21,7 +22,7 @@ const STATUS_STYLES = {
   Inprogress: "bg-purple-500/20 text-purple-400",
 };
 
-/* ▸ Status Icons (Neutral Gray) */
+/* ▸ Status Icons */
 const STATUS_ICONS = {
   Pending: <FaClock className="inline mr-1" />,
   Completed: <FaCheckCircle className="inline mr-1" />,
@@ -32,6 +33,13 @@ const STATUS_ICONS = {
 };
 
 export default function OrderCard({ order }) {
+  const { symbol, convert } = useCurrency();
+
+  const formattedCharge = (() => {
+    const num = Number(order?.charge || 0);
+    return convert(num).toFixed(2);
+  })();
+
   return (
     <div
       className="
@@ -106,7 +114,7 @@ export default function OrderCard({ order }) {
           <div className="flex items-center gap-1">
             <FaRupeeSign className="text-green-500 dark:text-green-400" />
             <span className="font-semibold text-green-600 dark:text-green-400">
-              {order.charge}
+              {symbol}{formattedCharge}
             </span>
           </div>
         </div>

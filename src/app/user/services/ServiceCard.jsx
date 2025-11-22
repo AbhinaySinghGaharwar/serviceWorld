@@ -1,9 +1,17 @@
 import { MdShoppingCart, MdInfoOutline } from "react-icons/md";
 import { useState } from "react";
 import ServiceDetailsPopup from "./ServiceDetailsPopup";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function ServiceCard({ service, getIconForService, onSelect }) {
   const [showDetails, setShowDetails] = useState(false);
+
+  const { symbol, convert } = useCurrency();
+
+  const formattedRate = (() => {
+    const num = Number(service.rate || 0);
+    return convert(num).toFixed(2);
+  })();
 
   return (
     <div
@@ -39,7 +47,8 @@ export default function ServiceCard({ service, getIconForService, onSelect }) {
       </p>
 
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-        <strong className="text-gray-800 dark:text-gray-200">Rate / 1K:</strong> ₹{service.rate}
+        <strong className="text-gray-800 dark:text-gray-200">Rate / 1K:</strong> 
+        {" "}{symbol}{formattedRate}
       </p>
 
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">

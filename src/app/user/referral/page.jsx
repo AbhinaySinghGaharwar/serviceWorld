@@ -45,7 +45,7 @@ export default function Referral() {
         const settings = await getAffiliateSettings();
         const bal = await getUserBalance();
         const req = await getUserWithdrawRequests();
-console.log(req)
+
         if (settings) {
           setCommissionRate(settings.commission_rate || 5);
           setMinimumPayout(settings.minimum_payout || 50);
