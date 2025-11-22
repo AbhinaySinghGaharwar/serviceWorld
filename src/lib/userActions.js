@@ -553,3 +553,147 @@ export async function createRandomOrders() {
     return { error: "Server error: " + err.message };
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+export async function refferalWidrawn(formData) {
+  try {
+    // 1️⃣ Read Token
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+      return { success: false, message: "Unauthorized token." };
+    }
+
+    // 2️⃣ Verify Token
+    let userData;
+    try {
+      userData = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return { success: false, message: "Invalid or expired token." };
+    }
+
+    // 3️⃣ Validate Amount
+    const amount = Number(formData.get("amount"));
+    if (!amount || amount <= 0) {
+      return { success: false, message: "Invalid withdrawal amount." };
+    }
+
+    // 4️⃣ Connect to DB
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+    const usersCollection = db.collection("users");
+
+    // 5️⃣ Validate user existence
+    const user = await usersCollection.findOne({ _id: new ObjectId(userData.id) });
+
+    console.log("User:", user);
+
+    if (!user) {
+      return { success: false, message: "User not found." };
+    }
+
+    // 6️⃣ Check balance
+    const currentBalance = Number(user.balance) || 0;
+
+    if (amount > currentBalance) {
+      return {
+        success: false,
+        message: "Withdrawal amount exceeds available balance.",
+      };
+    }
+
+    // 7️⃣ Deduct balance safely (no $inc problem)
+    const newBalance = currentBalance - amount;
+
+    await usersCollection.updateOne(
+      { _id: new ObjectId(userData.id) },
+      { $set: { balance: newBalance } }
+    );
+
+    // 8️⃣ Save withdrawal request
+    await db.collection("refferalWidrawn").insertOne({
+      userid: new ObjectId(userData.id),
+      amount,
+      status: "Pending",
+      userEmail: userData.email,
+      date: Date.now(),
+    });
+
+    return {
+      success: true,
+      message: "Withdrawal submitted successfully.",
+      newBalance,
+    };
+
+  } catch (error) {
+    console.error("Withdraw error:", error);
+    return { success: false, message: "Something went wrong." };
+  }
+}
+
+
+
+
+
+export async function getUserWithdrawRequests() {
+  try {
+    // 1️⃣ Read token
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+      return { success: false, message: "Unauthorized token." };
+    }
+
+    // 2️⃣ Verify token
+    let userData;
+    try {
+      userData = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return { success: false, message: "Invalid or expired token." };
+    }
+
+    // 3️⃣ Connect DB
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    // 4️⃣ Convert token ID → ObjectId
+    const userId = new ObjectId(userData.id);
+
+    // 5️⃣ Fetch withdrawal requests
+    const requests = await db
+      .collection("refferalWidrawn")
+      .find({ userid: userId })
+      .sort({ date: -1 })
+      .toArray();
+
+    // 6️⃣ Convert BSON → Plain JS object
+    const cleanRequests = requests.map((req) => ({
+      id: req._id.toString(),
+      userid: req.userid.toString(),
+      amount: Number(req.amount),
+      status: req.status,
+      userEmail: req.userEmail,
+      date: req.date, // timestamp is already serializable
+    }));
+
+    return {
+      success: true,
+      withdrawals: cleanRequests,
+    };
+
+  } catch (error) {
+    console.error("Get withdrawal requests error:", error);
+    return { success: false, message: "Something went wrong." };
+  }
+}

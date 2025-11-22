@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import BalanceDisplay from "./BalanceDisplay";
 import { FaBars, FaSun, FaMoon, FaUserCircle } from "react-icons/fa";
-import { FiSettings, FiLogOut } from "react-icons/fi";
+import UserDropdown from "./UserProfileDropdown";
 
 export default function Header({
   dark = true,
@@ -45,7 +45,6 @@ export default function Header({
     >
       {/* LEFT section */}
       <div className="flex items-center gap-3">
-
         {/* Sidebar Toggle */}
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -75,13 +74,12 @@ export default function Header({
             text-gray-700
           "
         >
-          {websitename.siteName}
+          {websitename?.siteName}
         </Link>
       </div>
 
       {/* RIGHT Section */}
       <div className="flex items-center gap-4 relative">
-
         {/* Dark Mode Toggle */}
         <button
           onClick={toggleDarkMode}
@@ -99,8 +97,7 @@ export default function Header({
         </button>
 
         {/* Balance */}
-       
-       <BalanceDisplay balance={user?.balance} />
+        <BalanceDisplay balance={user?.balance} />
 
         {/* Profile Button */}
         <button
@@ -118,61 +115,13 @@ export default function Header({
           <FaUserCircle size={22} />
         </button>
 
-        {/* DROPDOWN */}
-        {menuOpen && (
-          <div
-            className="
-              absolute right-0 top-12 w-48 rounded-xl overflow-hidden z-50
-              border shadow-lg transition
-
-              /* Dark */
-              dark:bg-[#1A1F2B] dark:border-gray-700 dark:text-white
-
-              /* Light */
-              bg-white border-gray-200 text-gray-700
-            "
-          >
-            {/* Settings */}
-            <button
-              className="
-                flex items-center gap-2 px-4 py-2 w-full text-sm transition
-
-                /* Dark */
-                dark:hover:bg-white/10
-
-                /* Light */
-                hover:bg-gray-100
-              "
-              onClick={() => {
-                setMenuOpen(false);
-                router.push("/user/settings");
-              }}
-            >
-              <FiSettings className="text-gray-700 dark:text-white" />
-              Settings
-            </button>
-
-            {/* Logout */}
-            <button
-              className="
-                flex items-center gap-2 px-4 py-2 w-full text-sm text-red-500 transition
-
-                /* Dark */
-                dark:hover:bg-red-500/10
-
-                /* Light */
-                hover:bg-red-100
-              "
-              onClick={() => {
-                setMenuOpen(false);
-                handleLogout();
-              }}
-            >
-              <FiLogOut className="dark:text-red-400" />
-              Logout
-            </button>
-          </div>
-        )}
+        {/* Dropdown Component */}
+        <UserDropdown
+          isOpen={menuOpen}
+          onClose={() => setMenuOpen(false)}
+          onSettings={() => router.push("/user/settings")}
+          onLogout={handleLogout}
+        />
       </div>
     </header>
   );
