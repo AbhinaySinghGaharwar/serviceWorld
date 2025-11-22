@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Menu, X, Bell, User, LogOut, Settings } from "lucide-react";
-import { logoutUser } from "@/lib/authentication";
+import { LogoutAdmin } from "@/lib/authentication";
 import ThemeSwitcher from "../components/ThemeSwitcher";
 const menuItems = [
   { name: "Dashboard", path: "/admin/dashboard" },
@@ -13,6 +13,7 @@ const menuItems = [
   { name: "Orders", path: "/admin/orders" },
   { name: "Payments", path: "/admin/payments" },
   { name: "Tickets", path: "/admin/tickets" },
+  { name: "referal requests", path: "/admin/rrequest" },
   { name: "Settings", path: "/admin/settings" },
 ];
 
@@ -111,7 +112,7 @@ export default function AdminLayout({ children }) {
                   </Link>
 
                   <button
-                    onClick={async () => await logoutUser()}
+                    onClick={async () => await LogoutAdmin()}
                     className="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
                   >
                     <LogOut size={16} /> Logout

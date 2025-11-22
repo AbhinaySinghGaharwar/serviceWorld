@@ -1551,3 +1551,104 @@ export async function addTestOrdersAction() {
     };
   }
 }
+
+
+
+
+
+export async function getAllWithdrawRequests() {
+  try {
+    // 1️⃣ Read token
+    const cookieStore = await cookies();
+    const token = cookieStore.get("admin_token")?.value;
+
+    if (!token) {
+      return { success: false, message: "Unauthorized token." };
+    }
+
+
+
+    // 4️⃣ Connect DB
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    // 5️⃣ Fetch ALL withdrawal requests (no userid filter)
+    const requests = await db
+      .collection("refferalWidrawn")
+      .find({})
+      .sort({ date: -1 }) // newest first
+      .toArray();
+
+    // 6️⃣ Convert BSON → plain JS objects
+    const cleanRequests = requests.map((req) => ({
+      id: req._id.toString(),
+      userid: req.userid instanceof ObjectId ? req.userid.toString() : req.userid,
+      amount: Number(req.amount),
+      status: req.status,
+      userEmail: req.userEmail,
+      date: req.date, // timestamp or Date is fine for JSON
+    }));
+
+    return {
+      success: true,
+      withdrawals: cleanRequests,
+    };
+  } catch (error) {
+    console.error("Get ALL withdrawal requests (admin) error:", error);
+    return { success: false, message: "Something went wrong." };
+  }
+}
+
+
+
+
+export async function updateWithdrawStatus(requestId, newStatus) {
+  try {
+    // 1️⃣ Read Admin Token
+    const cookieStore = await cookies();
+    const token = cookieStore.get("admin_token")?.value;
+
+    if (!token) {
+      return { success: false, message: "Unauthorized token." };
+    }
+
+    // 2️⃣ Validate request ID
+    if (!requestId || !ObjectId.isValid(requestId)) {
+      return { success: false, message: "Invalid withdrawal ID." };
+    }
+
+    // 3️⃣ Validate status
+    const validStatuses = ["Pending", "Completed", "Rejected", "Processing"];
+    if (!validStatuses.includes(newStatus)) {
+      return { success: false, message: "Invalid status value." };
+    }
+
+    // 4️⃣ Connect DB
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    // 5️⃣ Update withdrawal status
+    const result = await db.collection("refferalWidrawn").updateOne(
+      { _id: new ObjectId(requestId) },
+      {
+        $set: {
+          status: newStatus,
+          updatedAt: Date.now(),
+        },
+      }
+    );
+
+    if (result.modifiedCount === 0) {
+      return { success: false, message: "Request not found or already updated." };
+    }
+
+    return {
+      success: true,
+      message: "Withdrawal status updated successfully.",
+    };
+
+  } catch (error) {
+    console.error("Admin update withdraw status error:", error);
+    return { success: false, message: "Something went wrong." };
+  }
+}
