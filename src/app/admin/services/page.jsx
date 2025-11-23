@@ -7,10 +7,10 @@ const services=await getServices()
 
 const customservices= await GetServicesAction()
 const Allservices=[
+   ...customservices,
   ...services,
-  ...customservices,
+ 
 ]
-console.log(customservices)
 
   return (
    <>

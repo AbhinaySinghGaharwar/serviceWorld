@@ -40,13 +40,13 @@ async function verifyAdmin() {
 
         // 3) Clean + normalize input
         const serviceId = Number(data.id);
-        const providerId = Number(data.provider);
-        const price = Number(data.price);
+      
+        const rate = Number(data.rate);
         const min = data.min ? Number(data.min) : null;
         const max = data.max ? Number(data.max) : null;
-
+console.log(data)
         // 4) Validation
-        if (!serviceId || !data.name || !providerId || !price) {
+        if (!serviceId || !data.name || !data.provider || !rate) {
         return { status: false, message: "Missing required fields" };
         }
 
@@ -60,13 +60,13 @@ async function verifyAdmin() {
         await collection.insertOne({
         id: serviceId,
         name: data.name,
-        description: data.description || "",
+        desc: data.description || "",
         category: data.category || "",
         type: data.type || "service",
         refill: Boolean(data.refill),
         cancelAllowed: Boolean(data.cancelAllowed),
-        provider: providerId,
-        price,
+        provider: data.provider,
+        rate,
         min,
         max,
         status: data.status || "enabled",
@@ -103,11 +103,11 @@ export async function GetServicesAction() {
       name: s.name,
       type: s.type,
       refill: s.refill,
-      desc:s.description,
+      desc:s.desc,
       cancelAllowed: s.cancelAllowed,
       provider: s.provider,
       category:s.category,
-      rate: s.price,
+      rate: s.rate,
       min: s.min,
       max: s.max,
       status: s.status,

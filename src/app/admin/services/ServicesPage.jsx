@@ -60,7 +60,7 @@ export default function ServicesPage({ services }) {
   ];
 
   return (
-    <div className="min-h-screen px-3 sm:px-6 lg:px-10 py-8 bg-gray-100 text-gray-800 dark:bg-[#0F1117] dark:text-gray-200 transition-all">
+    <div className="min-h-screen   py-8 bg-gray-100 text-gray-800 dark:bg-[#0F1117] dark:text-gray-200 transition-all">
       {/* TOP BAR */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         

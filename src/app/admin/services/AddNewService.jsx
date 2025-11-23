@@ -5,7 +5,6 @@ import { getProvidersAction } from "@/lib/providerActions";
 import { AddNewServiceAction } from "@/lib/customservices";
 import { useCurrency } from "@/context/CurrencyContext";
 
-// Icons
 import {
   FaInstagram,
   FaFacebookF,
@@ -21,7 +20,24 @@ import {
   FaCircle,
 } from "react-icons/fa";
 
-const icons =  [
+const icons = [
+  { name: "Instagram", icon: <FaInstagram size={28} /> },
+  { name: "Facebook", icon: <FaFacebookF size={28} /> },
+  { name: "YouTube", icon: <FaYoutube size={28} /> },
+  { name: "Twitter", icon: <FaTwitter size={28} /> },
+  { name: "Spotify", icon: <FaSpotify size={28} /> },
+  { name: "TikTok", icon: <FaTiktok size={28} /> },
+  { name: "Telegram", icon: <FaTelegramPlane size={28} /> },
+  { name: "LinkedIn", icon: <FaLinkedinIn size={28} /> },
+  { name: "Discord", icon: <FaDiscord size={28} /> },
+  { name: "Website", icon: <FaGlobe size={28} /> },
+  { name: "Explore", icon: <FaStar size={28} /> },
+  { name: "Network", icon: <FaCircle size={28} /> },
+];
+
+
+// 🔹 Your category list
+const CATEGORY_OPTIONS = [
   "Instagram Shares",
   "Instagram : Comments [ RANDOM ]",
   "Youtube video Views ",
@@ -66,6 +82,18 @@ const icons =  [
   "Facebook",
 ];
 
+const CATEGORY_SELECT_OPTIONS = CATEGORY_OPTIONS.map((c) => {
+  const match = icons.find((i) =>
+    c.toLowerCase().includes(i.name.toLowerCase())
+  );
+
+  return {
+    value: c,
+    label: c,
+    icon: match ? match.icon : <FaCircle size={20} />,
+  };
+});
+
 
 export default function AddNewService() {
   const { symbol, convert } = useCurrency();
@@ -97,8 +125,9 @@ export default function AddNewService() {
   useEffect(() => {
     const loadProviders = async () => {
       const res = await getProvidersAction();
+
       setProviders(res || []);
-      if (res.length > 0) setSelectedProvider(String(res[0].id));
+      if (res?.length > 0) setSelectedProvider(String(res[0].name));
     };
     loadProviders();
   }, []);
@@ -117,13 +146,13 @@ export default function AddNewService() {
       const payload = {
         id: Number(serviceId),
         name: serviceName,
-        description: desc,
+        desc: desc,
         category,
         type: serviceType,
         refill: refill === "on",
         cancelAllowed: cancelAllowed === "on",
-        provider: Number(selectedProvider),
-        price: Number(price),
+        provider: selectedProvider,
+        rate: Number(price),
         min: min ? Number(min) : null,
         max: max ? Number(max) : null,
         status,
@@ -184,13 +213,11 @@ export default function AddNewService() {
       {showPopup && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center px-2 z-50">
           <div className="bg-white dark:bg-[#121212] w-full max-w-lg rounded-xl shadow-xl border dark:border-gray-700 p-4 max-h-[90vh] overflow-y-auto animate-fadeIn">
-
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
               Add New Service
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-
               <Input label="Service ID *" value={serviceId} onChange={setServiceId} />
               <Input label="Service Name *" value={serviceName} onChange={setServiceName} />
 
@@ -203,15 +230,19 @@ export default function AddNewService() {
 
               {/* Category + Service Type */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Select
-                  label="Category"
-                  value={category}
-                  onChange={setCategory}
-                  options={icons.map((i) => ({
-                    value: i.name,
-                    label: i.name,
-                  }))}
-                />
+   <CustomSelectWithIcons
+  label="Category"
+  value={
+    CATEGORY_SELECT_OPTIONS.find((o) => o.value === category) || {
+      label: "Select Category",
+      icon: <FaCircle size={20} />,
+    }
+  }
+  onChange={(opt) => setCategory(opt.value)}
+  options={CATEGORY_SELECT_OPTIONS}
+/>
+
+
 
                 <Select
                   label="Service Type"
@@ -231,7 +262,7 @@ export default function AddNewService() {
                 value={selectedProvider}
                 onChange={setSelectedProvider}
                 options={providers.map((p) => ({
-                  value: p.id,
+                  value: p.name,
                   label: p.name,
                 }))}
               />
@@ -295,7 +326,6 @@ export default function AddNewService() {
                   {loading ? "Saving..." : "Submit"}
                 </button>
               </div>
-
             </form>
           </div>
         </div>
@@ -307,8 +337,14 @@ export default function AddNewService() {
           animation: fadeIn 0.25s ease-out;
         }
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
       `}</style>
     </div>
@@ -340,8 +376,8 @@ function Select({ label, value, onChange, options }) {
         onChange={(e) => onChange(e.target.value)}
         className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200"
       >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
+        {options.map((opt, index) => (
+          <option key={index} value={opt.value}>
             {opt.label}
           </option>
         ))}
@@ -360,6 +396,53 @@ function TextareaField({ label, value, onChange, placeholder }) {
         placeholder={placeholder}
         className="w-full p-3 rounded-lg min-h-[100px] resize-y bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200"
       />
+    </div>
+  );
+}
+function CustomSelectWithIcons({ label, value, onChange, options }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">
+        {label}
+      </label>
+
+      {/* Selected Box */}
+      <div
+        onClick={() => setOpen(!open)}
+        className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800 border 
+        border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200
+        flex justify-between items-center cursor-pointer"
+      >
+        <span className="flex items-center gap-2">
+          {value?.icon}
+          {value?.label || "Select Category"}
+        </span>
+        <span className="text-gray-500">▼</span>
+      </div>
+
+      {/* Dropdown */}
+      {open && (
+        <div
+          className="absolute z-50 mt-1 w-full max-h-64 overflow-y-auto rounded-lg 
+          bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 shadow-lg"
+        >
+          {options.map((opt, i) => (
+            <div
+              key={i}
+              onClick={() => {
+                onChange(opt);
+                setOpen(false);
+              }}
+              className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
+              {opt.icon}
+              <span className="text-gray-700 dark:text-gray-200">{opt.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
