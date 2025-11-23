@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,10 +14,11 @@ import {
 
 import SearchBar from "./SearchBar";
 import ServiceCard from "./ServiceCard";
-import BuyPopup from "./BuyPopup";
+import ViewModal from "./ViewModal";
 
 
 export default function ServicesList({ services = [] }) {
+  const router= useRouter()
   const [selectedService, setSelectedService] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -152,32 +154,49 @@ export default function ServicesList({ services = [] }) {
                       ({list.length})
                     </span>
                   </div>
+<div className="overflow-x-auto mt-5">
+  <table className="min-w-full border border-gray-300 dark:border-gray-800 rounded-lg bg-white dark:bg-[#1A1C1F]">
+    
+    <thead className="bg-gray-100 dark:bg-[#2A2C31] text-gray-700 dark:text-gray-300">
+      <tr>
+        <th className="px-4 py-3 text-left font-semibold">ID</th>
+        <th className="px-4 py-3 text-left font-semibold">Service</th>
+        <th className="px-4 py-3 text-left font-semibold">Description</th>
+        <th className="px-4 py-3 text-left font-semibold">Rate</th>
+        <th className="px-4 py-3 text-left font-semibold">Min</th>
+        <th className="px-4 py-3 text-left font-semibold">Max</th>
+        <th className="px-4 py-3 text-center font-semibold">Action</th>
+      </tr>
+    </thead>
 
-                  {/* Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {list.map((service, index) => (
-                      <ServiceCard
-                        key={service.service || index}
-                        service={service}
-                        getIconForService={getIconForService}
-                        onSelect={setSelectedService}
-                      />
-                    ))}
-                  </div>
+    <tbody className="text-gray-700 dark:text-gray-300">
+      {list.map((service, index) => (
+        <ServiceCard
+          key={service.service || index}
+          service={service}
+          getIconForService={getIconForService}
+          onSelect={setSelectedService}
+        />
+      ))}
+    </tbody>
+
+  </table>
+</div>
+
+
                 </motion.div>
               )
             )
           )}
 
           {/* Popup */}
-          <AnimatePresence>
-            {selectedService && (
-              <BuyPopup
-                selectedService={selectedService}
-                setSelectedService={setSelectedService}
-              />
-            )}
-          </AnimatePresence>
+         {selectedService && (
+  <ViewModal
+    service={selectedService}
+    onClose={() => setSelectedService(null)}
+  />
+)}
+
         </div>
       </div>
     </>

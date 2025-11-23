@@ -39,7 +39,7 @@ export default function SignupForm() {
   const [usernameExists, setUsernameExists] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [captchaValue, setCaptchaValue] = useState(null);
+
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -81,11 +81,11 @@ export default function SignupForm() {
   const onSubmit = async (data) => {
     if (usernameExists) return setMessage("Username already exists");
     if (emailExists) return setMessage("Email already exists");
-    if (!captchaValue) return setMessage("Please complete CAPTCHA");
+  
 
     setLoading(true);
     try {
-      const res = await registerUser({ ...data, captcha: captchaValue });
+      const res = await registerUser({ ...data  });
       setMessage(res.message);
       router.push("/user/dashboard");
     } catch (err) {
@@ -166,7 +166,7 @@ export default function SignupForm() {
 
           {/* Mobile Number */}
           <div className="relative">
-            <FaPhone className="absolute left-4 top-3.5 text-gray-500 dark:text-gray-300" />
+            <FaPhone className="absolute left-4 top-3.5 text-gray-500 dark:text-gray-300 transform scale-x-[-1]" />
             <input
               type="text" 
               maxLength={13}
@@ -232,15 +232,6 @@ export default function SignupForm() {
             <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>
           )}
 
-          {/* Responsive CAPTCHA */}
-          <div className="w-full flex justify-center">
-            <div className="transform scale-90 sm:scale-100 origin-top">
-              <ReCAPTCHA
-                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-                onChange={setCaptchaValue}
-              />
-            </div>
-          </div>
 
           {/* BUTTON */}
           <button

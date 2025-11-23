@@ -4,8 +4,6 @@ import clientPromise from "@/lib/mongodb";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
-import { verifyCaptcha } from "@/lib/recaptha";
-
 // =========================
 // RATE LIMIT CONFIGURATION
 // =========================
@@ -33,19 +31,18 @@ function checkRateLimit(ip) {
 // =========================
 // USER SIGNUP
 // =========================
-export async function registerUser({ email, username, password,mobile, captcha, ip = "127.0.0.1" }) {
-  console.log(email,username,password,captcha,ip)
+export async function registerUser({ email, username, password,mobile, ip = "127.0.0.1" }) {
+
   try {
     if (checkRateLimit(ip)) {
       return { error: "Too many requests, try again later." };
     }
 
-    if (!email || !username || !password || !captcha || !mobile) {
+    if (!email || !username || !password || !mobile) {
       return { error: "Missing fields or CAPTCHA" };
     }
 
-    const isHuman = await verifyCaptcha(captcha);
-    if (!isHuman) return { error: "CAPTCHA verification failed" };
+   
 
     const client = await clientPromise;
     const db = client.db("smmpanel");
@@ -81,7 +78,7 @@ export async function registerUser({ email, username, password,mobile, captcha, 
 // =========================
 
 
-export async function loginUser({ email, password, captcha, ip = "127.0.0.1" }) {
+export async function loginUser({ email, password, ip = "127.0.0.1" }) {
   try {
     // 🧠 1. Rate limiting
     if (checkRateLimit(ip)) {
@@ -89,13 +86,11 @@ export async function loginUser({ email, password, captcha, ip = "127.0.0.1" }) 
     }
 
     // 🧩 2. Field validation
-    if (!email || !password || !captcha) {
+    if (!email || !password ) {
       return { error: "Missing fields or CAPTCHA." };
     }
 
-    // 🤖 3. Verify CAPTCHA
-    const isHuman = await verifyCaptcha(captcha);
-    if (!isHuman) return { error: "CAPTCHA verification failed." };
+  
 
     // ⚙️ 4. Connect to database
     const client = await clientPromise;

@@ -1,58 +1,56 @@
 export default function ServiceCard({ service, getIconForService, onSelect }) {
   return (
-    <div
-      className="
-        bg-white dark:bg-[#1A1F2B]
-        border border-gray-200 dark:border-[#2B3143]
-        rounded-2xl p-5 
-        transition-all duration-300 
-        hover:border-[#4A6CF7] 
-        hover:shadow-lg hover:shadow-[#4A6CF7]/20
-      "
-    >
-      <div>
-        {/* Title + Icon */}
-        <div className="flex items-center gap-3 mb-3">
-          {getIconForService(service.name)}
-          <h3 className="text-lg font-semibold text-[#1A1A1A] dark:text-white">
-            {service.name}
-          </h3>
-        </div>
+    <tr className="border-b border-gray-300 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-[#2A2C31] transition">
 
-        {/* ID */}
-        <p className="text-sm text-[#4B5563] dark:text-[#A0AEC3] mb-1">
-          <strong className="text-[#4A6CF7]">ID:</strong> {service.service}
-        </p>
+      {/* ID */}
+      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+        {service.service}
+      </td>
 
-        {/* Rate */}
-        <p className="text-sm text-[#4B5563] dark:text-[#A0AEC3] mb-1">
-          <strong className="text-[#16D1A5]">Rate / 1K:</strong> ${service.rate}
-        </p>
+      {/* Icon + Name */}
+      <td className="px-4 py-3 flex items-center gap-3 text-gray-700 dark:text-gray-300">
+        {getIconForService(service.name)}
+        <span className="text-sm font-semibold">
+          {service.name}
+        </span>
+      </td>
 
-        {/* Min */}
-        <p className="text-sm text-[#4B5563] dark:text-[#A0AEC3] mb-1">
-          <strong className="text-[#16D1A5]">Min:</strong> {service.min}
-        </p>
+      {/* Description */}
+      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 max-w-[300px] truncate">
+        {service.desc || "-"}
+      </td>
 
-        {/* Max */}
-        <p className="text-sm text-[#4B5563] dark:text-[#A0AEC3] mb-1">
-          <strong className="text-[#16D1A5]">Max:</strong> {service.max}
-        </p>
-      </div>
+      {/* Rate */}
+      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+        ${service.rate}
+      </td>
 
-      {/* Buy Button */}
-      <button
-        onClick={() => onSelect(service)}
-        className="
-          mt-4 w-full px-4 py-2 rounded-md 
-          bg-[#4A6CF7] text-white 
-          font-semibold
-          hover:bg-[#3D5DE0]
-          transition shadow-md
-        "
-      >
-        Buy
-      </button>
-    </div>
+      {/* Min */}
+      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+        {service.min}
+      </td>
+
+      {/* Max */}
+      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+        {service.max}
+      </td>
+
+      {/* Action */}
+      <td className="px-4 py-3 text-center">
+     <button
+  onClick={() => onSelect(service)}
+  className="
+    px-4 py-1 rounded-md 
+    bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm 
+    hover:bg-gray-300 dark:hover:bg-gray-600 
+    transition shadow
+  "
+>
+  View
+</button>
+
+      </td>
+
+    </tr>
   );
 }

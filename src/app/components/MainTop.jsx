@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import ReCAPTCHA from "react-google-recaptcha";
+
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -18,7 +18,6 @@ const schema = yup.object().shape({
 
 export default function MainTop({ websiteName }) {
   const router = useRouter();
-  const recaptchaRef = useRef(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -33,17 +32,11 @@ export default function MainTop({ websiteName }) {
 
   const onSubmit = async (data) => {
     setMessage("");
-    const captcha = recaptchaRef.current?.getValue();
-
-    if (!captcha) {
-      setMessage("Please complete the CAPTCHA.");
-      return;
-    }
-
+  
     setLoading(true);
 
     try {
-      const res = await loginUser({ ...data, captcha });
+      const res = await loginUser({ ...data });
 
       if (!res.success) {
         setMessage(res.message || res.error);
@@ -53,7 +46,7 @@ export default function MainTop({ websiteName }) {
     } catch (err) {
       setMessage(err?.message || "Login failed.");
     } finally {
-      recaptchaRef.current?.reset();
+ 
       setLoading(false);
     }
   };
@@ -144,15 +137,7 @@ export default function MainTop({ websiteName }) {
 </div>
 
 
-           {/* CAPTCHA (Responsive) */}
-<div className="w-full flex justify-center">
-  <div className="scale-[0.85] sm:scale-100 origin-top">
-    <ReCAPTCHA
-      ref={recaptchaRef}
-      sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
-    />
-  </div>
-</div>
+
 
 
             {/* Remember + Forgot */}
