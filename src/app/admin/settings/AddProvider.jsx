@@ -39,6 +39,7 @@ export default function AddProvider() {
   async function loadProviders() {
     setTableLoading(true);
     const res = await getProvidersAction();
+    console.log(res)
     setProviders(res || []);
     setTableLoading(false);
   }
@@ -172,7 +173,7 @@ export default function AddProvider() {
           <thead className="bg-gray-100 dark:bg-gray-700">
             <tr>
               <th className="p-3 font-semibold">ID</th>
-              <th className="p-3 font-semibold">Name</th>
+              <th className="p-3 font-semibold">Balance</th>
               <th className="p-3 font-semibold">Provider URL</th>
               <th className="p-3 font-semibold">API Key</th>
               <th className="p-3 font-semibold">Actions</th>
@@ -199,7 +200,7 @@ export default function AddProvider() {
                   className="border-t hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   <td className="p-3">{item.id}</td>
-                  <td className="p-3">{item.name}</td>
+                  <td className="p-3">{item.balance}</td>
                   <td className="p-3">{item.providerUrl}</td>
                   <td className="p-3">{item.apiKey}</td>
 

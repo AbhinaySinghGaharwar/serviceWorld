@@ -86,6 +86,8 @@ export async function addProviderAction({ id, name, providerUrl, apiKey }) {
 
 
 
+import axios from "axios";
+
 export async function getProvidersAction() {
   try {
     const cookieStore = await cookies();
@@ -106,21 +108,47 @@ export async function getProvidersAction() {
 
     const providers = await collection.find({}).sort({ id: 1 }).toArray();
 
-    // 🔥 Convert to plain objects
-    const plainProviders = providers.map((p) => ({
-      id: p.id,
-      name: p.name,
-      providerUrl: p.providerUrl,
-      apiKey: p.apiKey,
-      createdAt: p.createdAt ? p.createdAt.toString() : null, 
-    }));
+    // 🔥 Fetch balance using POST (same format as your getServices())
+    const providersWithBalance = await Promise.all(
+      providers.map(async (p) => {
+        let balance = null;
+        let currency = null;
 
-    return plainProviders;
+        try {
+          const params = new URLSearchParams();
+          params.append("key", p.apiKey);
+          params.append("action", "balance");
+
+          const res = await axios.post(p.providerUrl, params, {
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          });
+
+          balance = res.data?.balance ?? null;
+          currency = res.data?.currency ?? null;
+        } catch (err) {
+          console.error("Balance fetch error:", err.response?.data || err.message);
+        }
+
+        // Return plain serializable object
+        return {
+          id: p.id,
+          name: p.name,
+          providerUrl: p.providerUrl,
+          apiKey: p.apiKey,
+          balance,
+          currency,
+          createdAt: p.createdAt ? p.createdAt.toString() : null,
+        };
+      })
+    );
+
+    return providersWithBalance;
   } catch (error) {
     console.error("getProvidersAction error:", error);
     return [];
   }
 }
+
 
 
 

@@ -29,7 +29,7 @@ try {
   settings = {};
 }
 
-console.log(settings);
+
 
 
   return (
