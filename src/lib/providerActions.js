@@ -131,6 +131,7 @@ export async function getProvidersAction() {
 
         // Return plain serializable object
         return {
+          success:true,
           id: p.id,
           name: p.name,
           providerUrl: p.providerUrl,

@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { FaSearch, FaTimes } from "react-icons/fa";
+import AddNewService from "./AddNewService";
 
 export default function ServicesPage({ services }) {
   const [search, setSearch] = useState("");
@@ -44,13 +45,15 @@ export default function ServicesPage({ services }) {
 
   return (
     <div className="min-h-screen px-3 sm:px-6 lg:px-10 py-8 bg-gray-100 text-gray-800 dark:bg-[#0F1117] dark:text-gray-200 transition-all">
+     
 
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        
+         <AddNewService/>
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
           All Services
         </h1>
+
 
         {/* 🔍 Search */}
         <div className="relative w-full sm:w-1/3">
