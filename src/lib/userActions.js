@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { createOrder } from "./services";
 import crypto from "crypto";
 import { ObjectId } from "mongodb";
+import { ValidateTransactionBharatPe } from "./adminServices";
 const dbName = "smmpanel";
 const addFundsCollection = "add_funds";
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -305,30 +306,31 @@ return {
 // ========================= GET USER Transactions =========================
 export async function getUserTransactions() {
   try {
-    // 🔐 Read user token from cookies
-    const cookieStore = await cookies();
+    // Read token
+    const cookieStore = await cookies(); 
     const token = cookieStore.get("token")?.value;
     if (!token) throw new Error("Unauthorized");
 
-    // 🧩 Decode JWT
+    // Decode JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userEmail = decoded.email;
+    const userId = decoded.id; // this is ObjectId string
 
-    // 💾 Connect DB once via shared promise
+    // DB
     const client = await clientPromise;
     const db = client.db(dbName);
     const addFundsCol = db.collection(addFundsCollection);
 
-    // 📜 Fetch transactions for this user
+    // Fetch all user transactions
     const transactions = await addFundsCol
-      .find({ userEmail })
+      .find({ userId: new ObjectId(userId) })   // FIXED
       .sort({ createdAt: -1 })
       .toArray();
 
-    // 🧹 Convert ObjectId and Dates for serialization
+    // Prepare safe JSON data
     const safeTransactions = transactions.map((t) => ({
       ...t,
       _id: t._id.toString(),
+      userId: t.userId.toString(),
       createdAt: t.createdAt?.toISOString?.() || null,
     }));
 
@@ -338,7 +340,6 @@ export async function getUserTransactions() {
     return { success: false, error: "Unauthorized" };
   }
 }
-
 
 // ========================= Upload Profile Picutre =========================
 export async function uploadProfilePicture(formData) {
@@ -695,5 +696,125 @@ export async function getUserWithdrawRequests() {
   } catch (error) {
     console.error("Get withdrawal requests error:", error);
     return { success: false, message: "Something went wrong." };
+  }
+}
+
+
+
+
+export async function addFundAction({ utr, amount }) {
+  try {
+    // 1) Auth via cookie token
+    const cookieStore = await cookies(); // no need for await
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+      return {
+        status: false,
+        message: "Invalid token",
+      };
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      return {
+        status: false,
+        message: "Invalid token",
+      };
+    }
+
+    if (!decoded?.id) {
+      return {
+        status: false,
+        message: "Invalid user",
+      };
+    }
+
+    // 2) Connect to DB
+    const client = await clientPromise;
+    const db = client.db(dbName);
+
+    // 3) Get user
+    const user = await db.collection("users").findOne({
+      _id: new ObjectId(decoded.id),
+    });
+
+    if (!user) {
+      return {
+        status: false,
+        message: "User not found",
+      };
+    }
+
+    // Ensure amount is a number
+    const numericAmount = Number(amount);
+    if (!numericAmount || numericAmount <= 0) {
+      return {
+        status: false,
+        message: "Invalid amount",
+      };
+    }
+ 
+
+    // 4) Check if UTR is already used
+    const existingFund = await db.collection(addFundsCollection).findOne({
+      utr,
+      // optionally also tie to user
+      userId: user._id,
+    });
+
+    if (existingFund) {
+      return {
+        status: false,
+        message: "UTR already used",
+      };
+    }
+
+    // 5) Validate with BharatPe (or whichever)
+    const validationResult = await ValidateTransactionBharatPe(utr, numericAmount);
+console.log('kys baat hai',validationResult)
+    if (!validationResult?.success) {
+      return {
+        status: false,
+        message: "Invalid transaction details",
+      };
+    }
+
+    // 6) Update user balance atomically
+    const updateResult = await db.collection("users").updateOne(
+      { _id: user._id },
+      { $inc: { balance: numericAmount } }
+    );
+
+    if (updateResult.matchedCount === 0) {
+      return {
+        status: false,
+        message: "Failed to update balance",
+      };
+    }
+
+    // 7) Insert add-fund record
+    await db.collection(addFundsCollection).insertOne({
+      userId: user._id,
+      utr,
+      amount: numericAmount,
+      status: "success",
+      gateway: "BharatPe",
+      gatewayResponse: validationResult,
+      createdAt: new Date(),
+    });
+
+    return {
+      status: true,
+      message: "Fund added successfully",
+    };
+  } catch (error) {
+    console.error("addFundAction error:", error);
+    return {
+      status: false,
+      message: "Something went wrong. Please try again.",
+    };
   }
 }

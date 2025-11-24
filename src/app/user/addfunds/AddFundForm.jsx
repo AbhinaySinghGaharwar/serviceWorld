@@ -3,6 +3,7 @@
 import QRSection from "./QRSection";
 import { useRouter } from "next/navigation";
 import { useCurrency } from "@/context/CurrencyContext";
+import { addFundAction } from "@/lib/userActions";
 
 export default function AddFundForm({
   paymentType,
@@ -19,55 +20,53 @@ export default function AddFundForm({
   Instructions,
 }) {
   const router = useRouter();
-  const { symbol } = useCurrency(); // symbol only, no convert used here
-
+  const { symbol } = useCurrency(); 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const res = await fetch("/api/services/addFunds", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          payment_type: paymentType,
-          utr,
-          payment_amount: amount,
-        }),
+  try {
+    const res = await addFundAction({ utr, amount });
+    console.log("UTR:", utr, "Amount:", amount);
+
+    if (res.status) {
+      // ✔ success response
+      setPopup({
+        visible: true,
+        success: true,
+        message: res.message || "Transaction verified successfully!",
+        transaction: res.transaction || null,
       });
 
-      const data = await res.json();
+      setUtr("");
+      setAmount("");
 
-      if (res.ok && data.success) {
-        setPopup({
-          visible: true,
-          success: true,
-          message: "Transaction verified successfully!",
-          transaction: data.transaction,
-        });
-
-        setUtr("");
-        setAmount("");
-        router.reload();
-      } else {
-        setPopup({
-          visible: true,
-          success: false,
-          message: data.error || "Verification failed",
-          transaction: null,
-        });
-      }
-    } catch {
+      // Optional: reload after short delay
+      setTimeout(() => {
+        router.refresh();
+      }, 1000);
+    } else {
+      // ❌ failure from backend
       setPopup({
         visible: true,
         success: false,
-        message: "Verification failed",
+        message: res.message || "Verification failed",
         transaction: null,
       });
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (err) {
+    // ❌ system error
+    setPopup({
+      visible: true,
+      success: false,
+      message: "Something went wrong. Please try again.",
+      transaction: null,
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div

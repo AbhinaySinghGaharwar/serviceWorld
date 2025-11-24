@@ -552,6 +552,7 @@ console.log('hello',internalUtr,amount)
     }
 
     const data = await res.json();
+    
     const transactions = data?.data?.transactions || [];
 
     const matched = transactions.find(
@@ -752,10 +753,6 @@ export async function getAllTickets() {
     throw new Error("Failed to fetch tickets");
   }
 }
-
-
-
-
 export async function getUserTickets() {
   try {
     // 🍪 Get token from cookies
@@ -821,7 +818,6 @@ export async function getUserTickets() {
     return { error: "Failed to fetch user tickets" };
   }
 }
-
 // 🧩 Helper function to format tickets
 function formatTickets(tickets) {
   return tickets.map((t) => ({
@@ -836,11 +832,6 @@ function formatTickets(tickets) {
     updatedAt: t.updatedAt || null,
   }));
 }
-
-
-
-
-
 export async function getUnansweredTickets() {
   try {
     const client = await clientPromise;
@@ -882,11 +873,6 @@ export async function getUnansweredTickets() {
     throw new Error("Failed to fetch unanswered tickets");
   }
 }
-
-
-
-
-
 export async function replyToTicket({ ticketId, message }) {
   try {
     if (!ticketId || !message)
@@ -942,7 +928,6 @@ export async function replyToTicket({ ticketId, message }) {
     return { error: "Server error while replying to ticket." };
   }
 }
-
 export async function updateAdminReply({ ticketId, newMessage }) {
   try {
     if (!ticketId || !newMessage)
@@ -988,15 +973,6 @@ export async function updateAdminReply({ ticketId, newMessage }) {
     return { error: "Server error while updating reply." };
   }
 }
-
-
-
-
-
-
-
-
-
 export async function createTicket({ subject, message }) {
   try {
     // 🧠 1. Validate fields
@@ -1141,10 +1117,6 @@ export async function setChildPanelSettings(formData) {
     return { error: err.message };
   }
 }
-
-
-
-
 export async function getChildPanelSettings() {
   try {
     const client = await clientPromise;
@@ -1174,30 +1146,6 @@ export async function getChildPanelSettings() {
     return { error: err.message };
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export async function createChildPanel({ formData }) {
   try {
     // 🧮 Price (always in number format)
@@ -1412,10 +1360,6 @@ export async function updateOrderUrlAction(orderId, newUrl) {
     return { success: false, message: err.message };
   }
 }
-
-
-
-
 export async function resendOrderAction(orderId) {
   try {
     const client = await clientPromise;
@@ -1432,8 +1376,6 @@ export async function resendOrderAction(orderId) {
     return { success: false, message: err.message };
   }
 }
-
-
 export async function cancelOrderAction(orderId, reason) {
   try {
     const client = await clientPromise;
@@ -1455,10 +1397,6 @@ export async function cancelOrderAction(orderId, reason) {
     return { success: false, message: err.message };
   }
 }
-
-
-
-
 export async function markPartialAction(orderId, partialQty) {
   try {
     const client = await clientPromise;
@@ -1480,8 +1418,6 @@ export async function markPartialAction(orderId, partialQty) {
     return { success: false, message: err.message };
   }
 }
-
-
 export async function updateStartCountAction(orderId, startCount) {
   try {
     const client = await clientPromise;
@@ -1498,20 +1434,6 @@ export async function updateStartCountAction(orderId, startCount) {
     return { success: false, message: err.message };
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export async function addTestOrdersAction() {
   try {
     const client = await clientPromise;
@@ -1598,10 +1520,6 @@ export async function getAllWithdrawRequests() {
     return { success: false, message: "Something went wrong." };
   }
 }
-
-
-
-
 export async function updateWithdrawStatus(requestId, newStatus) {
   try {
     // 1️⃣ Read Admin Token
