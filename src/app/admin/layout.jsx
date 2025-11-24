@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { Menu, X, Bell, User, LogOut, Settings } from "lucide-react";
 import { LogoutAdmin } from "@/lib/authentication";
 import ThemeSwitcher from "../components/ThemeSwitcher";
+import { getWebsiteSettings } from "@/lib/adminServices";
 const menuItems = [
   { name: "Dashboard", path: "/admin/dashboard" },
   { name: "Services", path: "/admin/services" },
@@ -23,6 +24,7 @@ export default function AdminLayout({ children }) {
   const [openProfile, setOpenProfile] = useState(false);
   const menuRef = useRef(null);
   const profileRef = useRef(null);
+  const [siteSettings,setSiteSettings]=useState({})
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -36,6 +38,16 @@ export default function AdminLayout({ children }) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+   useEffect(()=>{
+  const load= async()=>{
+    const data=await getWebsiteSettings()
+   if(data.success){
+    const res=JSON.parse(data.plainsettings)
+    setSiteSettings(res)
+   }
+  } 
+  load()
+    },[])
 
   if (pathname.includes("admin/login")) {
     return <>{children}</>;
@@ -58,8 +70,11 @@ export default function AdminLayout({ children }) {
             </button>
 
             <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-              Admin Panel
-            </h1>
+  {siteSettings?.name
+    ? siteSettings.name
+    : <img src={siteSettings?.logo} alt="Logo" className="h-6" />}
+</h1>
+
           </div>
 
           {/* Desktop Navigation */}
