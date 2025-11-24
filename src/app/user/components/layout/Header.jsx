@@ -114,7 +114,7 @@ export default function Header({
           "
         >
           <img
-  src={user.avatar}       // replace with your image path
+  src={user?.avatar}       // replace with your image path
   alt="menu"
   className="w-6 h-6 object-cover"    // same size as size={20}
  />

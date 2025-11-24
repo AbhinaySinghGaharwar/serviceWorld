@@ -8,7 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
  * Returns payload if token is valid, otherwise throws an error
  */
 export async function verifyAdmin(req) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const token = cookieStore.get("adminToken")?.value;
 
   if (!token) {
