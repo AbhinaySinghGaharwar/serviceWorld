@@ -20,6 +20,7 @@ export default function Header({
   currency = "INR",
   websitename = "MyWebsite",
 }) {
+  console.log(user)
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
 
@@ -112,7 +113,11 @@ export default function Header({
             bg-gray-100 text-gray-700 hover:bg-gray-200
           "
         >
-          <FaUserCircle size={22} />
+          <img
+  src={user.avatar}       // replace with your image path
+  alt="menu"
+  className="w-6 h-6 object-cover"    // same size as size={20}
+ />
         </button>
 
         {/* Dropdown Component */}
