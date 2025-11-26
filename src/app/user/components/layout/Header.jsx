@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import BalanceDisplay from "./BalanceDisplay";
 import { FaBars, FaSun, FaMoon, FaUserCircle } from "react-icons/fa";
 import UserDropdown from "./UserProfileDropdown";
-
+   import { User } from "lucide-react";
 export default function Header({
   dark = true,
   user,
@@ -118,11 +118,19 @@ export default function Header({
             bg-gray-100 text-gray-700 hover:bg-gray-200
           "
         >
-          <img
-  src={user?.avatar}       // replace with your image path
-  alt="menu"
-  className="w-6 h-6 object-cover"    // same size as size={20}
- />
+      
+
+<img
+  src={user?.avatar || ""}  // avoid broken src
+  alt="user"
+  className="w-6 h-6 object-cover"
+  onError={(e) => {
+    e.currentTarget.onerror = null; // prevent loop
+    e.currentTarget.src = "";      // clear invalid image
+    e.currentTarget.replaceWith(<User size={20} className="text-gray-500" />); // fallback icon
+  }}
+/>
+
         </button>
 
         {/* Dropdown Component */}
