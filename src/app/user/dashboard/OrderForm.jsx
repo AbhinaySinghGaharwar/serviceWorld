@@ -73,6 +73,7 @@ export default function OrderForm({ selectedCategory }) {
   const [selectedService, setSelectedService] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
+  const [onlySelectedCategories,setOnlySelectedCategories]=useState([])
 
   const dropdownRef = useRef(null);
   const categoryRef = useRef(null);
@@ -91,24 +92,24 @@ export default function OrderForm({ selectedCategory }) {
     if (services.length > 0) {
       const cats = [...new Set(services.map((s) => s.category).filter(Boolean))];
       setCategories(cats);
+      setOnlySelectedCategories(cats)
       // if no category selected, set first
-      if (!category) setCategory(cats[0] || "");
+      if (!category) {
+        setCategory(cats[0] || "");
+         const firstSelected = services.find(s => s.category === cats[0]);
+  console.log(firstSelected,'hello')
+  setSelectedService(firstSelected||firstSelected[0])
+    
+      }
     } else {
       setCategories([]);
       setCategory("");
     }
   }, [services]);
 
-  // When parent prop selectedCategory changes, try to match it to existing categories
-  useEffect(() => {
-    if (selectedCategory && categories?.length > 0) {
-      const matched = categories.find((cat) =>
-        cat.toLowerCase().includes(selectedCategory.toLowerCase())
-      );
-      if (matched) setCategory(matched);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategory, categories]);
+
+  
+
 
   // Apply filters (category + search) with debounce
   useEffect(() => {
@@ -179,6 +180,7 @@ export default function OrderForm({ selectedCategory }) {
   // When category changes (user selected), clear service selection if it doesn't belong to new category
   useEffect(() => {
     if (selectedService && category && selectedService.category !== category) {
+      
       setService("");
       setSelectedService(null);
     }
@@ -224,6 +226,39 @@ export default function OrderForm({ selectedCategory }) {
 
     setSubmitting(false);
   };
+  //show selected category by defaulut
+  useEffect(() => {
+  if (selectedCategory && onlySelectedCategories?.length > 0) {
+    const lowerInput = selectedCategory.toLowerCase();
+
+    // smart split match so emojis/spaces don't break it
+    const words = lowerInput.split(/[^a-z0-9]+/);
+
+    // 1️⃣ Find best matched main category
+    const matched = onlySelectedCategories.find(cat =>
+      words.some(word => cat.toLowerCase().includes(word))
+    );
+    if (matched) {
+       // 2️⃣ Get ALL related categories from category list (only logging them)
+      const related = onlySelectedCategories.filter(cat =>
+        words.some(word => cat.toLowerCase().includes(word))
+      );
+     setCategories(related)
+     setCategory(related[0])
+  
+    
+    }
+  }
+}, [selectedCategory, onlySelectedCategories]);
+useEffect(()=>{
+  
+        const newservice=filteredServices[0]
+ setSelectedService(newservice)
+  if(!selectedCategory){
+    setCategories(onlySelectedCategories)
+  }
+},[categories,selectedCategory,filteredServices])
+
 
   return (
     <div className="w-full flex-1 flex justify-start bg-gray-100 text-gray-700 dark:bg-[#0F1117] dark:text-white">

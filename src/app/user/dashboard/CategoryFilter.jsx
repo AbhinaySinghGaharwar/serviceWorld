@@ -27,7 +27,7 @@ const icons = [
   { name: "Discord", icon: <FaDiscord size={28} /> },
   { name: "Website", icon: <FaGlobe size={28} /> },
   { name: "Explore", icon: <FaStar size={28} /> },
-  { name: "Network", icon: <FaCircle size={28} /> },
+  { name: null, icon: <FaCircle size={28} /> },
 ];
 
 export default function CategoryFilter({ selectedCategory, onCategorySelect }) {
