@@ -880,7 +880,7 @@ export async function replyToTicket({ ticketId, message }) {
 
     // 🍪 Get and verify admin token
     const cookieStore = await cookies()
-   const token= cookieStore.get("token")?.value;
+   const token= cookieStore.get("admin_token")?.value;
     if (!token) return { error: "Unauthorized: no token found." };
 
     let decoded;

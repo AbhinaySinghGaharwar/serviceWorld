@@ -10,8 +10,8 @@ export default async function DashboardPage() {
     const user=await getUserDetails()
   const data = await getWebsiteSettings();
   const result=await JSON.parse(data.plainsettings)
-  const orderCount= await getUserOrders()
-  console.log(orderCount)
+
+
 
   
     return (

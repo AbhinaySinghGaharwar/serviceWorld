@@ -5,14 +5,12 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Menu, X, Bell, User, LogOut, Settings } from "lucide-react";
 import { LogoutAdmin } from "@/lib/authentication";
-import ThemeSwitcher from "../components/ThemeSwitcher";
 import { getWebsiteSettings } from "@/lib/adminServices";
 const menuItems = [
   { name: "Dashboard", path: "/admin/dashboard" },
   { name: "Services", path: "/admin/services" },
   { name: "Users", path: "/admin/users" },
   { name: "Orders", path: "/admin/orders" },
-  { name: "Payments", path: "/admin/payments" },
   { name: "Tickets", path: "/admin/tickets" },
   { name: "referal requests", path: "/admin/rrequest" },
   { name: "Settings", path: "/admin/settings" },
@@ -70,8 +68,8 @@ export default function AdminLayout({ children }) {
             </button>
 
             <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-  {siteSettings?.name
-    ? siteSettings.name
+  {siteSettings?.siteName
+    ? siteSettings.siteName
     : <img src={siteSettings?.logo} alt="Logo" className="h-6" />}
 </h1>
 
@@ -102,7 +100,7 @@ export default function AdminLayout({ children }) {
               <Bell size={20} />
               <span className="absolute top-0 right-0 w-2 h-2 bg-gray-700 dark:bg-gray-300 rounded-full"></span>
             </button> */}
-            <ThemeSwitcher/>
+          
 
             {/* Profile Dropdown */}
             <div className="relative" ref={profileRef}>

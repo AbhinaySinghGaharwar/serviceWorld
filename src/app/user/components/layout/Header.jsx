@@ -75,7 +75,12 @@ export default function Header({
             text-gray-700
           "
         >
-          {websitename?.siteName}
+          
+   
+  {websitename?.siteName
+    ? websitename.siteName
+    : <img src={websitename?.logo} alt="Logo" className="h-6" />}
+
         </Link>
       </div>
 

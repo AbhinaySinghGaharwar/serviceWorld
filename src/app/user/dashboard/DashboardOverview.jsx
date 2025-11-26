@@ -5,6 +5,7 @@ import {
   MdAddShoppingCart,
 
 } from "react-icons/md";
+import { getUserOrders } from "@/lib/userActions";
 import { FaUserCircle, FaTools } from "react-icons/fa";
 import SocialButtons from "./SocialMediaButton";
 import Announcements from "./Announcements";
@@ -20,11 +21,27 @@ export default function DashboardLayout({ user, serviceEnabled }) {
   const [spent, setSpent] = useState(0);
   const [orders, setOrders] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState(null);
+useEffect(() => {
+  const loadOrders = async () => {
+    const res = await getUserOrders();
+    console.log(res);
 
-  useEffect(() => {
-    setSpent(1245.75);
-    setOrders(689);
-  }, []);
+    if (!res.success) {
+      return;
+    }
+
+    // ✅ Correct way to SUM total spent
+    const totalSpent = res.orders.reduce((acc, o) => acc + Number(o.charge || 0), 0);
+
+    console.log("Total spent:", totalSpent);
+
+    // ✅ Set values in state
+    setSpent(totalSpent);
+    setOrders(res.orders.length);
+  };
+
+  loadOrders();
+}, []);
 
   return (
     <div

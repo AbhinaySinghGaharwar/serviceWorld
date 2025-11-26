@@ -247,7 +247,7 @@ const user = await usersCollection.findOne({ _id: new ObjectId(userData.id) });
 export async function getUserOrders() {
   try {
     // 🍪 1. Get user token
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
     if (!token) {

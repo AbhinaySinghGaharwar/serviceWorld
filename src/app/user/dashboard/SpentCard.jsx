@@ -3,7 +3,7 @@ import { MdTrendingUp } from "react-icons/md";
 import { useCurrency } from "@/context/CurrencyContext";
 import Card from "./Card";
 
-export default function SpentCard({ spent }) {
+export default function SpentCard({ spent=0 }) {
   const { symbol, convert } = useCurrency();
 
   return (
