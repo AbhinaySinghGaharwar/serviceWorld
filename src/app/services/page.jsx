@@ -25,7 +25,7 @@ export default function ServicesPage() {
   }, []);
 
   if (loading)
-    return <p className="text-center text-gray-500">Loading services...</p>;
+    return <p className="min-h-screen text-center text-gray-500">Loading services...</p>;
   if (error)
     return <p className="text-center text-red-500">⚠️ {error}</p>;
 

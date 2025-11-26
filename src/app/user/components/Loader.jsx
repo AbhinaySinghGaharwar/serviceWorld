@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export default function Loader({ message = "Loading..." }) {
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center z-50">
+    <div className="min-h-screen fixed inset-0 flex flex-col items-center justify-center z-50">
       {/* Gradient Circle Logo */}
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}

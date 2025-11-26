@@ -1,56 +1,105 @@
+import { MdShoppingCart, MdInfoOutline } from "react-icons/md";
+import { useState } from "react";
+import ServiceDetailsPopup from "./ServiceDetailsPopup";
+import { useCurrency } from "@/context/CurrencyContext";
+import { useRouter } from "next/navigation";
 export default function ServiceCard({ service, getIconForService, onSelect }) {
+  const router=useRouter()
+  const [showDetails, setShowDetails] = useState(false);
+
+  const { symbol, convert } = useCurrency();
+
+  const formattedRate = (() => {
+    const num = Number(service.rate || 0);
+    return convert(num).toFixed(2);
+  })();
+
   return (
-    <tr className="border-b border-gray-300 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-[#2A2C31] transition">
+    <div
+      className="
+        bg-white dark:bg-[#1A1F2B]
+        border border-gray-300 dark:border-[#2B3143]
+        rounded-2xl 
+        p-5 
+        transition-all duration-300
+        hover:border-gray-400 dark:hover:border-gray-500
+        hover:shadow-md
+      "
+    >
+      {/* Popup */}
+      {showDetails && (
+        <ServiceDetailsPopup
+          service={service}
+          onClose={() => setShowDetails(false)}
+        />
+      )}
 
-      {/* ID */}
-      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-        {service.service}
-      </td>
-
-      {/* Icon + Name */}
-      <td className="px-4 py-3 flex items-center gap-3 text-gray-700 dark:text-gray-300">
+      {/* Top Section */}
+      <div className="flex items-center gap-3 mb-3">
         {getIconForService(service.name)}
-        <span className="text-sm font-semibold">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
           {service.name}
-        </span>
-      </td>
+        </h3>
+      </div>
 
-      {/* Description */}
-      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 max-w-[300px] truncate">
-        {service.desc || "-"}
-      </td>
+      {/* Details */}
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+        <strong className="text-gray-800 dark:text-gray-200">ID:</strong> {service.service}
+      </p>
 
-      {/* Rate */}
-      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-        ${service.rate}
-      </td>
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+        <strong className="text-gray-800 dark:text-gray-200">Rate / 1K:</strong> 
+        {" "}{symbol}{formattedRate}
+      </p>
 
-      {/* Min */}
-      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-        {service.min}
-      </td>
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+        <strong className="text-gray-800 dark:text-gray-200">Min:</strong> {service.min}
+      </p>
 
-      {/* Max */}
-      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-        {service.max}
-      </td>
+      <p className="text-sm text-gray-600 dark:text-gray-400">
+        <strong className="text-gray-800 dark:text-gray-200">Max:</strong> {service.max}
+      </p>
 
-      {/* Action */}
-      <td className="px-4 py-3 text-center">
-     <button
-  onClick={() => onSelect(service)}
-  className="
-    px-4 py-1 rounded-md 
-    bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm 
-    hover:bg-gray-300 dark:hover:bg-gray-600 
-    transition shadow
-  "
->
-  View
-</button>
+      {/* FULL-WIDTH BUTTONS */}
+      <div className="flex flex-row gap-3 mt-4">
 
-      </td>
+        {/* DETAILS BUTTON */}
+        <button
+          onClick={() => setShowDetails(true)}
+          className="
+            w-full py-2 px-2 rounded-lg
+            bg-gray-200 dark:bg-gray-700
+            text-gray-800 dark:text-gray-200
+            font-semibold
+            hover:bg-gray-300 dark:hover:bg-gray-600
+            transition shadow-sm
+            flex items-center justify-center gap-2
+          "
+        >
+          <MdInfoOutline size={18} />
+          Details
+        </button>
 
-    </tr>
+        {/* BUY NOW BUTTON */}
+        <button
+          onClick={() =>{
+            router.push('/auth/login')
+          }}
+          className="
+            w-full py-2 px-2 rounded-lg
+            bg-gray-800 dark:bg-gray-700
+            text-white 
+            font-semibold
+            hover:bg-gray-700 dark:hover:bg-gray-600
+            transition shadow-sm
+            flex items-center justify-center gap-2
+          "
+        >
+          <MdShoppingCart size={20} />
+          Buy Now
+        </button>
+
+      </div>
+    </div>
   );
 }

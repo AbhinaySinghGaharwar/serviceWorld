@@ -4,46 +4,34 @@ export default function SearchBar({ searchTerm, setSearchTerm, loadingSearch }) 
   return (
     <div className="relative w-full sm:w-[90%] mx-auto mb-8">
       
-      {/* Search icon */}
-      <FaSearch className="
-        absolute left-3 top-1/2 -translate-y-1/2 
-        text-[#4B5563] 
-        dark:text-[#A0AEC3]
-      " />
+      {/* Search Icon */}
+      <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
 
-      {/* Search input */}
+      {/* Input */}
       <input
         type="text"
         placeholder="Search service by name or description..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         className="
-          w-full pl-10 pr-10 py-2 rounded-xl 
-          bg-white text-[#1A1A1A]
-          placeholder-[#6B7280]
-
-          dark:bg-[#1A1F2B] dark:text-white 
-          dark:placeholder-[#A0AEC3]
-
-          border border-gray-300 
-          dark:border-[#2B3143]
-
-          focus:border-[#4A6CF7]
-          focus:ring-1 focus:ring-[#4A6CF7]
-
+          w-full pl-10 pr-10 py-2 rounded-xl
+          bg-gray-100 dark:bg-[#1A1F2B]
+          border border-gray-300 dark:border-[#2B3143]
+          text-gray-800 dark:text-gray-200
+          placeholder-gray-500 dark:placeholder-gray-400
+          focus:border-gray-500 dark:focus:border-gray-500
+          focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-500
           outline-none transition
         "
       />
 
-      {/* Loading spinner */}
+      {/* Loading Spinner */}
       {loadingSearch && (
-        <div className="
-          absolute right-3 top-1/2 -translate-y-1/2 
-          text-[#4A6CF7] animate-spin
-        ">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300 animate-spin">
           <FaSearch />
         </div>
       )}
+
     </div>
   );
 }
