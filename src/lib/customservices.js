@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import clientPromise from "./mongodb";
 
 const DB_ADMIN = "smmadmin";
-const COLLECTION = "Services";
+const COLLECTION = "services";
 
 /* -------------------------------------------------------
    🔐 Helper → verify admin
@@ -44,7 +44,7 @@ async function verifyAdmin() {
         const rate = Number(data.rate);
         const min = data.min ? Number(data.min) : null;
         const max = data.max ? Number(data.max) : null;
-console.log(data)
+
         // 4) Validation
         if (!serviceId || !data.name || !data.provider || !rate) {
         return { status: false, message: "Missing required fields" };
@@ -81,45 +81,6 @@ console.log(data)
     }
     }
 
-
-    
-/* -------------------------------------------------------
-   📥 GET ALL SERVICES (PLAIN OBJECTS)
--------------------------------------------------------- */
-export async function GetServicesAction() {
-  try {
-    const auth = await verifyAdmin();
-    if (!auth.valid) return [];
-
-    const client = await clientPromise;
-    const db = client.db(DB_ADMIN);
-    const collection = db.collection(COLLECTION);
-
-    const services = await collection.find({}).sort({ id: 1 }).toArray();
-
-    // return clean objects (no _id)
-    return services.map((s) => ({
-      service: s.id,
-      name: s.name,
-      type: s.type,
-      refill: s.refill,
-      desc:s.desc,
-      cancelAllowed: s.cancelAllowed,
-      provider: s.provider,
-      category:s.category,
-      rate: s.rate,
-      min: s.min,
-      max: s.max,
-      status: s.status,
-      createdAt: s.createdAt ? s.createdAt.toString() : null,
-      updatedAt: s.updatedAt ? s.updatedAt.toString() : null,
-      customservice:true,
-    }));
-  } catch (error) {
-    console.error("GetServicesAction:", error);
-    return [];
-  }
-}
 
 
 /* -------------------------------------------------------

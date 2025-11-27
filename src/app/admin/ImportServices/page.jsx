@@ -1,27 +1,37 @@
 'use client'
 import React, { useState, useRef, useEffect } from "react";
 import { Search } from "lucide-react";
-import { importServicesAction } from "@/lib/services";
-
-export default function ServiceImporter({ providers = [], onSave }) {
+import { importServicesAction,StoreServicesInDB } from "@/lib/services";
+import { getProvidersAction } from "@/lib/providerActions";
+export default function ServiceImporter() {
   const [usePredefined, setUsePredefined] = useState(true);
-  const [providerInput, setProviderInput] = useState(providers[0]?.value || "");
+  const [providerInput, setProviderInput] = useState( "");
   const [apiKey, setApiKey] = useState("");
   const [services, setServices] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-
+const [submitting, setSubmitting] = useState(false);
   const [openProviderDropdown, setOpenProviderDropdown] = useState(false);
   const [openCategoryDropdown, setOpenCategoryDropdown] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
   const [viewService, setViewService] = useState(null);
-
+const [provider,setProvider]=useState([])
   const providerDropdownRef = useRef(null);
   const categoryDropdownRef = useRef(null);
-
+useEffect(()=>{
+  const loadProviders=async()=>{
+    const res= await getProvidersAction()
+    if(res){
+      setProvider(res)
+    }
+    console.log(res)
+  }
+  loadProviders()
+},[])
   // Import Services API Call
   const handleSubmit = async (e) => {
+    console.log(providerInput,apiKey)
     e.preventDefault();
     const result = await importServicesAction({ url: providerInput, api: apiKey });
 
@@ -95,12 +105,22 @@ export default function ServiceImporter({ providers = [], onSave }) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const handleFinalSubmit = () => {
-    const selected = services.filter(s => selectedServices.includes(s.id));
-    console.log(selected)
-    onSave?.(selected);
-    onSave && alert("Services Saved!");
-  };
+  // client side
+const handleFinalSubmit = async () => {
+  const selected = services.filter(s => selectedServices.includes(s.id));
+  console.log("Selected services ->", selected);
+  setSubmitting(true);  // start loading
+  const res = await StoreServicesInDB({ services: selected });
+ 
+  if(res.status){
+    alert(res.message)
+      setSubmitting(false); 
+    return
+  }
+  alert(res.message)
+    setSubmitting(false);  
+  return
+};
 
   return (
     <div className="flex flex-col p-4 gap-4 w-full">
@@ -123,54 +143,58 @@ export default function ServiceImporter({ providers = [], onSave }) {
             <label>{usePredefined ? "Use Predefined Provider" : "Enter New Provider URL"}</label>
           </div>
 
-          <div className="flex gap-2">
-            {usePredefined && (
-              <div ref={providerDropdownRef} className="relative w-[180px]">
-                <button
-                  type="button"
-                  onClick={() => setOpenProviderDropdown(!openProviderDropdown)}
-                  className="w-full border px-2 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-sm"
-                >
-                  {providers.find(p => p.value === providerInput)?.label || "Select Provider ▼"}
-                </button>
+         
+         <div className="flex gap-2">
+  {usePredefined && (
+    <div ref={providerDropdownRef} className="relative w-[180px]">
+      <button
+        type="button"
+        onClick={() => setOpenProviderDropdown(!openProviderDropdown)}
+        className="w-full border px-2 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-sm"
+      >
+        {provider?.find(p => p.providerUrl === providerInput)?.name || "Select Provider ▼"}
+      </button>
 
-                {openProviderDropdown && (
-                  <div className="absolute mt-1 w-full bg-white dark:bg-gray-800 border rounded-xl shadow z-50">
-                    {providers.map(p => (
-                      <div
-                        key={p.id}
-                        onClick={() => {
-                          setProviderInput(p.value);
-                          setOpenProviderDropdown(false);
-                        }}
-                        className="px-2 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer text-sm"
-                      >
-                        {p.label}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+      {openProviderDropdown && (
+        <div className="absolute mt-1 w-full bg-white dark:bg-gray-800 border rounded-xl shadow z-50">
+          {provider.map(p => (
+            <div
+              key={p.id}
+              onClick={() => {
+                setProviderInput(p.providerUrl); // ✅ Sets dropdown URL
+                setApiKey(p.apiKey);            // ✅ Auto-fills API key input
+                setOpenProviderDropdown(false);
+              }}
+              className="px-2 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer text-sm"
+            >
+              {p.name}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )}
 
-            {/* URL Input */}
-            <input
-              placeholder="Enter provider API URL"
-              value={providerInput}
-              onChange={(e) => setProviderInput(e.target.value)}
-              className="flex-1 border p-2 rounded-lg text-sm"
-              required
-            />
-          </div>
+  {/* URL Input */}
+  <input
+    placeholder="Enter provider API URL"
+    value={providerInput}
+    onChange={(e) => setProviderInput(e.target.value)}
+    className="flex-1 border p-2 rounded-lg text-sm"
+    required
+  />
+</div>
 
-          <input
-            type="password"
-            placeholder="Enter API Key"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            className="w-full border p-2 rounded-lg text-sm"
-            required
-          />
+{/* API Key Password Input */}
+<input
+  type="text"
+  placeholder="Enter API Key"
+  value={apiKey}
+  onChange={(e) => setApiKey(e.target.value)}
+  className="w-full border p-2 rounded-lg text-sm"
+  required
+/>
+
 
           <button
             type="submit"
@@ -282,12 +306,14 @@ export default function ServiceImporter({ providers = [], onSave }) {
           </div>
 
           {/* Final Submit */}
-          <button
-            onClick={handleFinalSubmit}
-            className="mt-3 w-full py-2 bg-green-700 text-white text-sm rounded-lg hover:bg-green-600"
-          >
-            Submit Selected Services
-          </button>
+        <button
+  onClick={handleFinalSubmit}
+  disabled={submitting}
+  className="mt-3 w-full py-2 bg-green-700 text-white text-sm rounded-lg hover:bg-green-600 disabled:opacity-50"
+>
+  {submitting ? "Submitting..." : "Submit Selected Services"}
+</button>
+
 
         </div>
       )}

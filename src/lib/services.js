@@ -30,23 +30,48 @@ const postAction = async (action, data = {}) => {
 //
 // 🔹 API Actions
 //
-//get all services from api
 export async function getServices() {
   try {
-    const params = new URLSearchParams();
-    params.append("key", API_KEY);
-    params.append("action", "services");
+    const client = await clientPromise;
+    const servicesCollection = client.db(DB_ADMIN).collection("services");
 
-    const res = await axios.post(API_URL, params, {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    });
+    const data = await servicesCollection.find({}).toArray();
 
-    return res.data;
+    // ✅ MANUAL CONVERSION TO PLAIN OBJECT
+    const plain = data.map(s => ({
+      _id: s._id ? s._id.toString() : null,  // convert ObjectId → string
+      id: s.id ?? null,
+      name: s.name ?? "",
+      category: s.category ?? "",
+      min: Number(s.min) || 0,
+      max: s.max?.toString() || "0",
+      rate: Number(s.rate) || 0,
+      provider: s.provider ?? "",
+      service: s.service ?? null,
+      type: s.type ?? "Default",
+      desc: s.desc ?? "",
+      storedBy: s.storedBy ?? "",
+      createdAt: s.createdAt ? s.createdAt.toISOString() : null // date → string
+    }));
+
+
+    return {
+      status: true,
+      plain,  // ✅ Now safe pure plain objects
+      message: "Fetched from DB ✅"
+    };
+
   } catch (error) {
-    console.error("SMM API Error:", error.response?.data || error.message);
-    return { error: error.response?.data || error.message };
+    console.error("DB FETCH ERROR:", error.message);
+    return {
+      status: false,
+      services: [],
+      message: error.message
+    };
   }
 }
+
+
 export async function importServicesAction({url,api}) {
   try {
     const params = new URLSearchParams();
@@ -63,48 +88,57 @@ export async function importServicesAction({url,api}) {
     return { error: error.response?.data || error.message };
   }
 }
-export async function StoreServicesInDB({services}){
+
+
+export async function StoreServicesInDB({ services }) {
   try {
-    const cookieStore= await cookies()
-    const token = cookieStore.get('admin_token')?.value
-    if(!token){
+    const cookieStore = await cookies();
+    const token = cookieStore.get("admin_token")?.value;
+
+    if (!token) {
       return {
-        status:false,
-        message:'invalid token',
-      }
+        status: false,
+        message: "invalid token",
+      };
     }
-    const admin=jwt.verify(token,process.env.JWT_SECRET)
-    if(!admin){
+
+    const admin = jwt.verify(token, process.env.JWT_SECRET);
+    if (!admin) {
       return {
-        status:false,
-        message:'unauthorized admin',
-      }
+        status: false,
+        message: "unauthorized admin",
+      };
     }
-    const client= await clientPromise
-    const db=client.db(DB_ADMIN).collection('services')
-       // ✅ Format for DB
-    const payload = services.map((s) => ({
-      id: s.id,
-      name: s.name.trim(),
-      category: s.category.trim(),
-      min: Number(s.min),
-      max: s.max.toString(),  // stored as string because large
-      rate: Number(s.rate),
-      provider: s.provider.trim(),
-      service: s.service,     // provider service id
-      type: s.type || "Default",
-      desc: s.desc || "",
-      storedBy: admin.id,
-      createdAt: new Date(),
-    }));
-   // ✅ Insert multiple services in one query
-    await collection.insertMany(payload);
-     return { status: true, message: "Services stored successfully ✅" };
+
+    const client = await clientPromise;
+    const servicesCollection = client
+      .db(DB_ADMIN)
+      .collection("services");
+
+   const payload = services.map((s) => ({
+  id: s.id ?? Date.now(), // fallback unique id
+  name: s.name?.trim() || "Unnamed Service",
+  category: s.category?.trim() || "Uncategorized",
+  min: Number(s.min) || 0,
+  max: s.max?.toString() || "0",
+  rate: Number(s.rate) || 0,
+  provider: s.provider?.trim() || providerInput || "Unknown",
+  service: s.service ?? null,
+  type: s.type?.trim() || "Default",
+  desc: s.desc?.trim() || "",
+  storedBy: admin.id ?? "system",
+  createdAt: new Date(),
+}));
+
+    await servicesCollection.insertMany(payload);
+
+    return { status: true, message: "Services stored successfully ✅" };
   } catch (error) {
-      console.error("DB STORE ERROR:", error);
-    return { status: false, message: error.message };
+    console.error("DB STORE ERROR:", error);
+    return { status: false, message: error.message || "Something went wrong" };
   }
 }
+
 
 // ✅ Create a new order
 export async function createOrder(data) {

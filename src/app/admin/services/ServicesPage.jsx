@@ -6,7 +6,7 @@ import AddNewService from "./AddNewService";
 import ServiceTable from "./ServiceTable";
 import ServiceModal from "./ServiceModal";
 import { useRouter } from "next/navigation";
-export default function ServicesPage({ services }) {
+export default function ServicesPage({ services=[] }) {
   const router=useRouter()
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");

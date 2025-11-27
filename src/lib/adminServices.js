@@ -1057,7 +1057,7 @@ export async function createTicket({ subject, message }) {
 export async function getChildPanels() {
   try {
     // 🍪 Get token from cookies
-    const token =await cookies().get("token")?.value;
+    const token =await cookies().get("admin_token")?.value;
     if (!token) {
       return { error: "Unauthorized. Please log in first." };
     }
@@ -1092,7 +1092,7 @@ export async function getChildPanels() {
 }
 export async function setChildPanelSettings(formData) {
   try {
-    const token =await cookies().get("token")?.value;
+    const token =await cookies().get("admin_token")?.value;
     if (!token) return { error: "Unauthorized" };
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
