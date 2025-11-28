@@ -120,17 +120,18 @@ export default function Header({
         >
       
 
-<img
-  src={user?.avatar || ""}  // avoid broken src
-  alt="user"
-  className="w-6 h-6 object-cover"
-  onError={(e) => {
-    e.currentTarget.onerror = null; // prevent loop
-    e.currentTarget.src = "";      // clear invalid image
-    e.currentTarget.replaceWith(<User size={20} className="text-gray-500" />); // fallback icon
-  }}
-/>
-
+{user?.avatar ? (
+  <img
+    src={user.avatar}
+    alt="user"
+    className="w-6 h-6 object-cover"
+    onError={(e) => {
+      e.currentTarget.src = ""; // optional safety clear
+    }}
+  />
+) : (
+  <User size={20} className="text-gray-500" /> // ✅ Fallback when empty string/null/undefined
+)}
         </button>
 
         {/* Dropdown Component */}

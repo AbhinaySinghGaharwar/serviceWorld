@@ -42,7 +42,7 @@ useEffect(() => {
 
   loadOrders();
 }, []);
-console.log(selectedCategory)
+
   return (
     <div
       className="

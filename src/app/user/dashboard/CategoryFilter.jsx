@@ -27,10 +27,12 @@ const icons = [
   { name: "Discord", icon: <FaDiscord size={28} /> },
   { name: "Website", icon: <FaGlobe size={28} /> },
   { name: "Explore", icon: <FaStar size={28} /> },
+  { name: false, icon: <FaCircle size={28} /> },
   { name: null, icon: <FaCircle size={28} /> },
 ];
 
 export default function CategoryFilter({ selectedCategory, onCategorySelect }) {
+
   return (
     <div className="flex items-center justify-center px-2">
       <div
@@ -47,7 +49,8 @@ export default function CategoryFilter({ selectedCategory, onCategorySelect }) {
          
         "
       >
-        {icons.map((item, i) => {
+        {icons
+  .filter(item => item.name !== null).map((item, i) => {
           const isSelected = selectedCategory === item.name;
 
           return (

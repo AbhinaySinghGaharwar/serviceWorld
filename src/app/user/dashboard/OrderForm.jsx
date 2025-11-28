@@ -53,7 +53,7 @@ const getPlatformIcon = (name = "") => {
   return <FaGlobe className="text-gray-500 text-lg" />;
 };
 
-export default function OrderForm({ selectedCategory }) {
+export default function OrderForm({ selectedCategory='' }) {
   const {symbol,convert}=useCurrency()
   const [category, setCategory] = useState(selectedCategory || "");
   const [service, setService] = useState("");
