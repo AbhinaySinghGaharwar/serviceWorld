@@ -3,6 +3,8 @@ import "./globals.css";
 import { getWebsiteSettings } from "@/lib/adminServices";
 import LayoutWrapper from "./components/LayoutWrapper";
 import { CurrencyProvider } from "@/context/CurrencyContext";
+import { headers } from "next/headers";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -29,9 +31,17 @@ try {
   console.error("Invalid JSON in plainsettings:", err);
   settings = {};
 }
-if(settings.maintenanceMode){
+const h = await headers();
+ const referer = h.get("referer")
 
+let path = "/";
+if (referer) {
+  try {
+    path = new URL(referer).pathname; // ✅ extract "/user/data", "/admin/dashboard", etc.
+  } catch {}
 }
+
+
 
 
 

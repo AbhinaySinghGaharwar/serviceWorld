@@ -5,7 +5,8 @@ const SECRET = new TextEncoder().encode(process.env.JWT_SECRET); // ONE SECRET
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
-
+ const res = NextResponse.next();
+  res.headers.set("url", pathname); 
   // Cookies
   const userToken = request.cookies.get("token")?.value;
   const adminToken = request.cookies.get("admin_token")?.value;

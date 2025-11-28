@@ -1,43 +1,46 @@
 'use client'
 import React, { useState, useRef, useEffect } from "react";
-import { Search } from "lucide-react";
-import { importServicesAction,StoreServicesInDB } from "@/lib/services";
+import { importServicesAction, StoreServicesInDB } from "@/lib/services";
 import { getProvidersAction } from "@/lib/providerActions";
+import FormSection from "./FormSection";
+
 export default function ServiceImporter() {
-  const [usePredefined, setUsePredefined] = useState(true);
-  const [providerInput, setProviderInput] = useState( "");
+  const [providerInput, setProviderInput] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [services, setServices] = useState([]);
-  const [selectedServices, setSelectedServices] = useState([]);
+  const [selectedServices, setSelectedServices] = useState([]); // ids of selected rows
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [openProviderDropdown, setOpenProviderDropdown] = useState(false);
-  const [openCategoryDropdown, setOpenCategoryDropdown] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
-  const [viewService, setViewService] = useState(null);
-const [provider,setProvider]=useState([])
+  const [provider, setProvider] = useState([]);
+  const [profitPercentage, setProfitPercentage] = useState(0);
+  const [categories, setCategories] = useState([]);
+  const [showServices, setShowServices] = useState(false);
+  const [reviewServices, setReviewServices] = useState([]); // rows shown in final table
+
   const providerDropdownRef = useRef(null);
-  const categoryDropdownRef = useRef(null);
-useEffect(()=>{
-  const loadProviders=async()=>{
-    const res= await getProvidersAction()
-    if(res){
-      setProvider(res)
-    }
-    console.log(res)
-  }
-  loadProviders()
-},[])
+
+  useEffect(() => {
+    const loadProviders = async () => {
+      const res = await getProvidersAction();
+      if (res) setProvider(res);
+    };
+    loadProviders();
+  }, []);
+
   // Import Services API Call
   const handleSubmit = async (e) => {
-    console.log(providerInput,apiKey)
     e.preventDefault();
     const result = await importServicesAction({ url: providerInput, api: apiKey });
 
     if (result.error) {
       alert("Failed to import services!");
       setServices([]);
+      setCategories([]);
+      setSelectedServices([]);
+      setShowServices(false);
       return;
     }
 
@@ -50,300 +53,220 @@ useEffect(()=>{
           max: s.max,
           rate: s.rate,
           provider: providerInput,
-          ...s
+          api_category: s.category || "Other",
+          ...s,
         }))
       : [];
 
     setServices(formatted);
     setSelectedServices([]);
-    setViewService(null);
+    setShowServices(false);
+    setReviewServices([]);
+
+    const catList = ["All", ...new Set(formatted.map((s) => s.category || "Other"))];
+    setCategories(catList);
   };
 
-  const toggleSelectService = (id) => {
-    setSelectedServices(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+  // CHECK / UNCHECK ONLY LOGIC
+  const handleRowCheck = (id, checked) => {
+    setSelectedServices((prev) =>
+      checked ? [...prev, id] : prev.filter((x) => x !== id)
     );
   };
 
-  // Select ALL from table
-  const handleSelectAll = () => {
-    if (!selectAll) {
-      setSelectedServices(services.map(s => s.id));
-      setSelectAll(true);
-    } else {
-      setSelectedServices([]);
-      setSelectAll(false);
-    }
-  };
-
+  // Keep selectAll state synced
   useEffect(() => {
-    setSelectAll(services.length > 0 && selectedServices.length === services.length);
+    setSelectAll(
+      services.length > 0 &&
+      selectedServices.length > 0 &&
+      selectedServices.length === services.length
+    );
   }, [selectedServices, services]);
 
-  // Categories list
-  const categories = ["All", ...new Set(services.map(s => s.category))];
-
-  // Filter services
-  const filteredServices = services.filter(s => {
+  const filteredServices = services.filter((s) => {
     return (
       s.name.toLowerCase().includes(search.toLowerCase()) &&
       (activeCategory === "All" || s.category === activeCategory)
     );
   });
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handler = (e) => {
-      if (providerDropdownRef.current && !providerDropdownRef.current.contains(e.target)) {
-        setOpenProviderDropdown(false);
-      }
-      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(e.target)) {
-        setOpenCategoryDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  // Submit Categories → prepare final table list
+  const handleCategorySubmit = () => {
+    if (selectedServices.length === 0) {
+      alert("Select at least one service!");
+      return;
+    }
+    const initialReview = services.filter((s) => selectedServices.includes(s.id));
+    setReviewServices(initialReview); // freeze rows shown in final table
+    setShowServices(true);
+  };
 
-  // client side
-const handleFinalSubmit = async () => {
-  const selected = services.filter(s => selectedServices.includes(s.id));
-  console.log("Selected services ->", selected);
-  setSubmitting(true);  // start loading
-  const res = await StoreServicesInDB({ services: selected });
- 
-  if(res.status){
-    alert(res.message)
-      setSubmitting(false); 
-    return
-  }
-  alert(res.message)
-    setSubmitting(false);  
-  return
-};
+  // Final Submit
+  const handleFinalSubmit = async () => {
+    const selected = services.filter((s) => selectedServices.includes(s.id));
+
+    if (selected.length === 0) {
+      alert("No services selected to submit!");
+      return;
+    }
+
+    setSubmitting(true);
+    const res = await StoreServicesInDB({ services: selected, profitPercentage });
+    alert(res.message);
+    setSubmitting(false);
+  };
 
   return (
     <div className="flex flex-col p-4 gap-4 w-full">
+      <FormSection
+        provider={provider}
+        providerInput={providerInput}
+        apiKey={apiKey}
+        profitPercentage={profitPercentage}
+        openProviderDropdown={openProviderDropdown}
+        setOpenProviderDropdown={setOpenProviderDropdown}
+        setProviderInput={setProviderInput}
+        setApiKey={setApiKey}
+        setProfitPercentage={setProfitPercentage}
+        handleSubmit={handleSubmit}
+      />
 
-      {/* FORM SECTION */}
-      <div className="border p-4 rounded-2xl shadow bg-white dark:bg-gray-900">
-        <form onSubmit={handleSubmit} className="space-y-3">
-          
-          {/* Provider Mode Toggle */}
-          <div className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={usePredefined}
-              onChange={() => {
-                setUsePredefined(!usePredefined);
-                setProviderInput("");
-              }}
-              className="h-4 w-4"
-            />
-            <label>{usePredefined ? "Use Predefined Provider" : "Enter New Provider URL"}</label>
-          </div>
+      {/* MAIN TABLE */}
+      {categories.length > 0 && !showServices && (
+        <div className="border p-4 rounded-2xl shadow bg-white dark:bg-gray-900">
+          {/* (Optional) Search input – you already have state */}
+          {/* <input
+            className="mb-3 w-full border rounded-lg px-3 py-2"
+            placeholder="Search service..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          /> */}
 
-         
-         <div className="flex gap-2">
-  {usePredefined && (
-    <div ref={providerDropdownRef} className="relative w-[180px]">
-      <button
-        type="button"
-        onClick={() => setOpenProviderDropdown(!openProviderDropdown)}
-        className="w-full border px-2 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-sm"
-      >
-        {provider?.find(p => p.providerUrl === providerInput)?.name || "Select Provider ▼"}
-      </button>
+          <table className="table-auto w-full border-collapse border border-gray-300 dark:border-gray-700 text-sm">
+            <thead className="bg-gray-100 dark:bg-gray-800">
+              <tr>
+                <th className="border p-2"></th>
+                <th className="border p-2">ID</th>
+                <th className="border p-2">Select Categories</th>
+                <th className="border p-2">API Category Name</th>
+              </tr>
+            </thead>
 
-      {openProviderDropdown && (
-        <div className="absolute mt-1 w-full bg-white dark:bg-gray-800 border rounded-xl shadow z-50">
-          {provider.map(p => (
-            <div
-              key={p.id}
-              onClick={() => {
-                setProviderInput(p.providerUrl); // ✅ Sets dropdown URL
-                setApiKey(p.apiKey);            // ✅ Auto-fills API key input
-                setOpenProviderDropdown(false);
-              }}
-              className="px-2 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer text-sm"
-            >
-              {p.name}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )}
+            <tbody>
+              {filteredServices.map((service) => (
+                <tr key={service.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="border p-2 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedServices.includes(service.id)}
+                      onChange={(e) => handleRowCheck(service.id, e.target.checked)}
+                    />
+                  </td>
 
-  {/* URL Input */}
-  <input
-    placeholder="Enter provider API URL"
-    value={providerInput}
-    onChange={(e) => setProviderInput(e.target.value)}
-    className="flex-1 border p-2 rounded-lg text-sm"
-    required
-  />
-</div>
+                  <td className="border p-2 text-center">{service.id}</td>
 
-{/* API Key Password Input */}
-<input
-  type="text"
-  placeholder="Enter API Key"
-  value={apiKey}
-  onChange={(e) => setApiKey(e.target.value)}
-  className="w-full border p-2 rounded-lg text-sm"
-  required
-/>
+                  <td className="border p-2">
+                    <select
+                      className="form-control w-full p-1 border rounded-lg"
+                      value={service.category || ""}  // ✅ never null/undefined
+                      onChange={(e) =>
+                        setServices((prev) =>
+                          prev.map((s) =>
+                            s.id === service.id
+                              ? {
+                                  ...s,
+                                  category:
+                                    e.target.value === "0"
+                                      ? "Other"
+                                      : e.target.value,
+                                }
+                              : s
+                          )
+                        )
+                      }
+                    >
+                      <option value="0">Create New</option>
+                      {categories
+                        .filter((c) => c !== "All")
+                        .map((cat, i) => (
+                          <option key={i} value={cat}>
+                            {cat}
+                          </option>
+                        ))}
+                    </select>
+                  </td>
 
+                  <td className="border p-2">
+                    <input
+                      readOnly
+                      className="form-control w-full p-1 border rounded-lg bg-gray-50 dark:bg-gray-800"
+                      value={service.api_category || ""}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
           <button
-            type="submit"
-            className="w-full py-2 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-700"
+            onClick={handleCategorySubmit}
+            className="mt-4 px-6 py-2 bg-green-500 text-white rounded-xl shadow hover:opacity-90"
           >
-            Import Services
+            Submit Categories
           </button>
-        </form>
-      </div>
-
-      {/* SERVICE TABLE + CONTROLS */}
-      {services.length > 0 && (
-        <div className="border p-4 rounded-2xl shadow bg-white dark:bg-gray-900">
-
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4" />
-            <input
-              placeholder="Search services..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full border p-2 pl-8 rounded-lg text-sm"
-            />
-          </div>
-
-          {/* Category Dropdown */}
-          <div ref={categoryDropdownRef} className="relative mt-3">
-            <button
-              type="button"
-              onClick={() => setOpenCategoryDropdown(!openCategoryDropdown)}
-              className="w-full border px-3 py-2 rounded-lg text-sm bg-gray-100 dark:bg-gray-800"
-            >
-              Category: {activeCategory} ▼
-            </button>
-
-            {openCategoryDropdown && (
-              <div className="absolute mt-1 w-full bg-white dark:bg-gray-800 border rounded-xl shadow z-50">
-                {categories.map((c, i) => (
-                  <div
-                    key={i}
-                    onClick={() => {
-                      setActiveCategory(c);
-                      setOpenCategoryDropdown(false);
-                    }}
-                    className="px-2 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer text-sm"
-                  >
-                    {c}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Select All */}
-          <div className="flex items-center gap-2 text-sm mt-3">
-            <input type="checkbox" checked={selectAll} onChange={handleSelectAll} className="h-4 w-4" />
-            <label>Select All Services</label>
-          </div>
-
-          {/* Table */}
-          <div className="overflow-x-auto mt-3">
-            <table className="w-full border text-xs">
-              <thead className="border-b bg-gray-100 dark:bg-gray-800">
-                <tr>
-                  <th className="p-2">Select</th>
-                  <th className="p-2 text-left">Service</th>
-                  <th className="p-2 text-left">Category</th>
-                  <th className="p-2">Rate</th>
-                  <th className="p-2">Min</th>
-                  <th className="p-2">Max</th>
-                  <th className="p-2 text-right">View</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredServices.map(s => (
-                  <tr key={s.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="p-2 text-center">
-                      <input
-                        type="checkbox"
-                        checked={selectedServices.includes(s.id)}
-                        onChange={() => toggleSelectService(s.id)}
-                        className="h-4 w-4"
-                      />
-                    </td>
-                    <td className="p-2">{s.name}</td>
-                    <td className="p-2">{s.category}</td>
-                    <td className="p-2 text-center">{s.rate}</td>
-                    <td className="p-2 text-center">{s.min}</td>
-                    <td className="p-2 text-center">{s.max}</td>
-                    <td className="p-2 text-right">
-                      <button
-                        type="button"
-                        onClick={() => setViewService(s)}
-                        className="px-2 py-1 bg-blue-600 text-white rounded-lg text-xs"
-                      >
-                        View Details
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-
-                {filteredServices.length === 0 && (
-                  <tr>
-                    <td colSpan="7" className="p-3 text-center text-sm text-gray-500">No services found</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Final Submit */}
-        <button
-  onClick={handleFinalSubmit}
-  disabled={submitting}
-  className="mt-3 w-full py-2 bg-green-700 text-white text-sm rounded-lg hover:bg-green-600 disabled:opacity-50"
->
-  {submitting ? "Submitting..." : "Submit Selected Services"}
-</button>
-
-
         </div>
       )}
 
-     {/* ✅ Responsive Centered Details Panel */}
-{viewService && (
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-3 z-50">
-    <div className="
-      bg-white dark:bg-gray-900 
-      w-full max-w-[420px] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px]
-      max-h-[85vh] 
-      overflow-y-auto 
-      shadow-xl border rounded-2xl p-4
-      animate-fadeIn
-    ">
-      <button
-        onClick={() => setViewService(null)}
-        className="text-xs bg-red-600 text-white px-3 py-1.5 rounded-lg mb-3"
-      >
-        Close Panel
-      </button>
+      {/* FINAL TABLE */}
+      {showServices && (
+        <div className="border p-4 rounded-2xl shadow bg-white dark:bg-gray-900">
+          <h2 className="text-lg font-semibold mb-3 text-center">
+            Selected Services
+          </h2>
 
-      <pre className="text-[11px] sm:text-xs bg-gray-100 dark:bg-gray-800 p-3 rounded-xl border overflow-x-auto">
-        {JSON.stringify(viewService, null, 2)}
-      </pre>
-    </div>
-  </div>
-)}
+          <table className="table-auto w-full border-collapse border border-gray-400 dark:border-gray-600 text-sm">
+            <thead className="bg-gray-200 dark:bg-gray-700">
+              <tr>
+                <th className="border p-2"></th>
+                <th className="border p-2">ID</th>
+                <th className="border p-2">Service Name</th>
+                <th className="border p-2">Category</th>
+                <th className="border p-2">Min</th>
+                <th className="border p-2">Max</th>
+                <th className="border p-2">Rate</th>
+              </tr>
+            </thead>
 
+            <tbody>
+              {reviewServices.map((s) => (
+                <tr key={s.id}>
+                  <td className="border p-2 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedServices.includes(s.id)}
+                      onChange={(e) => handleRowCheck(s.id, e.target.checked)}
+                    />
+                  </td>
+                  <td className="border p-2 text-center">{s.id}</td>
+                  <td className="border p-2">{s.name}</td>
+                  <td className="border p-2">{s.category}</td>
+                  <td className="border p-2 text-center">{s.min}</td>
+                  <td className="border p-2 text-center">{s.max}</td>
+                  <td className="border p-2 text-center">{s.rate}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
+          <button
+            onClick={handleFinalSubmit}
+            disabled={submitting}
+            className="mt-6 px-6 py-3 bg-blue-600 text-white text-md rounded-xl shadow hover:opacity-90 disabled:opacity-50"
+          >
+            {submitting ? "Submitting…" : "Import services"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -91,7 +91,8 @@ export async function importServicesAction({url,api}) {
 }
 
 
-export async function StoreServicesInDB({ services }) {
+export async function StoreServicesInDB({ services ,profitPercentage}) {
+
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("admin_token")?.value;
