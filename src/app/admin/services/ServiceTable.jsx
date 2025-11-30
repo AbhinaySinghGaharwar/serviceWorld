@@ -3,11 +3,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaTimes } from "react-icons/fa";
-import {  DeleteServiceAction, UpdateServiceStatusAction } from "@/lib/customservices";
+import { DeleteServiceAction, UpdateServiceStatusAction } from "@/lib/customservices";
 import { UpdateMultipleServicesAction } from "@/lib/customservices";
 import EditServiceModal from "./EditModal";
 import CategoryOption from "./CategoryOption";
-export default function ServiceTable({ title, grouped,category }) {
+
+export default function ServiceTable({ title, grouped, category }) {
   const disabledStatus = "disabled";
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [editData, setEditData] = useState(null);
@@ -15,7 +16,7 @@ export default function ServiceTable({ title, grouped,category }) {
   const [statusData, setStatusData] = useState(null);
   const dropdownRef = useRef(null);
 
-  // NEW ✅ store multiple selected rows
+  // ✅ store multiple selected rows
   const [selectedRows, setSelectedRows] = useState({});
 
   useEffect(() => {
@@ -27,8 +28,6 @@ export default function ServiceTable({ title, grouped,category }) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
- 
 
   const onDelete = async (srv) => {
     const res = await DeleteServiceAction(srv.service);
@@ -42,38 +41,59 @@ export default function ServiceTable({ title, grouped,category }) {
 
   // ✅ toggle single checkbox
   const toggleRow = (key) => {
-    setSelectedRows(prev => ({
+    setSelectedRows((prev) => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: !prev[key],
     }));
+  };
+
+  // ✅ toggle ALL checkboxes
+  const handleSelectAll = (checked) => {
+    if (!checked) {
+      setSelectedRows({});
+      return;
+    }
+
+    const allSelected = {};
+    Object.keys(grouped || {}).forEach((catGroup) => {
+      grouped[catGroup].forEach((srv, idx) => {
+        const rowKey = `${catGroup}-${idx}`;
+        allSelected[rowKey] = true;
+      });
+    });
+
+    setSelectedRows(allSelected);
   };
 
   // ✅ BULK DELETE FUNCTION
   const bulkDelete = async () => {
-    const keys = Object.entries(selectedRows).filter(([_, v]) => v).map(([k]) => k);
+    const keys = Object.entries(selectedRows)
+      .filter(([_, v]) => v)
+      .map(([k]) => k);
+
     if (keys.length === 0) return alert("No rows selected!");
 
     for (const key of keys) {
-      const [category, idx] = key.split("-");
-      const srv = grouped[category][idx];
+      const [catGroup, idx] = key.split("-");
+      const srv = grouped[catGroup][idx];
       await DeleteServiceAction(srv.service);
     }
+
     alert("Bulk delete completed ✅");
     setSelectedRows({});
   };
 
-  // ✅ BULK EDIT FUNCTION (opens first selected row in modal)
+  // ✅ BULK EDIT FUNCTION
   const bulkEdit = () => {
     const firstKey = Object.entries(selectedRows).find(([_, v]) => v)?.[0];
     if (!firstKey) return alert("No rows selected!");
 
-    const [category, idx] = firstKey.split("-");
-    setEditData(grouped[category][idx]);
-
+    const [catGroup, idx] = firstKey.split("-");
+    setEditData(grouped[catGroup][idx]);
   };
-   const onEdit = async (updated) => {
-    
-    const res = await UpdateMultipleServicesAction(updated,selectedRows);
+
+  const onEdit = async (updated) => {
+    const res = await UpdateMultipleServicesAction(updated, selectedRows);
     alert(res.message);
     setSelectedRows({});
   };
@@ -101,15 +121,20 @@ export default function ServiceTable({ title, grouped,category }) {
           <table className="min-w-full text-sm">
             <thead className="border-b bg-gray-100 text-gray-700 border-gray-300 dark:bg-[#1E1F23] dark:text-gray-200 dark:border-gray-700">
               <tr>
-
-                {/* ✅ checkbox header */}
-                <th className="px-4 py-3 text-center">Select</th>
+                {/* ✅ Select-ALL Checkbox */}
+                <th className="px-4 py-3 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4"
+                      onChange={(e) => handleSelectAll(e.target.checked)}
+                    />
+                    <span className="text-xs font-semibold">Select</span>
+                  </div>
+                </th>
 
                 <th className="px-4 py-3 text-left">ID</th>
-
-                {/* ✅ Make service column a little big */}
                 <th className="px-4 py-3 text-left w-[300px]">Service</th>
-
                 <th className="px-4 py-3 text-left">Type</th>
                 <th className="px-4 py-3 text-left">Refill</th>
                 <th className="px-4 py-3 text-left">Cancel</th>
@@ -122,180 +147,158 @@ export default function ServiceTable({ title, grouped,category }) {
               </tr>
             </thead>
 
-    <tbody>
-  {Object.keys(grouped || {}).map((catGroup) => (
-    <React.Fragment key={catGroup}>
+            <tbody>
+              {Object.keys(grouped || {}).map((catGroup) => (
+                <React.Fragment key={catGroup}>
+                  
+                  {/* ✅ CATEGORY HEADING */}
+                  <tr className="bg-gray-200 text-gray-700 dark:bg-[#1E1F23] dark:text-gray-200">
+                    <td colSpan={12} className="px-4 py-2 font-bold text-sm">
+                      <span className="flex">
+                        {catGroup}
+                        <CategoryOption
+                          category={catGroup}
+                          services={grouped[catGroup]}
+                          onClose={() => setEditData(null)}
+                          OnSave={onEdit}
+                          ModalCategory={category}
+                        />
+                      </span>
+                    </td>
+                  </tr>
 
-      {/* ✅ Category Group Heading Row (ONLY TR + TD, no span, no extra node) */}
-      <tr className=" bg-gray-200 text-gray-700 dark:bg-[#1E1F23] dark:text-gray-200">
-        <td colSpan={11} className="px-4 py-2 font-bold text-sm"><span className="flex ">{catGroup}
-          <CategoryOption category={catGroup} services={grouped[catGroup]} onClose={() => setEditData(null)} OnSave={onEdit} ModalCategory={category}/></span></td>
-      </tr>
+                  {/* ✅ TABLE ROWS */}
+                  {grouped[catGroup].map((srv, idx) => {
+                    const rowKey = `${catGroup}-${idx}`;
 
-      {/* ✅ Service Rows */}
-      {grouped[catGroup].map((srv, idx) => {
-        const rowKey = `${catGroup}-${idx}-${srv.name}-${srv.id}`;
+                    return (
+                      <tr key={rowKey} className="border-b hover:bg-gray-100 border-gray-300 text-gray-700 dark:border-gray-700 dark:hover:bg-gray-800 dark:text-gray-200">
+                        
+                        {/* ✅ Checkbox */}
+                        <td className="px-2 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedRows[rowKey] || false}
+                            onChange={() => toggleRow(rowKey)}
+                            className="w-4 h-4 accent-black cursor-pointer"
+                          />
+                        </td>
 
-        return (
-          <tr key={rowKey} className="border-b hover:bg-gray-100 border-gray-300 text-gray-700 dark:border-gray-700 dark:hover:bg-gray-800 dark:text-gray-200">
+                        {/* ✅ ID */}
+                        <td className="font-bold">{srv.id}</td>
 
-            {/* ✅ Checkbox */}
-            <td className="px-2 text-center">
-              <input
-                type="checkbox"
-                checked={selectedRows[rowKey] || false}
-                onChange={() => toggleRow(rowKey)}
-                className="w-4 h-4 accent-black cursor-pointer"
-              />
-            </td>
+                        {/* ✅ Name */}
+                        <td className="px-2 font-extrabold text-sm min-w-[340px]">{srv.name}</td>
 
-            {/* ✅ ID */}
-            <td className=" font-bold">{srv.id}</td>
+                        {/* ✅ Type */}
+                        <td className="px-2">{srv.type}</td>
 
-            {/* ✅ Service Column Wider (little big as you asked) */}
-            <td className="px-2 font-extrabold text-sm min-w-[340px]">{srv.name}</td>
+                        {/* ✅ Refill */}
+                        <td className="px-2">{srv.refill ? "Yes" : "No"}</td>
 
-            {/* ✅ Type */}
-            <td className="px-2">{srv.type}</td>
+                        {/* ✅ Cancel */}
+                        <td className="px-2">{srv.cancelAllowed ? "Yes" : "No"}</td>
 
-            {/* ✅ Refill */}
-            <td className="px-2">{srv.refill ? "Yes" : "No"}</td>
+                        {/* ✅ Provider */}
+                        <td className="px-2 truncate max-w-[240px] text-xs">
+                          <span className="font-bold block">{srv.provider}</span>
+                          <span className="font-xs text-center block font-bold">{srv.service}</span>
+                        </td>
 
-            {/* ✅ Cancel */}
-            <td className="px-2">{srv.cancelAllowed ? "Yes" : "No"}</td>
+                        {/* ✅ Price */}
+                        <td className="px-2">
+                          <span className="block font-bold text-green-600 dark:text-green-400 text-sm">
+                            ₹{((srv.rate ?? 0) * (1 + (srv.profitPercentage ?? 0) / 100)).toFixed(2)}
+                          </span>
+                          <span className="block font-bold text-xs dark:text-gray-300">₹{srv.rate ?? 0}</span>
+                          <span className="block text-[10px] font-bold text-gray-500">Profit: {srv.profitPercentage ?? 0}%</span>
+                        </td>
 
-            {/* ✅ Provider */}
-            <td className="px-2 truncate max-w-[240px] text-xs">
-              <span className="font-bold block">
-                {srv.provider}
-              </span>
-              <span className="font-xs text-center block font-bold">
-                {srv.service}
-              </span>
-            </td>
+                        {/* ✅ Min */}
+                        <td className="px-2 text-xs font-bold">{srv.min}</td>
 
-            {/* ✅ Price + Profit (unchanged logic ✅) */}
-            <td className="px-2">
-              <span className="block font-bold text-green-600 dark:text-green-400 text-sm">
-                ₹{((srv.rate ?? 0) * (1 + (srv.profitPercentage ?? 0) / 100)).toFixed(2)}
-              </span>
-              <span className="block font-bold text-xs dark:text-gray-300">
-                ₹{srv.rate ?? 0}
-              </span>
-              <span className="block text-[10px] font-bold text-gray-500">
-                Profit: {srv.profitPercentage ?? 0}%
-              </span>
-            </td>
+                        {/* ✅ Max */}
+                        <td className="px-2 text-xs font-bold">{srv.max}</td>
 
-            {/* ✅ Min */}
-            <td className="px-2 text-xs font-bold">{srv.min}</td>
+                        {/* ✅ Status */}
+                        <td className="px-2 text-center">
+                          <span className={`px-2 py-0.5 text-[10px] font-extrabold rounded-md ${
+                              srv.status === disabledStatus
+                                ? "bg-red-300 text-red-800 dark:bg-red-900/40 dark:text-red-300"
+                                : "bg-green-300 text-green-800 dark:bg-green-900/40 dark:text-green-300"
+                            }`}>
+                            {srv.status === disabledStatus ? "Disabled" : "Enabled"}
+                          </span>
+                        </td>
 
-            {/* ✅ Max */}
-            <td className="px-2 text-xs font-bold">{srv.max}</td>
+                        {/* ✅ Dropdown */}
+                        <td className="px-4 py-3 text-center relative">
+                          <button onClick={() =>
+                                setDropdownOpen(dropdownOpen === rowKey ? null : rowKey)
+                              } className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                            <BsThreeDotsVertical size={15} className="opacity-70" />
+                          </button>
 
-            {/* ✅ Status Badge */}
-            <td className="px-2 text-center">
-              <span
-                className={`px-2 py-0.5 text-[10px] font-extrabold rounded-md ${
-                  srv.status === "disabled"
-                    ? "bg-red-300 text-red-800 dark:bg-red-900/40 dark:text-red-300"
-                    : "bg-green-300 text-green-800 dark:bg-green-900/40 dark:text-green-300"
-                }`}
-              >
-                {srv.status === "disabled" ? "Disabled" : "Enabled"}
-              </span>
-            </td>
+                          {dropdownOpen === rowKey && (
+                            <div ref={dropdownRef} className="absolute right-0 mt-1.5 w-28 rounded-md shadow bg-white dark:bg-[#1E1F23] border border-gray-300 dark:border-gray-700 text-xs z-50">
+                              
+                              <button onClick={() => {
+                                  setDropdownOpen(null);
+                                  setEditData(srv);
+                                }} className="block w-full text-left px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 font-bold">Edit</button>
 
-            {/* ✅ Action Dropdown */}
-            <td className="px-4 py-3 text-center relative">
-              <button
-                onClick={() => setDropdownOpen(dropdownOpen === rowKey ? null : rowKey)}
-                className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-              >
-                <BsThreeDotsVertical size={15} className="opacity-70" />
-              </button>
+                              <button onClick={() => {
+                                  setDropdownOpen(null);
+                                  setStatusData(srv);
+                                }} className="block w-full text-left px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 font-bold">Change Status</button>
 
-              {dropdownOpen === rowKey && (
-                <div
-                  ref={dropdownRef}
-                  className="absolute right-0 mt-1.5 w-28 rounded-md shadow bg-white dark:bg-[#1E1F23] border border-gray-300 dark:border-gray-700 text-xs z-50"
-                >
-                  <button
-                    onClick={() => { setDropdownOpen(null); setEditData(srv); }}
-                    className="block w-full text-left px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 font-bold"
-                  >
-                    Edit
-                  </button>
+                              <button onClick={() => {
+                                  setDropdownOpen(null);
+                                  setDeleteData(srv);
+                                }} className="block w-full text-left px-3 py-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/40 font-extrabold">Delete</button>
 
-                  <button
-                    onClick={() => { setDropdownOpen(null); setStatusData(srv); }}
-                    className="block w-full text-left px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 font-bold"
-                  >
-                    Change Status
-                  </button>
-
-                  <button
-                    onClick={() => { setDropdownOpen(null); setDeleteData(srv); }}
-                    className="block w-full text-left px-3 py-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/40 font-extrabold"
-                  >
-                    Delete
-                  </button>
-
-                </div>
-              )}
-            </td>
-
-          </tr>
-        );
-      })}
-
-    </React.Fragment>
-  ))}
-</tbody>
-
-
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </React.Fragment>
+              ))}
+            </tbody>
           </table>
         </div>
       </div>
 
-      {/* ✅ BULK EDIT MODAL REUSE (untouched behavior) */}
+      {/* ✅ EDIT MODAL */}
       {editData && <EditServiceModal editData={editData} onSave={onEdit} onClose={() => setEditData(null)} category={category} />}
-
-      {/* ✅ DELETE MODAL (untouched) */}
+      
+      {/* ✅ DELETE MODAL */}
       {deleteData && (
         <Modal onClose={() => setDeleteData(null)} title="Delete Service">
           <p className="mb-3 text-center">Delete <b>{deleteData.name}</b>?</p>
-          <button
-            onClick={() => { onDelete(deleteData); setDeleteData(null); }}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 w-full"
-          >
+          <button onClick={() => { onDelete(deleteData); setDeleteData(null); }} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 w-full">
             Confirm Delete
           </button>
         </Modal>
       )}
 
-      {/* ✅ STATUS MODAL (untouched) */}
+      {/* ✅ STATUS MODAL */}
       {statusData && (
         <Modal onClose={() => setStatusData(null)} title="Update Service Status">
           <div className="space-y-4">
-            <label className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-              Change Status for:
+            <label className="text-sm font-semibold text-gray-800 dark:text-gray-200">Change Status for:
               <p className="mt-1 font-bold text-purple-600">{statusData.name}</p>
             </label>
 
-            <select
-              value={statusData.status}
-              onChange={(e) => setStatusData({ ...statusData, status: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1E1F23] text-sm outline-none dark:text-white"
-            >
+            <select value={statusData.status} onChange={(e) =>
+                setStatusData({ ...statusData, status: e.target.value })
+              } className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1E1F23] text-sm outline-none dark:text-white">
               <option value="enabled">Enabled</option>
               <option value="disabled">Disabled</option>
             </select>
 
-            <button
-              onClick={() => { onStatus(statusData); setStatusData(null); }}
-              className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 w-full"
-            >
+            <button onClick={() => { onStatus(statusData); setStatusData(null); }} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 w-full">
               Save Status
             </button>
           </div>
