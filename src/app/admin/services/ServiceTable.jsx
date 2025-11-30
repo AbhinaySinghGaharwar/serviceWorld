@@ -122,113 +122,130 @@ export default function ServiceTable({ title, grouped,category }) {
               </tr>
             </thead>
 
-            <tbody>
-              {Object.keys(grouped || {}).map((category) => (
-                <React.Fragment key={category}>
-                  <tr className="bg-gray-200 text-gray-700 dark:bg-[#1E1F23] dark:text-gray-200">
-                    <td></td>
-                    <td colSpan={11} className="px-4 py-2 font-bold text-lg">{category}</td>
-                  </tr>
+    <tbody>
+  {Object.keys(grouped || {}).map((catGroup) => (
+    <React.Fragment key={catGroup}>
 
-                  {grouped[category].map((srv, idx) => {
-                    const rowKey = `${category}-${idx}-${srv.name}-${srv.id}`;
+      {/* ✅ Category Group Heading Row (ONLY TR + TD, no span, no extra node) */}
+      <tr className="bg-gray-200 text-gray-700 dark:bg-[#1E1F23] dark:text-gray-200">
+        <td colSpan={11} className="px-4 py-2 font-bold text-sm">{catGroup}</td>
+      </tr>
 
-                    return (
-                      <tr key={rowKey} className="border-b hover:bg-gray-100 border-gray-300 text-gray-700 dark:border-gray-700 dark:hover:bg-gray-800 dark:text-gray-200">
+      {/* ✅ Service Rows */}
+      {grouped[catGroup].map((srv, idx) => {
+        const rowKey = `${catGroup}-${idx}-${srv.name}-${srv.id}`;
 
-                        {/* ✅ Checkbox column */}
-                        <td className="px-4 py-3 text-center">
-                          <input
-                            type="checkbox"
-                            checked={selectedRows[rowKey] || false}
-                            onChange={() => toggleRow(rowKey)}
-                            className="w-4 h-4 accent-black cursor-pointer"
-                          />
-                        </td>
+        return (
+          <tr key={rowKey} className="border-b hover:bg-gray-100 border-gray-300 text-gray-700 dark:border-gray-700 dark:hover:bg-gray-800 dark:text-gray-200">
 
-                        <td className="px-4 py-3">{srv.service}</td>
+            {/* ✅ Checkbox */}
+            <td className="px-2 text-center">
+              <input
+                type="checkbox"
+                checked={selectedRows[rowKey] || false}
+                onChange={() => toggleRow(rowKey)}
+                className="w-4 h-4 accent-black cursor-pointer"
+              />
+            </td>
 
-                        {/* ✅ Wider Service Name field */}
-                        <td className="px-4 py-3 font-bold w-full">{srv.name}</td>
+            {/* ✅ ID */}
+            <td className=" font-bold">{srv.id}</td>
 
-                        <td className="px-4 py-3">{srv.type}</td>
-                        <td className="px-4 py-3">{srv.refill ? "Yes" : "No"}</td>
-                        <td className="px-4 py-3">{srv.cancelAllowed ? "Yes" : "No"}</td>
-                        <td className="px-4 py-3">{srv.provider}</td>
+            {/* ✅ Service Column Wider (little big as you asked) */}
+            <td className="px-2 font-extrabold text-sm min-w-[340px]">{srv.name}</td>
 
-                        {/* ✅ PRICE + PROFIT (your logic untouched) */}
-                        <td className="px-4 py-3">
-                          <span className="block font-bold text-green-500">
-                            ₹{((srv.rate ?? 0) * (1 + (srv.profitPercentage ?? 0) / 100)).toFixed(2)}
-                          </span>
-                          <span className="block font-bold">
-                            ₹{srv.rate ?? 0}
-                          </span>
-                          <span className="block text-xs text-gray-500 font-bold">
-                            Profit: {srv.profitPercentage ?? 0}%
-                          </span>
-                        </td>
+            {/* ✅ Type */}
+            <td className="px-2">{srv.type}</td>
 
-                        <td className="px-4 py-3">{srv.min}</td>
-                        <td className="px-4 py-3">{srv.max}</td>
+            {/* ✅ Refill */}
+            <td className="px-2">{srv.refill ? "Yes" : "No"}</td>
 
-                        {/* ✅ STATUS BADGE (untouched) */}
-                        <td className="px-4 py-3">
-                          <span
-                            className={`px-2 py-1 text-xs rounded-md ${
-                              srv.status === disabledStatus
-                                ? "bg-red-200 text-red-700 dark:bg-red-900/30 dark:text-red-300"
-                                : "bg-green-200 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                            }`}
-                          >
-                            {srv.status === disabledStatus ? "Disabled" : "Enabled"}
-                          </span>
-                        </td>
+            {/* ✅ Cancel */}
+            <td className="px-2">{srv.cancelAllowed ? "Yes" : "No"}</td>
 
-                        {/* ✅ DROPDOWN 3 DOT ACTION (untouched) */}
-                        <td className="px-4 py-3 text-center relative">
-                          <button
-                            onClick={() => setDropdownOpen(dropdownOpen === rowKey ? null : rowKey)}
-                            className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-                          >
-                            <BsThreeDotsVertical size={18} />
-                          </button>
+            {/* ✅ Provider */}
+            <td className="px-2 truncate max-w-[240px] text-xs">{srv.provider}</td>
 
-                          {dropdownOpen === rowKey && (
-                            <div
-                              ref={dropdownRef}
-                              className="absolute right-0 mt-2 w-28 rounded-lg shadow bg-white border dark:bg-[#1E1F23] dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200 z-50"
-                            >
-                              <button
-                                onClick={() => { setDropdownOpen(null); setEditData(srv); }}
-                                className="block w-full text-left px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
-                              >
-                                Edit
-                              </button>
+            {/* ✅ Price + Profit (unchanged logic ✅) */}
+            <td className="px-2">
+              <span className="block font-bold text-green-600 dark:text-green-400 text-sm">
+                ₹{((srv.rate ?? 0) * (1 + (srv.profitPercentage ?? 0) / 100)).toFixed(2)}
+              </span>
+              <span className="block font-bold text-xs dark:text-gray-300">
+                ₹{srv.rate ?? 0}
+              </span>
+              <span className="block text-[10px] font-bold text-gray-500">
+                Profit: {srv.profitPercentage ?? 0}%
+              </span>
+            </td>
 
-                              <button
-                                onClick={() => { setDropdownOpen(null); setStatusData(srv); }}
-                                className="block w-full text-left px-3 py-2 text-gray-600 hover:bg-red-100 dark:hover:bg-red-900/40"
-                              >
-                                Status
-                              </button>
+            {/* ✅ Min */}
+            <td className="px-2 text-xs font-bold">{srv.min}</td>
 
-                              <button
-                                onClick={() => { setDropdownOpen(null); setDeleteData(srv); }}
-                                className="block w-full text-left px-3 py-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/40"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          )}
-                        </td>
+            {/* ✅ Max */}
+            <td className="px-2 text-xs font-bold">{srv.max}</td>
 
-                      </tr>
-                    );
-                  })}
-                </React.Fragment>
-              ))}
-            </tbody>
+            {/* ✅ Status Badge */}
+            <td className="px-2 text-center">
+              <span
+                className={`px-2 py-0.5 text-[10px] font-extrabold rounded-md ${
+                  srv.status === "disabled"
+                    ? "bg-red-300 text-red-800 dark:bg-red-900/40 dark:text-red-300"
+                    : "bg-green-300 text-green-800 dark:bg-green-900/40 dark:text-green-300"
+                }`}
+              >
+                {srv.status === "disabled" ? "Disabled" : "Enabled"}
+              </span>
+            </td>
+
+            {/* ✅ Action Dropdown */}
+            <td className="px-4 py-3 text-center relative">
+              <button
+                onClick={() => setDropdownOpen(dropdownOpen === rowKey ? null : rowKey)}
+                className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+              >
+                <BsThreeDotsVertical size={15} className="opacity-70" />
+              </button>
+
+              {dropdownOpen === rowKey && (
+                <div
+                  ref={dropdownRef}
+                  className="absolute right-0 mt-1.5 w-28 rounded-md shadow bg-white dark:bg-[#1E1F23] border border-gray-300 dark:border-gray-700 text-xs z-50"
+                >
+                  <button
+                    onClick={() => { setDropdownOpen(null); setEditData(srv); }}
+                    className="block w-full text-left px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 font-bold"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => { setDropdownOpen(null); setStatusData(srv); }}
+                    className="block w-full text-left px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 font-bold"
+                  >
+                    Change Status
+                  </button>
+
+                  <button
+                    onClick={() => { setDropdownOpen(null); setDeleteData(srv); }}
+                    className="block w-full text-left px-3 py-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/40 font-extrabold"
+                  >
+                    Delete
+                  </button>
+
+                </div>
+              )}
+            </td>
+
+          </tr>
+        );
+      })}
+
+    </React.Fragment>
+  ))}
+</tbody>
+
+
           </table>
         </div>
       </div>

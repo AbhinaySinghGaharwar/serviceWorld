@@ -6,7 +6,7 @@ import AddNewService from "./AddNewService";
 import ServiceTable from "./ServiceTable";
 import ServiceModal from "./ServiceModal";
 import { useRouter } from "next/navigation";
-
+import AddNewCategory from "./AddNewCategory";
 export default function ServicesPage({ services = [] ,category=[] }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -68,20 +68,25 @@ export default function ServicesPage({ services = [] ,category=[] }) {
             required
           />
         </div>
+<select
+  value={selectedCategory}
+  onChange={(e) => setSelectedCategory(e.target.value)}
+  className="rounded-lg py-2 px-3 text-sm outline-none bg-white border border-gray-300
+    text-gray-800 focus:ring-1 dark:bg-[#1A1C1F] dark:border-gray-700
+    dark:text-gray-300 w-full sm:w-auto"
+>
+  {category.map((cat, i) => (
+    <option key={i} value={cat} className="text-xs py-0.5">
+      {cat}
+    </option>
+  ))}
+</select>
 
-        {/* Category Filter */}
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="rounded-lg py-2 px-3 text-sm outline-none bg-white border border-gray-300 text-gray-800 focus:ring-2 focus:ring-gray-400 dark:bg-[#1A1C1F] dark:border-gray-700 dark:text-gray-300 dark:focus:ring-gray-600 w-full sm:w-auto"
-        >
-          {allCategories.map((cat, i) => (
-            <option key={i} value={cat}>{cat}</option>
-          ))}
-        </select>
+
 
         {/* Buttons */}
         <div className="flex justify-center flex-col">
+          <AddNewCategory/>
           <AddNewService />
           <button
             onClick={() => router.push("/admin/ImportServices")}
