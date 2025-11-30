@@ -1056,40 +1056,44 @@ export async function createTicket({ subject, message }) {
 
 export async function getChildPanels() {
   try {
-    // 🍪 Get token from cookies
-    const token =await cookies().get("admin_token")?.value;
-    if (!token) {
-      return { error: "Unauthorized. Please log in first." };
-    }
+    const cookieStore = await cookies();
+    const token = cookieStore.get("admin_token")?.value;
 
-    // 🔐 Verify token
+    if (!token) return { error: "Unauthorized. Please log in first." };
+
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (err) {
+    } catch {
       return { error: "Invalid or expired token." };
     }
 
     const { email, role } = decoded;
 
-    // 🗃️ Connect to DB
     const client = await clientPromise;
     const db = client.db("smmpanel");
 
-    // 🧾 Fetch all requests (admin sees all, user sees their own)
     const filter = role === "admin" ? {} : { email };
+
     const requests = await db
       .collection("child_panel_requests")
       .find(filter)
       .sort({ createdAt: -1 })
       .toArray();
 
-    return { success: true, requests };
+    // ✅ Convert Mongo + Date to plain object
+    const plain = requests.map(p => ({
+      ...p,
+      _id: p._id.toString(),                 // ✅ ObjectId → string
+      createdAt: p.createdAt?.toISOString()  // ✅ Date → string
+    }));
+
+    return { success: true, requests: plain }; // now fully plain object ✅
   } catch (err) {
-    console.error("❌ Error fetching panels:", err);
     return { error: "Server error: " + err.message };
   }
 }
+
 export async function setChildPanelSettings(formData) {
   try {
     const cookieStore =await cookies()
