@@ -52,6 +52,7 @@ export async function getUserDetails() {
       email: user.email,
       username: user.username,
       frozen: user.frozen,
+      mobileNumber:user.mobileNumber
     };
   } catch (err) {
     return {
@@ -62,6 +63,67 @@ export async function getUserDetails() {
     };
   }
 }
+
+
+
+export async function updateMobileNumber(mobileNumber) {
+  try {
+    // Validate input
+    if (!mobileNumber || mobileNumber.length < 10) {
+      return {
+        success: false,
+        error: "Invalid mobile number",
+      };
+    }
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token");
+
+    if (!token) {
+      return {
+        success: false,
+        error: "Not authenticated",
+      };
+    }
+
+    // Decode token
+    const decoded = jwt.verify(token.value, JWT_SECRET);
+
+    // Database connection
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    // Update user
+    const result = await db.collection("users").findOneAndUpdate(
+      { email: decoded.email },
+      { $set: { mobileNumber } }, // Only update mobile number
+      {
+        returnDocument: "after", // return updated user
+        projection: { password: 0 },
+      }
+    );
+
+    if (!result) {
+      return {
+        success: false,
+        error: "User not found",
+      };
+    }
+console.log(result)
+    return {
+      success: true,
+      message: "Mobile number updated successfully",
+     
+    };
+  } catch (err) {
+    console.error("Update mobile error:", err);
+    return {
+      success: false,
+      error: err.message,
+    };
+  }
+}
+
 
 export async function getUserBalance() {
   try {
