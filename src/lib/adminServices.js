@@ -1093,6 +1093,40 @@ export async function getChildPanels() {
     return { error: "Server error: " + err.message };
   }
 }
+export async function updateChildPanelStatus(panel) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("admin_token")?.value;
+    if (!token) return { error: "Unauthorized. Please log in first." };
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch {
+      return { error: "Invalid or expired token." };
+    }
+
+    const { role } = decoded;
+    if (role !== "admin") return { error: "Access denied. Admin only." };
+
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+
+    const res = await db.collection("child_panel_requests").updateOne(
+      { _id: panel._id }, // panel._id should be string from client
+      { $set: { status: panel.status } }
+    );
+
+    if (res.modifiedCount === 0) {
+      return { success: false, message: "No update happened!" };
+    }
+
+    // ✅ Return plain object response
+    return { success: true, message: "Status updated ✅", updated: panel };
+  } catch (err) {
+    return { success: false, message: "Server error: " + err.message };
+  }
+}
 
 export async function setChildPanelSettings(formData) {
   try {
