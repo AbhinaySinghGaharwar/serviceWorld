@@ -170,7 +170,7 @@ export default function ServiceTable({ title, grouped, category }) {
                             category={catName}
                             services={services}
                             onClose={() => setEditData(null)}
-                            OnSave={onEdit}
+                        
                             ModalCategory={category}
                           />
                         </span>
@@ -208,8 +208,9 @@ export default function ServiceTable({ title, grouped, category }) {
                             <span className="font-bold text-green-600 dark:text-green-400 text-sm">
                               ₹{((srv.rate ?? 0) * (1 + (srv.profitPercentage ?? 0) / 100)).toFixed(2)}
                             </span>
+                            <br></br>
                             <span className="font-bold text-xs">₹{srv.rate ?? 0}</span>
-                            <span className="text-[10px] font-bold text-gray-500">Profit: {srv.profitPercentage ?? 0}%</span>
+                            
                           </td>
 
                           <td className="px-2 text-xs font-bold">{srv.min}</td>

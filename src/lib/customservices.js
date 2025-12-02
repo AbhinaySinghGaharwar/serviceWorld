@@ -115,63 +115,73 @@ console.log(result)
   }
 }
 
-/* -------------------------------------------------------
-   🔄 UPDATE SERVICE
--------------------------------------------------------- */
-export async function UpdateAllCategoryServiceAction(data, category) {
-  console.log('this is the data',data)
-  console.log('this is the category',category)
+export async function UpdateAllCategoryServiceAction(newCategory, oldCategory) {
   try {
-    // ✅ Verify admin
+    // 1️⃣ Verify admin
     const auth = await verifyAdmin();
     if (!auth.valid) return { status: false, message: auth.message };
 
-    if (!category) {
-      return { status: false, message: "Category is required" };
+    if (!oldCategory || !newCategory) {
+      return { status: false, message: "Old and new category are required." };
     }
 
-    // ✅ Connect DB
+    // 2️⃣ Connect DB
     const client = await clientPromise;
     const db = client.db(DB_ADMIN);
-    const collection = db.collection("services");
 
-    // ✅ Build update payload from form data
-    const updatePayload = {
-      name: data.name || "",
-      desc: data.desc || data.description || "",
-      category: data.category || category, // keep updated category or fallback to selected
-      type: data.type ?? "Default",
+    const categoriesCol = db.collection("categories");
+    const servicesCol = db.collection("services");
 
-      refill: data.refill === true || data.refill === "yes",
-      cancelAllowed: data.cancelAllowed === true || data.cancelAllowed === "yes",
+    /* -----------------------------------------------------
+       🔄 Step 1: Update Categories Collection
+    ------------------------------------------------------*/
 
-      rate: Number(data.rate ?? data.price ?? 0),
-      min: data.min !== "" ? Number(data.min) : null,
-      max: data.max !== "" ? Number(data.max) : null,
+    // Get all categories
+    const categories = await categoriesCol.find({}).toArray();
 
-      status: data.status ?? "enabled",
-      updatedAt: new Date(),
-    };
+    // Extract names
+    const catNames = categories.map((x) => x.category);
 
-    // ✅ Bulk update only docs where category matches
-    const result = await collection.updateMany(
-      { category },          // ✅ FIXED FILTER
-      { $set: updatePayload }
+    // Find index of old category
+    const index = catNames.indexOf(oldCategory);
+
+    if (index === -1) {
+      return { status: false, message: "Old category not found in DB." };
+    }
+
+    // Replace old category with new
+    catNames[index] = newCategory;
+
+    // Delete all categories
+    await categoriesCol.deleteMany({});
+
+    // Insert updated list back
+    await categoriesCol.insertMany(
+      catNames.map((c) => ({ category: c }))
     );
 
-    if (result.matchedCount === 0) {
-      return { status: false, message: `No services found in category "${category}"` };
-    }
+    /* -----------------------------------------------------
+       🔄 Step 2: Update All Services with Old Category
+    ------------------------------------------------------*/
+    const result = await servicesCol.updateMany(
+      { category: oldCategory },
+      {
+        $set: {
+          category: newCategory,
+          updatedAt: new Date(),
+        },
+      }
+    );
 
     return {
       status: true,
-      matchedCount: result.matchedCount,
-      modifiedCount: result.modifiedCount,
-      message: `Updated ${result.modifiedCount}/${result.matchedCount} services in category "${category}" ✅`,
+      updatedServices: result.modifiedCount,
+      message: `Category renamed and ${result.modifiedCount} services updated successfully!`,
     };
+
   } catch (error) {
     console.error("UpdateAllCategoryServiceAction:", error);
-    return { status: false, message: error.message || "Internal server error" };
+    return { status: false, message: error.message };
   }
 }
 
@@ -251,8 +261,7 @@ console.log('this is the data',data,'this is the services',services)
 
 
 
-    console.log("Service IDs extracted:", serviceIds);
-console.log(services)
+
     if (serviceIds.length === 0) {
       return { status: false, message: "No valid services selected" };
     }
@@ -273,7 +282,6 @@ console.log(services)
       { $set: updatePayload }
     );
 
-    console.log("Bulk update result:", result);
 
     return {
       status: true,
