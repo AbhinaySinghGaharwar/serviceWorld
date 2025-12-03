@@ -187,16 +187,21 @@ export async function createOrder(data) {
     if (!service || !link || !quantity) {
       throw new Error("Missing required fields: service, link, or quantity");
     }
+const client = await clientPromise;
 
+const selectedProvider = await client
+  .db(DB_ADMIN)
+  .collection("Providers")
+  .findOne({ selected: true });
     const params = new URLSearchParams();
-    params.append("key", API_KEY);
+    params.append("key", selectedProvider.apiKey);
     params.append("action", "add");
     params.append("service", service);
     params.append("link", link);
     params.append("quantity", quantity);
 
     // 🚀 Send the order to your SMM provider
-    const res = await axios.post(API_URL, params, {
+    const res = await axios.post(selectedProvider.providerUrl, params, {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       timeout: 15000, // 15s timeout
     });

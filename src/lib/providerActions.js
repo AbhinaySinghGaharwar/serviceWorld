@@ -90,17 +90,7 @@ import axios from "axios";
 
 export async function getProvidersAction() {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("admin_token")?.value;
-
-    if (!token) return [];
-
-    let admin;
-    try {
-      admin = jwt.verify(token, process.env.JWT_SECRET);
-    } catch {
-      return [];
-    }
+  
 
     const client = await clientPromise;
     const db = client.db(DB_ADMIN);
@@ -136,6 +126,7 @@ export async function getProvidersAction() {
           success:true,
           id: p.id,
           name: p.name,
+          selected:p.selected,
           providerUrl: p.providerUrl,
           apiKey: p.apiKey,
           balance,
@@ -282,6 +273,66 @@ export async function deleteProviderAction(id) {
     };
   } catch (error) {
     console.error("deleteProviderAction error:", error);
+    return { status: false, message: "Internal server error" };
+  }
+}
+export async function updateSelectedProviderAction({ selectedId }) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("admin_token")?.value;
+
+    if (!token) {
+      return { status: false, message: "Invalid admin" };
+    }
+
+    let admin;
+    try {
+      admin = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return { status: false, message: "Unauthorized admin" };
+    }
+
+    const client = await clientPromise;
+    const db = client.db(DB_ADMIN);
+    const collection = db.collection("Providers");
+
+    // Check if provider exists
+    const exists = await collection.findOne({ id: selectedId });
+
+    if (!exists) {
+      return {
+        status: false,
+        message: "Provider not found",
+      };
+    }
+
+    // First set all providers to unselected
+    await collection.updateMany({}, { $set: { selected: false } });
+
+    // Set only this provider as selected
+    const result = await collection.updateOne(
+      { id: selectedId },
+      {
+        $set: {
+          selected: true,
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    if (result.modifiedCount === 0) {
+      return {
+        status: false,
+        message: "Failed to update selected provider",
+      };
+    }
+
+    return {
+      status: true,
+      message: "Selected provider updated successfully",
+    };
+  } catch (error) {
+    console.error("updateSelectedProviderAction error:", error);
     return { status: false, message: "Internal server error" };
   }
 }

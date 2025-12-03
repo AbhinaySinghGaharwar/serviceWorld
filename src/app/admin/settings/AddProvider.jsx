@@ -7,6 +7,7 @@ import {
   getProvidersAction,
   updateProviderAction,
   deleteProviderAction,
+  updateSelectedProviderAction,
 } from "@/lib/providerActions";
 
 export default function AddProvider() {
@@ -29,7 +30,7 @@ export default function AddProvider() {
 
   /* ----------- MESSAGE SYSTEM ----------- */
   const [message, setMessage] = useState(null); // {type:'success'|'error', text:''}
-
+const [selectedProviderId,setSelectedProviderId]=useState('')
   const showMessage = (type, text) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 3000);
@@ -140,6 +141,30 @@ export default function AddProvider() {
     setEditData(null);
   };
 
+
+const handleOnChange = async (item) => {
+  try {
+    setSelectedProviderId(item.id);
+
+    const res = await updateSelectedProviderAction({
+      selectedId: item.id,
+    });
+
+    console.log("Selected Provider:", item.id);
+    console.log("API Response:", res);
+
+  } catch (error) {
+    console.error("Selection error:", error);
+  }
+};
+useEffect(() => {
+  const selected = providers.find(p => p.selected === true);
+  if (selected) {
+    setSelectedProviderId(selected.id);
+  }
+}, [providers]);  
+
+
   /* ---------------------- RENDER ---------------------- */
 
   return (
@@ -172,6 +197,8 @@ export default function AddProvider() {
         <table className="w-full text-left border-collapse">
           <thead className="bg-gray-100 dark:bg-gray-700">
             <tr>
+
+              <th className="p-3 font-semibold">Selected</th>
               <th className="p-3 font-semibold">ID</th>
               <th className="p-3 font-semibold">Balance</th>
               <th className="p-3 font-semibold">Provider URL</th>
@@ -199,6 +226,19 @@ export default function AddProvider() {
                   key={item.id}
                   className="border-t hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
+
+                  <td className="p-3">
+                    <span>
+                      <input
+  type="radio"
+  name="select"
+  value={item.id}
+  checked={selectedProviderId === item.id}
+  onChange={() => handleOnChange(item)}
+/>
+
+                    </span>
+                  </td>
                   <td className="p-3">{item.id}</td>
                   <td className="p-3">{item.balance}</td>
                   <td className="p-3">{item.providerUrl}</td>
