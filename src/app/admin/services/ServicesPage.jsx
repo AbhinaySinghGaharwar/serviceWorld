@@ -71,12 +71,19 @@ export default function ServicesPage({ services = [] ,category=[] }) {
     text-gray-800 focus:ring-1 dark:bg-[#1A1C1F] dark:border-gray-700
     dark:text-gray-300 w-full sm:w-auto"
 >
+  {/* Add "All" option */}
+  <option value="All" className="text-xs py-0.5">
+    All
+  </option>
+
+  {/* Existing categories */}
   {category.map((cat, i) => (
     <option key={i} value={cat} className="text-xs py-0.5">
       {cat}
     </option>
   ))}
 </select>
+
 
 
 

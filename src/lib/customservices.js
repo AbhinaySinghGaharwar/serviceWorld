@@ -224,7 +224,7 @@ console.log('this is the data',data,'this is the services',services)
       rate: Number(data.rate ?? data.price ?? 0), // ✅ updates `rate` not `price`
       min: data.min !== "" ? Number(data.min) : null,
       max: data.max !== "" ? Number(data.max) : null,
-
+profitPercentage:data?.profitPercentage,
       status: data?.status,
       updatedAt: new Date()
     };

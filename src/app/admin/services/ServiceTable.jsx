@@ -8,7 +8,7 @@ import { UpdateMultipleServicesAction } from "@/lib/customservices";
 import EditServiceModal from "./EditModal";
 import CategoryOption from "./CategoryOption";
 
-export default function ServiceTable({ title, grouped, category }) {
+export default function ServiceTable({ title, grouped = {}, category = [] }) {
   const disabledStatus = "disabled";
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [editData, setEditData] = useState(null);
@@ -18,8 +18,11 @@ export default function ServiceTable({ title, grouped, category }) {
 
   const [selectedRows, setSelectedRows] = useState({});
 
-  // -------------------- CATEGORY LIST --------------------
-  const categoryList =category
+  // -------------------- VISIBLE CATEGORIES (skip empty) --------------------
+  const visibleCategories = (category || []).slice(0).filter((catName) => {
+    const services = grouped[catName] || [];
+    return services.length > 0;
+  });
 
   // -------------------- CLICK OUTSIDE FOR DROPDOWN --------------------
   useEffect(() => {
@@ -49,7 +52,7 @@ export default function ServiceTable({ title, grouped, category }) {
 
     const allSelected = {};
 
-    categoryList.slice(1).forEach((catName) => {
+    visibleCategories.forEach((catName) => {
       const services = grouped[catName] || [];
       services.forEach((_, idx) => {
         const rowKey = `${catName}-${idx}`;
@@ -112,7 +115,6 @@ export default function ServiceTable({ title, grouped, category }) {
   return (
     <>
       <div className="mt-8 rounded-2xl shadow-lg overflow-hidden border bg-gray-50 border-gray-300 dark:bg-[#1A1C1F] dark:border-gray-700">
-
         {/* TOP BAR */}
         <div className="flex justify-between items-center px-4 py-3 border-b bg-gray-100 dark:bg-[#1E1F23]">
           <div className="text-lg font-bold">{title}</div>
@@ -156,7 +158,7 @@ export default function ServiceTable({ title, grouped, category }) {
 
             {/* CATEGORY + SERVICES */}
             <tbody>
-              {categoryList.slice(1).map((catName) => {
+              {visibleCategories.map((catName) => {
                 const services = grouped[catName] || [];
 
                 return (
@@ -170,7 +172,6 @@ export default function ServiceTable({ title, grouped, category }) {
                             category={catName}
                             services={services}
                             onClose={() => setEditData(null)}
-                        
                             ModalCategory={category}
                           />
                         </span>
@@ -183,7 +184,6 @@ export default function ServiceTable({ title, grouped, category }) {
 
                       return (
                         <tr key={rowKey} className="border-b hover:bg-gray-100 dark:hover:bg-gray-800">
-
                           <td className="px-2 text-center">
                             <input
                               type="checkbox"
@@ -208,9 +208,8 @@ export default function ServiceTable({ title, grouped, category }) {
                             <span className="font-bold text-green-600 dark:text-green-400 text-sm">
                               ₹{((srv.rate ?? 0) * (1 + (srv.profitPercentage ?? 0) / 100)).toFixed(2)}
                             </span>
-                            <br></br>
+                            <br />
                             <span className="font-bold text-xs">₹{srv.rate ?? 0}</span>
-                            
                           </td>
 
                           <td className="px-2 text-xs font-bold">{srv.min}</td>
@@ -219,9 +218,7 @@ export default function ServiceTable({ title, grouped, category }) {
                           <td className="px-2 text-center">
                             <span
                               className={`px-2 py-0.5 text-[10px] font-extrabold rounded-md ${
-                                srv.status === disabledStatus
-                                  ? "bg-red-300 text-red-800"
-                                  : "bg-green-300 text-green-800"
+                                srv.status === disabledStatus ? "bg-red-300 text-red-800" : "bg-green-300 text-green-800"
                               }`}
                             >
                               {srv.status === disabledStatus ? "Disabled" : "Enabled"}
@@ -230,9 +227,7 @@ export default function ServiceTable({ title, grouped, category }) {
 
                           <td className="px-4 py-3 text-center relative">
                             <button
-                              onClick={() =>
-                                setDropdownOpen(dropdownOpen === rowKey ? null : rowKey)
-                              }
+                              onClick={() => setDropdownOpen(dropdownOpen === rowKey ? null : rowKey)}
                               className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
                             >
                               <BsThreeDotsVertical size={15} />
@@ -282,7 +277,6 @@ export default function ServiceTable({ title, grouped, category }) {
                 );
               })}
             </tbody>
-
           </table>
         </div>
       </div>
@@ -319,15 +313,14 @@ export default function ServiceTable({ title, grouped, category }) {
       {statusData && (
         <Modal onClose={() => setStatusData(null)} title="Update Service Status">
           <div className="space-y-4">
-            <label className="text-sm font-semibold">Change status for:
+            <label className="text-sm font-semibold">
+              Change status for:
               <p className="mt-1 font-bold text-purple-600">{statusData.name}</p>
             </label>
 
             <select
               value={statusData.status}
-              onChange={(e) =>
-                setStatusData({ ...statusData, status: e.target.value })
-              }
+              onChange={(e) => setStatusData({ ...statusData, status: e.target.value })}
               className="w-full px-3 py-2 rounded-lg border"
             >
               <option value="enabled">Enabled</option>

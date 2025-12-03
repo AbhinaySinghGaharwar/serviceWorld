@@ -113,57 +113,70 @@ export async function importServicesAction({url,api}) {
 }
 
 
-export async function StoreServicesInDB({ services ,profitPercentage}) {
-
+export async function StoreServicesInDB({ services, profitPercentage }) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("admin_token")?.value;
 
     if (!token) {
-      return {
-        status: false,
-        message: "invalid token",
-      };
+      return { status: false, message: "invalid token" };
     }
 
     const admin = jwt.verify(token, process.env.JWT_SECRET);
     if (!admin) {
-      return {
-        status: false,
-        message: "unauthorized admin",
-      };
+      return { status: false, message: "unauthorized admin" };
     }
 
     const client = await clientPromise;
-    const servicesCollection = client
-      .db(DB_ADMIN)
-      .collection("services");
 
-   const payload = services.map((s) => ({
-  id: s.id ?? Date.now(), // fallback unique id
-  name: s.name?.trim() || "Unnamed Service",
-  category: s.category?.trim() || "Uncategorized",
-  min: Number(s.min) || 0,
-  max: s.max?.toString() || "0",
-  rate: Number(s.rate) || 0,
-  provider: s.provider?.trim() || providerInput || "Unknown",
-  service: s.service ?? null,
-  type: s.type?.trim() || "Default",
-  status:'enabled',
-  desc: s.desc?.trim() || "",
-  profitPercentage:profitPercentage||1,
-  storedBy: admin.id ?? "system",
-  createdAt: new Date(),
-}));
+    const servicesCollection = client.db(DB_ADMIN).collection("services");
+    const categoriesCollection = client.db(DB_ADMIN).collection("categories");
 
+    // ---------- PREPARE SERVICES PAYLOAD ----------
+    const payload = services.map((s) => ({
+      id: s.id ?? Date.now(),
+      name: s.name?.trim() || "Unnamed Service",
+      category: s.category?.trim() || "Uncategorized",
+      min: Number(s.min) || 0,
+      max: s.max?.toString() || "0",
+      rate: Number(s.rate) || 0,
+      provider: s.provider?.trim() || "Unknown",
+      service: s.service ?? null,
+      type: s.type?.trim() || "Default",
+      status: "enabled",
+      desc: s.desc?.trim() || "",
+      profitPercentage: profitPercentage || 1,
+      storedBy: admin.id ?? "system",
+      createdAt: new Date(),
+    }));
+
+    // ---------- INSERT SERVICES ----------
     await servicesCollection.insertMany(payload);
 
+    // ---------- CATEGORY INSERT LOGIC ----------
+    const uniqueCategories = [
+      ...new Set(payload.map((s) => s.category)),
+    ];
+
+    for (const cat of uniqueCategories) {
+      const exists = await categoriesCollection.findOne({ category: cat });
+
+      if (!exists) {
+        await categoriesCollection.insertOne({
+          category: cat,
+          createdAt: new Date(),
+        });
+      }
+    }
+
     return { status: true, message: "Services stored successfully ✅" };
+
   } catch (error) {
     console.error("DB STORE ERROR:", error);
     return { status: false, message: error.message || "Something went wrong" };
   }
 }
+
 
 
 // ✅ Create a new order
