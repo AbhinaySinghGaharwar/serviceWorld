@@ -177,7 +177,7 @@ return (
                 <p className="font-semibold text-gray-700 dark:text-gray-300 text-sm">
                   Use this DNS in your Name Server:
                 </p>
-               <ul className="mt-1 w-[50%] text-sm text-gray-600 dark:text-gray-400    whitespace-normal">
+               <ul className="mt-1 w-[80%] sm:w-[50%] md:w-[50%] lg:w-[50%] text-sm text-gray-600 dark:text-gray-400    whitespace-normal">
   {settings?.nameserver
     ?.split(/[\s,]+/)  // handles spaces & commas
   // split into array
