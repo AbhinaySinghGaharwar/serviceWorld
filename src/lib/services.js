@@ -235,7 +235,6 @@ export async function createOrder(data) {
 
 
 
-
 export async function deleteCategoryAllServices({ category }) {
   try {
     if (!category) {
@@ -260,20 +259,38 @@ export async function deleteCategoryAllServices({ category }) {
       return { status: false, message: "Admin Not Logged In" };
     }
 
-    // ✅ Connect DB
+    // DB
     const client = await clientPromise;
-    const collection = client.db(DB_ADMIN).collection("services");
 
-    // ✅ Delete only services with this category
-    const result = await collection.deleteMany({ category });
+    const servicesCollection = client.db(DB_ADMIN).collection("services");
+    const categoriesCollection = client.db(DB_ADMIN).collection("categories");
+
+    // 1️⃣ Delete all services of this category
+    const servicesDeleteResult = await servicesCollection.deleteMany({
+      category,
+    });
+
+    // 2️⃣ Check if category exists
+    const existingCategory = await categoriesCollection.findOne({ category });
+
+    if (!existingCategory) {
+      return {
+        status: true,
+        deletedCount: servicesDeleteResult.deletedCount,
+        message: `Services deleted. Category "${category}" not found in categories list.`,
+      };
+    }
+
+    // 3️⃣ Delete category from categories collection
+    await categoriesCollection.deleteOne({ category });
 
     return {
       status: true,
-      deletedCount: result.deletedCount,
-      message: `Deleted ${result.deletedCount} services in category "${category}" successfully ✅`,
+      deletedCount: servicesDeleteResult.deletedCount,
+      message: `Deleted category "${category}" and ${servicesDeleteResult.deletedCount} related services successfully ✅`,
     };
   } catch (error) {
-    console.error("DELETE ALL ERROR:", error.message);
+    console.error("DELETE CATEGORY + SERVICES ERROR:", error.message);
     return { status: false, message: "Server error", error: error.message };
   }
 }

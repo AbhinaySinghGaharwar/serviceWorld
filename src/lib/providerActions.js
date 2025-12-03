@@ -110,6 +110,7 @@ export async function getProvidersAction() {
 
     // 🔥 Fetch balance using POST (same format as your getServices())
     const providersWithBalance = await Promise.all(
+      
       providers.map(async (p) => {
         let balance = null;
         let currency = null;
@@ -128,6 +129,7 @@ export async function getProvidersAction() {
         } catch (err) {
           console.error("Balance fetch error:", err.response?.data || err.message);
         }
+    
 
         // Return plain serializable object
         return {
