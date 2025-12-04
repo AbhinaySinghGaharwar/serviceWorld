@@ -554,7 +554,7 @@ export async function ValidateTransactionBharatPe(internalUtr, amount) {
     const data = await res.json();
     
     const transactions = data?.data?.transactions || [];
-
+console.log(transactions)
     const matched = transactions.find(
       (t) => t.bankReferenceNo === internalUtr && Number(t.amount) === Number(amount)
     );
