@@ -90,14 +90,18 @@ export async function loginUser({ email, password, ip = "127.0.0.1" }) {
       return { error: "Missing fields or CAPTCHA." };
     }
 
-  
+  console.log(email,password)
 
     // ⚙️ 4. Connect to database
     const client = await clientPromise;
     const db = client.db("smmpanel");
 
     // 🔍 5. Find user
-    const user = await db.collection("users").findOne({ email: email.toLowerCase() });
+ const user = await db.collection("users").findOne({
+  email: { $regex: new RegExp(`^${email}$`, "i") }
+});
+
+    console.log(user,'hello')
     if (!user) return { error: "Invalid credentials." };
 
     // 🧊 6. Check if frozen

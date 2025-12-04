@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import AddProvider from "./AddProvider";
+import SmtpConfigPage from "./Smtp";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -79,6 +80,12 @@ export default function SettingsPage() {
       desc: "Add or manage your service providers.",
       actions: [], // No cards needed (we show AddProvider instead)
     },
+    {
+      title: "Smtp Config",
+      icon: <PlugZap className="text-gray-700 dark:text-gray-200" size={20} />,
+      desc: " Add or manage your email service configuration.",
+      actions: [], // No cards needed (we show AddProvider instead)
+    },
   ];
 
   const activeData = sections.find((s) => s.title === activeSection)
@@ -139,6 +146,8 @@ export default function SettingsPage() {
             {/* 🔥 Show Cards OR AddProvider Component */}
             {activeSection === "Add Provider" ? (
               <AddProvider />
+            ): activeSection === "Smtp Config" ? (
+              <SmtpConfigPage/>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                 {activeData.actions.map((action, idx) => (

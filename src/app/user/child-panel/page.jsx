@@ -9,7 +9,7 @@ export default async function Page() {
   const payment_methods= await getAllPaymentMethods()
   const result= await getUserBalance()
 const panels=await getUserChildPanels()
-console.log(panels) 
+
 
   return <ChildPanelPageClient settings={settings} paymentMethods={payment_methods} balance={result.balance} panels={panels.requests} />;
 }
