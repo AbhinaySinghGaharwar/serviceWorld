@@ -182,8 +182,9 @@ export default function EditPaymentTypePage() {
 
               {/* Token */}
               <div>
+                <label className="block font-semibold mb-2">Token</label>
                 <input
-                hidden
+                
                   type="text"
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
