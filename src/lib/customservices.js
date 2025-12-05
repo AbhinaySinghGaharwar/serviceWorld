@@ -191,6 +191,7 @@ export async function UpdateAllCategoryServiceAction(newCategory, oldCategory) {
 
 
 export async function UpdateMultipleServicesAction(data, services){
+  console.log(data)
 
  const isEmpty = Object.keys(services).length === 0
   if(isEmpty){
@@ -214,6 +215,9 @@ export async function UpdateMultipleServicesAction(data, services){
 
     // ✅ Now build update payload correctly mapping your DB fields
     const updatePayload = {
+      id:data?.id,
+      provider:data?.provider,
+      service:data?.service,
       name: data.name || "",
       desc: data.desc || data.description || "",
       category: data.category || "",
@@ -221,6 +225,7 @@ export async function UpdateMultipleServicesAction(data, services){
 average_time:data?.average_time,
       refill: data.refill === true || data.refill === "yes",
       cancelAllowed: data.cancelAllowed === true || data.cancelAllowed === "yes",
+
 
       rate: Number(data.rate ?? data.price ?? 0), // ✅ updates `rate` not `price`
       min: data.min !== "" ? Number(data.min) : null,
@@ -268,6 +273,9 @@ profitPercentage:data?.profitPercentage,
     }
 
     const updatePayload = {
+       id:data?.id,
+      provider:data?.provider,
+      service:data?.service,
       category: data.category ?? "",
       min: data.min !== "" ? Number(data.min) : null,
       max: data.max !== "" ? Number(data.max) : null,

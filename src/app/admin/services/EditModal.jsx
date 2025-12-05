@@ -65,8 +65,8 @@ export default function EditServiceModal({ editData, onSave, onClose, category }
           "customservice",
           "_id",
           "storedBy",
-          "id",
-          "service",
+      
+          
           "profitPercentage",
         ].includes(key)
       )
