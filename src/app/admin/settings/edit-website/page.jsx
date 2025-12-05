@@ -92,6 +92,7 @@ export default function EditWebsite() {
           {/* Toggles */}
           <SectionTitle title="System Controls" />
           <ToggleSwitch
+          
             label="Maintenance Mode"
             enabled={formData.maintenanceMode}
             onChange={(v) => setFormData((p) => ({ ...p, maintenanceMode: v }))}
@@ -123,7 +124,7 @@ export default function EditWebsite() {
 
 function SectionTitle({ title }) {
   return (
-    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+    <h2 hidden className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
       {title}
     </h2>
   );
@@ -172,7 +173,7 @@ function FileInput({ label, name, file, onChange }) {
 
 function ToggleSwitch({ label, enabled, onChange }) {
   return (
-    <div className="flex items-center justify-between bg-gray-100 dark:bg-[#0e0e0f] border border-gray-300 dark:border-gray-700 px-4 py-3 rounded-xl">
+    <div hidden className="flex items-center justify-between bg-gray-100 dark:bg-[#0e0e0f] border border-gray-300 dark:border-gray-700 px-4 py-3 rounded-xl">
       <span className="font-medium text-gray-800 dark:text-gray-300">
         {label}
       </span>
