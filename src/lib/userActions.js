@@ -258,10 +258,14 @@ export async function createOrderAction(service, link, qua, paying) {
     console.log("💰 User balance:", user.balance);
     console.log("💸 Charge required:", charge);
 
-    if (user.balance < charge) {
-      console.log("❌ Insufficient balance.");
-      return { success: false, message: "Insufficient balance." };
-    }
+   const temp = Number(user.balance);
+
+if (!Number.isFinite(temp) || temp < charge) {
+  console.log("❌ Insufficient balance.");
+  return { success: false, message: "Insufficient balance." };
+}
+
+
 
     // 7️⃣ Prepare provider API body
     const orderData = { service, link, quantity };
