@@ -1,5 +1,5 @@
 "use server";
-
+import { headers } from "next/headers";
 import clientPromise from "./mongodb";
 import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
@@ -34,32 +34,39 @@ export async function forgotPasswordAction(email) {
         { expiresIn: "30m" }
       );
 
-      const resetLink = `${process.env.NEXT_PUBLIC_BASE_URL}/forgotpassword?token=${token}`;
+
+    // ⭐ 4️⃣ Auto-detect BASE URL dynamically
+    const headerList = await headers();
+    const host = headerList.get("host");          // example.com
+    const protocol = headerList.get("x-forwarded-proto") || "https"; 
+    const baseUrl = `${protocol}://${host}`;
+
+    const resetLink = `${baseUrl}/reset-password?token=${token}`;
 
 
-      // 4️⃣ Create Nodemailer transporter
-      const transporter = nodemailer.createTransport({
-        host: smtp.host,
-        port: Number(smtp.port),
-        secure: true,
-        auth: {
-          user: smtp.user,
-          pass: smtp.pass,
-        },
-      });
+        // 4️⃣ Create Nodemailer transporter
+        const transporter = nodemailer.createTransport({
+          host: smtp.host,
+          port: Number(smtp.port),
+          secure: true,
+          auth: {
+            user: smtp.user,
+            pass: smtp.pass,
+          },
+        });
 
-      // 5️⃣ Send Email
-      await transporter.sendMail({
-        from: `"${smtp.fromName}" <${smtp.fromEmail}>`,
-        to: email,
-        subject: "Password Reset Request",
-        html: `
-          <p>Hello ${user.name || ""},</p>
-          <p>Click below to reset your password:</p>
-          <a href="${resetLink}" style="color:blue">${resetLink}</a>
-          <p>This link will expire in 30 minutes.</p>
-        `,
-      });
+        // 5️⃣ Send Email
+     await transporter.sendMail({
+  from: `"${smtp.fromName}" <${smtp.fromEmail}>`,
+  to: email,
+  subject: "Password Reset Request",
+  html: `
+    <p>Hello ${user.name || ""},</p>
+    <p>Click below to reset your password:</p>
+    <a href="${resetLink}" style="color:blue">${resetLink}</a>
+    <p>This link will expire in 30 minutes.</p>
+  `,
+});
 
       return { success: true, message: "Reset email sent" };
 
