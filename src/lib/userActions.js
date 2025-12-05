@@ -925,101 +925,83 @@ export async function getUserWithdrawRequests() {
 
 
 
-
 export async function addFundAction({ utr, amount }) {
   try {
-    // 1) Auth via cookie token
-    const cookieStore = await cookies(); // no need for await
+    // 1) Auth
+    const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
     if (!token) {
-      return {
-        status: false,
-        message: "Invalid token",
-      };
+      return { status: false, message: "Invalid token" };
     }
 
     let decoded;
     try {
       decoded = jwt.verify(token, JWT_SECRET);
-    } catch (err) {
-      return {
-        status: false,
-        message: "Invalid token",
-      };
-    }
-console.log(decoded)
-    if (!decoded?.id) {
-      return {
-        status: false,
-        message: "Invalid user",
-      };
+    } catch {
+      return { status: false, message: "Invalid token" };
     }
 
-    // 2) Connect to DB
+    if (!decoded?.id) {
+      return { status: false, message: "Invalid user" };
+    }
+
+    // 2) Connect DB
     const client = await clientPromise;
     const db = client.db(dbName);
 
-    // 3) Get user
+    // 3) Find user
     const user = await db.collection("users").findOne({
       _id: new ObjectId(decoded.id),
     });
 
     if (!user) {
-      return {
-        status: false,
-        message: "User not found",
-      };
+      return { status: false, message: "User not found" };
     }
 
-    // Ensure amount is a number
+    // 4) Validate amount safely
     const numericAmount = Number(amount);
-    if (!numericAmount || numericAmount <= 0) {
-      return {
-        status: false,
-        message: "Invalid amount",
-      };
-    }
- 
 
-    // 4) Check if UTR is already used
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+      return { status: false, message: "Invalid amount" };
+    }
+
+    // 5) UTR duplication check
     const existingFund = await db.collection(addFundsCollection).findOne({
       utr,
-      // optionally also tie to user
       userId: user._id,
     });
 
     if (existingFund) {
-      return {
-        status: false,
-        message: "UTR already used",
-      };
+      return { status: false, message: "UTR already used" };
     }
 
-    // 5) Validate with BharatPe (or whichever)
+    // 6) Validate using BharatPe or Gateway
     const validationResult = await ValidateTransactionBharatPe(utr, numericAmount);
 
     if (!validationResult?.success) {
-      return {
-        status: false,
-        message: "Invalid transaction details",
-      };
+      return { status: false, message: "Invalid transaction details" };
     }
 
-    // 6) Update user balance atomically
+    // 7) Ensure balance field exists if missing
+    if (user.balance === undefined || user.balance === null || isNaN(user.balance)) {
+      await db.collection("users").updateOne(
+        { _id: user._id },
+        { $set: { balance: 0 } }
+      );
+    }
+
+    // 8) Add funds atomically (safest way)
     const updateResult = await db.collection("users").updateOne(
       { _id: user._id },
       { $inc: { balance: numericAmount } }
     );
 
     if (updateResult.matchedCount === 0) {
-      return {
-        status: false,
-        message: "Failed to update balance",
-      };
+      return { status: false, message: "Failed to update balance" };
     }
 
-    // 7) Insert add-fund record
+    // 9) Insert add-fund record
     await db.collection(addFundsCollection).insertOne({
       userId: user._id,
       utr,
@@ -1030,18 +1012,13 @@ console.log(decoded)
       createdAt: new Date(),
     });
 
-    return {
-      status: true,
-      message: "Fund added successfully",
-    };
+    return { status: true, message: "Fund added successfully" };
   } catch (error) {
     console.error("addFundAction error:", error);
-    return {
-      status: false,
-      message: "Something went wrong. Please try again.",
-    };
+    return { status: false, message: "Something went wrong. Please try again." };
   }
 }
+
 
 
 

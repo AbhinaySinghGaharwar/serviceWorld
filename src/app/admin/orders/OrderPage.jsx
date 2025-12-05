@@ -234,8 +234,8 @@ export default function OrdersPage({ sorders = "[]" }) {
                     </td>
 
                     <td className="p-3">{order.username || "No username"}</td>
-                    <td className="p-3">${order.charge}</td>
-                    <td className="p-3">${order?.profit || "0"}</td>
+                    <td className="p-3">₹{order.charge}</td>
+                    <td className="p-3">₹{order?.profit || "0"}</td>
 
                     <td className="p-3">
                       <a className="text-blue-500 underline" href={order.link} target="_blank">
