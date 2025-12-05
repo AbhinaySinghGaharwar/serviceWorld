@@ -163,7 +163,9 @@ export default function MainTop({ websiteName }) {
               {loading ? "Signing in..." : "Sign in"}
             </button>
   {/* Google Button */}
-        <button
+      
+          </form>
+            <button
           onClick={handleGoogleLogin}
           className="w-full py-3 mt-2 rounded-xl flex items-center justify-center gap-2 bg-[#F5F7FA] dark:bg-[#0F1117] border border-[#4A6CF7]/20 text-[#1A1A1A] dark:text-white font-semibold hover:text-[#4A6CF7] hover:shadow-md transition"
         >
@@ -179,7 +181,6 @@ export default function MainTop({ websiteName }) {
                 Sign up
               </a>
             </p>
-          </form>
         </div>
 
         {/* RIGHT — HERO IMAGE */}
