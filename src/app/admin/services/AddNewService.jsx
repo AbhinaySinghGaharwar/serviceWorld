@@ -113,7 +113,7 @@ export default function AddNewService() {
   const [min, setMin] = useState("");
   const [max, setMax] = useState("");
   const [status, setStatus] = useState("enabled");
-
+const [averageTime,setAverageTime]=useState('')
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
@@ -155,6 +155,7 @@ export default function AddNewService() {
         rate: Number(price),
         min: min ? Number(min) : null,
         max: max ? Number(max) : null,
+        average_time:averageTime,
         status,
       };
 
@@ -298,7 +299,7 @@ export default function AddNewService() {
                 <Input label="Min" type="number" value={min} onChange={setMin} />
                 <Input label="Max" type="number" value={max} onChange={setMax} />
               </div>
-
+  <Input label="AverageTime *" value={averageTime} onChange={setAverageTime} />
               <Select
                 label="Status"
                 value={status}
