@@ -185,7 +185,9 @@ export async function generateApiKey() {
     return { success: false, error: "Failed to generate API key." };
   }
 }
-
+function generateFallbackOrderId() {
+  return Math.floor(1000 + Math.random() * 9000); // 1000–9999
+}
 
 // ========================= Create Order Action =========================
 export async function createOrderAction(service, link, qua, paying) {
@@ -195,10 +197,8 @@ export async function createOrderAction(service, link, qua, paying) {
     // 1️⃣ Get user token
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
-    console.log("🔐 Token from cookies:", token);
 
     if (!token) {
-      console.log("❌ No token found.");
       return { success: false, message: "Unauthorized — please log in first." };
     }
 
@@ -206,26 +206,18 @@ export async function createOrderAction(service, link, qua, paying) {
     let userData;
     try {
       userData = jwt.verify(token, JWT_SECRET);
-      console.log("🟢 Decoded Token:", userData);
-    } catch (err) {
-      console.log("❌ Token verification failed:", err.message);
+    } catch {
       return { success: false, message: "Invalid or expired token." };
     }
 
     // 3️⃣ DB
     const client = await clientPromise;
-    console.log("🗄 Connected to DB.");
     const db = client.db("smmpanel");
     const usersCollection = db.collection("users");
 
-    // 4️⃣ User
+    // 4️⃣ Find user
     const user = await usersCollection.findOne({ _id: new ObjectId(userData.id) });
-    console.log("👤 User found:", user);
-
-    if (!user) {
-      console.log("❌ User not found.");
-      return { success: false, message: "User not found." };
-    }
+    if (!user) return { success: false, message: "User not found." };
 
     // Provider
     const selectedProvider = await client
@@ -233,90 +225,109 @@ export async function createOrderAction(service, link, qua, paying) {
       .collection("Providers")
       .findOne({ selected: true });
 
-    console.log("🌐 Selected Provider:", selectedProvider);
-
     // 5️⃣ Inputs
-    console.log("📥 Input service:", service);
-    console.log("📥 Input link:", link);
-    console.log("📥 Input quantity:", qua);
-    console.log("📥 Input charge:", paying);
-
     const quantity = Number(qua);
     const charge = Number(paying);
 
-    if (!service || !link || !quantity || quantity <= 0) {
-      console.log("❌ Invalid inputs (missing or wrong format)");
+    if (!service || !link || !Number.isFinite(quantity) || quantity <= 0)
       return { success: false, message: "Invalid input." };
-    }
 
-    if (isNaN(charge) || charge <= 0) {
-      console.log("❌ Invalid charge:", charge);
+    if (!Number.isFinite(charge) || charge <= 0)
       return { success: false, message: "Invalid charge amount." };
-    }
 
     // 6️⃣ Check balance
-    console.log("💰 User balance:", user.balance);
-    console.log("💸 Charge required:", charge);
+    const balance = Number(user.balance);
+    if (!Number.isFinite(balance) || balance < charge) {
+      return { success: false, message: "Insufficient balance." };
+    }
 
-   const temp = Number(user.balance);
-
-if (!Number.isFinite(temp) || temp < charge) {
-  console.log("❌ Insufficient balance.");
-  return { success: false, message: "Insufficient balance." };
-}
-
-
-
-    // 7️⃣ Prepare provider API body
+    // 7️⃣ Provider order body
     const orderData = { service, link, quantity };
-    console.log("📦 Provider API Request Body:", orderData);
 
-    // 8️⃣ Provider API call
-    const response = await createOrder(orderData);
-    console.log("📦 Provider API Response:", response);
+    // 8️⃣ Call provider
+    let response;
+    try {
+      response = await createOrder(orderData);
+    } catch (e) {
+      response = null;
+    }
 
+    // ========================= PROVIDER FAILED =========================
     if (!response || response.error) {
-      console.log("❌ Provider API Error:", response?.error);
+      console.log("❌ Provider failed:", response?.error);
+
+      const fallbackId = generateFallbackOrderId(); // 4-digit ID
+      const updatedBalance = balance - charge;
+
+      // Deduct user balance
+      await usersCollection.updateOne(
+        { _id: user._id },
+        { $set: { balance: updatedBalance } }
+      );
+
+      // Get service data for profit
+      const admindb = client.db(DB_ADMIN);
+      const serviceData = await admindb.collection("services").findOne({ service });
+
+      const profitPercentage = Number(serviceData?.profitPercentage) || 0;
+      const profit = (charge * profitPercentage) / 100;
+
+      // Insert order with fallback ID
+      await db.collection("orders").insertOne({
+        userId: user._id.toString(),
+        username: user.username,
+        userEmail: user.email,
+
+        ProviderUrl: selectedProvider.providerUrl,
+        providerApiKey: selectedProvider.apiKey,
+
+        service,
+        link,
+        quantity,
+        charge,
+        profit,
+
+        status: "Pending",
+        providerOrderId: fallbackId,
+        providerError: response?.error || "Provider unreachable",
+        startCount: 0,
+        remains: 0,
+        createdAt: new Date(),
+      });
+
+      revalidatePath("/user/dashboard");
+
       return {
-        success: false,
-        message: "Failed to create order on provider side.",
-        providerError: response?.error || "Network error.",
+        success: true,
+        message: "Order placed successfully!",
+        orderId: fallbackId,
+        balanceAfter: updatedBalance,
+        warning: "Provider not available, order queued.",
       };
     }
 
-    // 9️⃣ Deduct balance
-    console.log("💸 Deducting balance...");
-    console.log("Old Balance:", user.balance);
+    // ========================= PROVIDER SUCCESS =========================
 
-    const updatedBalance = user.balance - charge;
+    const updatedBalance = balance - charge;
 
-    console.log("New Balance:", updatedBalance);
-
+    // Deduct balance
     await usersCollection.updateOne(
       { _id: user._id },
       { $set: { balance: updatedBalance } }
     );
 
-    // 🔟 Fetch service detail
-    const admindb=await client.db(DB_ADMIN)
+    // Fetch service
+    const admindb = client.db(DB_ADMIN);
     const servicesCollection = admindb.collection("services");
-    const serviceData = await servicesCollection.findOne({ service: service });
+    const serviceData = await servicesCollection.findOne({ service });
 
-    console.log("📚 Service Data from DB:", serviceData);
-
-    if (!serviceData) {
-      console.log("❌ Service not found.");
+    if (!serviceData)
       return { success: false, message: "Service not found in database." };
-    }
 
-    // ✔ Profit calculation
     const profitPercentage = Number(serviceData.profitPercentage) || 0;
-    console.log("📊 Profit Percentage:", profitPercentage);
-
     const profit = (charge * profitPercentage) / 100;
-    console.log("💰 Calculated Profit:", profit);
 
-    // 💾 Order object
+    // Build order
     const newOrder = {
       userId: user._id.toString(),
       username: user.username,
@@ -338,14 +349,9 @@ if (!Number.isFinite(temp) || temp < charge) {
       createdAt: new Date(),
     };
 
-    console.log("📝 Final Order Object:", newOrder);
-
     // Insert order
     await db.collection("orders").insertOne(newOrder);
-    console.log("🟢 Order inserted successfully!");
 
-    // Revalidate dashboard
-    console.log("🔄 Revalidating dashboard...");
     revalidatePath("/user/dashboard");
 
     return {
@@ -358,14 +364,9 @@ if (!Number.isFinite(temp) || temp < charge) {
 
   } catch (err) {
     console.error("❌ ERROR in createOrderAction:", err);
-    return {
-      success: false,
-      message: "Internal server error.",
-      details: err.message,
-    };
+    return { success: false, message: "Internal server error." };
   }
 }
-
 
 
 

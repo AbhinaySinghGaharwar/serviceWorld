@@ -67,10 +67,16 @@ export default function AdminLayout({ children }) {
               {openMenu ? <X size={22} /> : <Menu size={22} />}
             </button>
 
-            <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-  {siteSettings?.siteName
-    ? siteSettings.siteName
-    : <img src={siteSettings?.logo} alt="Logo" className="h-6" />}
+           <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+  {siteSettings?.siteName ? (
+    siteSettings.siteName
+  ) : (
+    <img
+      src={siteSettings?.logo}
+      alt="Logo"
+      style={{ height: `${siteSettings?.logosize}px` }}
+    />
+  )}
 </h1>
 
           </div>

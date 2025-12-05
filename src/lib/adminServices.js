@@ -665,9 +665,8 @@ export async function updateWebsiteSettings(formData) {
     const panelName = formData.panelName
     const maintenanceMode = formData.maintenanceMode
     const servicesEnabled = formData.servicesEnabled
-    const bronzeMember = formData.bronzeMember
-    const silverMember = formData.silverMember
-    const goldMember = formData.goldMember
+   const faviconsize=formData.faviconsize
+   const logosize=formData.logosize
     const reseller = formData.reseller
 
     // 🧩 Prepare updated data
@@ -676,10 +675,10 @@ export async function updateWebsiteSettings(formData) {
       panelName,
       maintenanceMode,
       servicesEnabled,
-      bronzeMember,
-      silverMember,
-      goldMember,
+  
       reseller,
+      logosize,
+      faviconsize,
       updatedAt: new Date(),
     };
 

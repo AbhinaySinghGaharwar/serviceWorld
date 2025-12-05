@@ -87,7 +87,9 @@ export default function EditWebsite() {
           {/* Branding */}
           <SectionTitle title="Branding" />
           <FileInput label="Logo" name="logo" file={formData.logo} onChange={handleFileChange} />
+            <Input label="Logo Size" name="logosize" value={formData?.logosize||''} onChange={handleChange} />
           <FileInput label="Favicon" name="favicon" file={formData.favicon} onChange={handleFileChange} />
+           
 
           {/* Toggles */}
           <SectionTitle title="System Controls" />
