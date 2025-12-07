@@ -193,6 +193,7 @@ export default function OrdersPage({ sorders = "[]" }) {
                 {[
                   "#",
                   "ID",
+                  'Date',
                   "Username",
                   "Charge",
                   "Profit",
@@ -233,6 +234,15 @@ export default function OrdersPage({ sorders = "[]" }) {
                         </span>
                       </div>
                     </td>
+<td className="p-3 leading-tight">
+  {order?.createdAt && (
+    <>
+      <div>{new Date(order.createdAt).toLocaleDateString()}</div>
+      <div>{new Date(order.createdAt).toLocaleTimeString()}</div>
+    </>
+  )}
+</td>
+
 
                     <td className="p-3">{order.username || "No username"}</td>
                     <td className="p-3">₹{order.charge}</td>
