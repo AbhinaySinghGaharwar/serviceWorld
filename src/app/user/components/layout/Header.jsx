@@ -61,29 +61,28 @@ export default function Header({
         >
           <FaBars size={20} />
         </button>
+<Link
+  href="/"
+  className="
+    text-xl sm:text-2xl font-bold tracking-wide
+    dark:text-white
+    text-gray-700
+  "
+>
+  {websitename?.siteName ? (
+    websitename.siteName
+  ) : (
+    <img
+      src={websitename?.logo}
+      alt="Logo"
+      style={{ height: `${websitename?.logosize}px` }}
+    />
+  )}
+</Link>
 
-        {/* Website Title */}
-        <Link
-          href="/"
-          className="
-            text-xl sm:text-2xl font-bold tracking-wide
-
-            /* Dark */
-            dark:text-white
-
-            /* Light */
-            text-gray-700
-          "
-        >
-          
-   
-  {websitename?.siteName
-    ? websitename.siteName
-    : <img src={websitename?.logo} alt="Logo" className="h-6" />}
-
-        </Link>
       </div>
-
+     
+  
       {/* RIGHT Section */}
       <div className="flex items-center gap-4 relative">
         {/* Dark Mode Toggle */}

@@ -334,9 +334,15 @@ export default function OrderForm({ selectedCategory = "" }) {
       const res = await createOrderAction(service, link, quantity, charge);
       console.log("createOrderAction response:", res);
 
-      if (!res.success) {
-        setResponseMessage("❌ Failed to create order");
-        setResponseType("error");
+   if (!res.success) {
+  if (res.message === 'Insufficient balance.') {
+    setResponseMessage(`${res.message} Please Add Fund In Your Account`);
+  } else {
+    setResponseMessage(res.message);
+  }
+  setResponseType("error");
+
+
       } else {
         setResponseMessage(`✅ Order created successfully (ID: ${res.orderId})`);
         setResponseType("success");

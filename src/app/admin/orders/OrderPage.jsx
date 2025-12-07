@@ -132,6 +132,7 @@ export default function OrdersPage({ sorders = "[]" }) {
 
   // actions
   const getFilteredOptions = (status) => {
+    
     const base = [
       ["editUrl", "Edit URL"],
       ["editStart", "Edit Start Count"],
@@ -143,7 +144,7 @@ export default function OrdersPage({ sorders = "[]" }) {
     const s = normalize(status);
     if (s === "completed") return [];
     if (s === "canceled" || s === "cancelled") return base;
-    return base.filter(([t]) => t !== "cancelReason");
+    return base.filter(([t]) => t !== "cancelReason"&&t!=='resend');
   };
 
   const openPopup = (type, order) => {

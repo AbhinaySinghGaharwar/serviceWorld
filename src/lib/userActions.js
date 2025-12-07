@@ -322,7 +322,7 @@ export async function createOrderAction(service, link, qua, paying) {
     const serviceData = await servicesCollection.findOne({ service });
 
     if (!serviceData)
-      return { success: false, message: "Service not found in database." };
+      return { success: false, message: "Service not found ." };
 
     const profitPercentage = Number(serviceData.profitPercentage) || 0;
     const profit = (charge * profitPercentage) / 100;
