@@ -6,13 +6,14 @@ import AddNewService from "./AddNewService";
 import ServiceTable from "./ServiceTable";
 import ServiceModal from "./ServiceModal";
 import { useRouter } from "next/navigation";
+import DeleteCategory from "./DeleteCategory";
 import AddNewCategory from "./AddNewCategory";
 export default function ServicesPage({ services = [] ,category=[] }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedService, setSelectedService] = useState(null);
-
+const [isDeleteCategory,setIsDeleteCategory]=useState(false)
   /* ---------------- FILTERING ---------------- */
   const filtered = useMemo(() => {
     return services.filter((srv) => {
@@ -105,8 +106,26 @@ export default function ServicesPage({ services = [] ,category=[] }) {
           >
            Edit Category
           </button>
+            <div className="py-2">
+            <button onClick={()=>setIsDeleteCategory(true)} className="px-2 py-2 bg-gray-800 text-sm text-white rounded-lg">
+             Delete Category
+            </button>
+
+            </div>
         </div>
+        
       </div>
+ {isDeleteCategory&&(
+     <>
+ <DeleteCategory
+  category={category}
+Isopen={isDeleteCategory}
+setIsopen={setIsDeleteCategory}
+/>
+
+</>
+ )}
+
 
       {/* ✅ NORMAL TABLE WITH CATEGORIES */}
       <ServiceTable

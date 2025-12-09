@@ -17,7 +17,7 @@ export default function ServiceTable({ title, grouped = {}, category = [] }) {
   const dropdownRef = useRef(null);
 const [deleting,setDeleting]=useState(false)
   const [selectedRows, setSelectedRows] = useState({});
-
+const [isDeleteCategory,setIsDeleteCategory]=useState(false)
   // -------------------- VISIBLE CATEGORIES (skip empty) --------------------
   const visibleCategories = (category || []).slice(0).filter((catName) => {
     const services = grouped[catName] || [];
@@ -165,6 +165,7 @@ const idx = Number(idxStr);
         <div className="flex justify-between items-center px-4 py-3 border-b bg-gray-100 dark:bg-[#1E1F23]">
           <div className="text-lg font-bold">{title}</div>
 
+        
           <div className="flex gap-3">
             <button onClick={bulkEdit} className="px-4 py-1 bg-gray-800 text-white rounded-lg">
               Bulk Edit

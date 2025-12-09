@@ -116,6 +116,60 @@ console.log(result)
   }
 }
 
+export async function deleteCat(categories) {
+ 
+
+  try {
+    // 1️⃣ Verify admin
+    const auth = await verifyAdmin();
+    if (!auth.valid) {
+      return { status: false, message: auth.message };
+    }
+
+    // 2️⃣ Basic validation
+    if (!categories) {
+      return { status: false, message: "no category found." };
+    }
+
+    // 3️⃣ Normalize input → array of category names
+    let namesToDelete = [];
+
+      // object with { "Category name": true }
+      namesToDelete = Object.keys(categories).filter(
+        key => categories[key] === true
+      );
+    
+console.log(namesToDelete)
+    if (namesToDelete.length === 0) {
+      return { status: false, message: "no categories to delete." };
+    }
+
+    // 4️⃣ Connect DB
+    const client = await clientPromise;
+    const db = client.db(DB_ADMIN);
+    const categoriesCol = db.collection("categories");
+
+    // 5️⃣ Delete by name
+    const result = await categoriesCol.deleteMany({
+      category: { $in: namesToDelete }
+    });
+
+    return {
+      status: true,
+      deletedCount: result.deletedCount,
+      message: `Deleted ${result.deletedCount} categor${result.deletedCount === 1 ? "y" : "ies"}.`
+    };
+  } catch (error) {
+    console.error("deleteCat error:", error);
+    return {
+      status: false,
+      message: "Something went wrong while deleting categories.",
+      error: String(error)
+    };
+  }
+}
+
+
 export async function UpdateAllCategoryServiceAction(newCategory, oldCategory) {
   try {
     // 1️⃣ Verify admin
