@@ -313,7 +313,7 @@ export default function OrderForm({ selectedCategory = "" }) {
           </div>
 
           {/* CATEGORY */}
-          <div className="relative" ref={categoryRef}>
+          <div className="relative z-50" ref={categoryRef}>
             <label>Category</label>
             <div
               onClick={() => setCategoryDropdownOpen((p) => !p)}

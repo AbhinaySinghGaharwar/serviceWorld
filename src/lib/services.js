@@ -193,6 +193,7 @@ export async function StoreServicesInDB({ services, profitPercentage }) {
 
 // ✅ Create a new order
 export async function createOrder(data) {
+
   try {
     const { service, link, quantity } = data;
 
@@ -204,16 +205,33 @@ const client = await clientPromise;
 const selectedProvider = await client
   .db(DB_ADMIN)
   .collection("Providers")
-  .findOne({ selected: true });
+  .find({}).toArray();
+  console.log(selectedProvider)
+  const serviceData = await client
+  .db(DB_ADMIN)
+  .collection("services")
+  .findOne({ service: Number(service) });
+
+
+
+const result=selectedProvider.find((p)=>p.providerUrl===serviceData.provider)
+// IMPORTANT SAFE CHECK
+if (!result) {
+   return {
+      error: error.response?.data || error.message,
+      success: false,
+    };
+}
+
     const params = new URLSearchParams();
-    params.append("key", selectedProvider.apiKey);
+    params.append("key", result.apiKey);
     params.append("action", "add");
     params.append("service", service);
     params.append("link", link);
     params.append("quantity", quantity);
 
     // 🚀 Send the order to your SMM provider
-    const res = await axios.post(selectedProvider.providerUrl, params, {
+    const res = await axios.post(result.providerUrl, params, {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       timeout: 15000, // 15s timeout
     });
