@@ -58,7 +58,7 @@ export default function OrderForm({ selectedCategory = "" }) {
   const [category, setCategory] = useState(selectedCategory || "");
   const [service, setService] = useState("");
   const [selectedService, setSelectedService] = useState(null);
-
+const [allCategory,setAllCategory]=useState([])
   const [link, setLink] = useState("");
   const [quantity, setQuantity] = useState("");
   const [charge, setCharge] = useState("");
@@ -84,6 +84,7 @@ export default function OrderForm({ selectedCategory = "" }) {
   // LOAD ALL DATA FIRST (CATEGORIES + SERVICES)
   // ---------------------------------------------------------
   useEffect(() => {
+
     let alive = true;
 
     async function load() {
@@ -105,7 +106,7 @@ export default function OrderForm({ selectedCategory = "" }) {
 
         setServices(srvList);
         setCategories(catList);
-
+setAllCategory(catList)
         // Auto-select category after everything is loaded
         let chosenCategory = selectedCategory
           ? catList.find((c) => c.toLowerCase().includes(selectedCategory.toLowerCase())) || catList[0]
@@ -125,7 +126,8 @@ export default function OrderForm({ selectedCategory = "" }) {
 
     load();
     return () => (alive = false);
-  }, [selectedCategory]);
+  }, []);
+
 
   // ---------------------------------------------------------
   // MEMOIZED FILTERED SERVICES
@@ -212,6 +214,57 @@ useEffect(() => {
   setSelectedService(first);
   setService(first?.service || "");
 }, [category, services]);
+
+// Re-apply selectedCategory when categories or param changes
+useEffect(() => {
+  if (!categories.length) return;
+
+  let chosen =
+    selectedCategory
+      ? categories.find((c) =>
+          c.toLowerCase().includes(selectedCategory.toLowerCase())
+        ) || categories[0]
+      : categories[0];
+
+  setCategory(chosen);
+}, [ categories]);
+useEffect(() => {
+  if(!selectedCategory){
+setCategories(allCategory)
+  }
+  if (!selectedCategory || categories.length === 0) return;
+
+  const target = selectedCategory
+    .normalize("NFKD")
+    .replace(/[^\x00-\x7F]/g, "")
+    .toLowerCase();
+
+  const matchedList = allCategory.filter((c) => {
+    const clean = c
+      .normalize("NFKD")
+      .replace(/[^\x00-\x7F]/g, "")
+      .toLowerCase();
+
+    return clean.startsWith(target);
+  });
+
+  console.log("Matched Categories:", matchedList,categories);
+
+  if (matchedList.length > 0) {
+    const firstMatch = matchedList[0];
+
+setCategories(matchedList)
+    // set selected category
+    setCategory(matchedList[0]);
+
+    // pick first service from matched category
+    const filtered = services.filter((s) => s.category === firstMatch);
+    const firstSrv = filtered[0] || null;
+
+    setSelectedService(firstSrv);
+    setService(firstSrv?.service || "");
+  }
+}, [selectedCategory]);
 
 
   // ---------------------------------------------------------
