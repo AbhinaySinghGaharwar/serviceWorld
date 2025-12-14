@@ -1054,6 +1054,8 @@ export async function addFundAction({ utr, amount }) {
     await db.collection(addFundsCollection).insertOne({
       userId: user._id,
       utr,
+      email:user?.email,
+      username:user?.username,
       amount: numericAmount,
       status: "success",
       gateway: "BharatPe",
