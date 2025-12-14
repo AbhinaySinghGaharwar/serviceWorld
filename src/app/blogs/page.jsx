@@ -14,7 +14,7 @@ export default function BlogList() {
       if (res.status) {
         setBlogs(res.blogs);
       } else {
-        setError(res.message);
+        setError(' Coming soon');
       }
       setLoading(false);
     };

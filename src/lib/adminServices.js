@@ -1816,17 +1816,7 @@ export async function createBlogAction({ title, content, tags, image }) {
 
 export async function getBlogsAction() {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("admin_token")?.value;
-
-    if (!token) {
-      return { status: false, message: "Admin not logged in", blogs: [] };
-    }
-
-    const admin = jwt.verify(token, process.env.JWT_SECRET);
-    if (!admin) {
-      return { status: false, message: "Unauthorized admin", blogs: [] };
-    }
+   
 
     const client = await clientPromise;
     const collection = client.db("DB_ADMIN").collection("blogs");
