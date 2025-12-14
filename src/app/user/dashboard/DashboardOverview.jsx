@@ -17,7 +17,7 @@ import Card from "./Card";
 import BalanceCard from "./BalanceCard";
 import SpentCard from "./SpentCard";
 
-export default function DashboardLayout({ user, serviceEnabled }) {
+export default function DashboardLayout({ user, serviceEnabled ,totalOrders=0}) {
   const [spent, setSpent] = useState(0);
   const [orders, setOrders] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -37,7 +37,7 @@ useEffect(() => {
 
     // ✅ Set values in state
     setSpent(totalSpent);
-    setOrders(res.orders.length);
+   
   };
 
   loadOrders();
@@ -97,7 +97,7 @@ useEffect(() => {
           Total Orders
         </p>
         <h4 className="text-sm sm:text-base font-semibold text-green-600 dark:text-green-400 mt-0.5">
-          {orders}
+          {totalOrders}
         </h4>
       </div>
     </div>

@@ -31,18 +31,43 @@ const icons = [
   { name: "Website", icon: <FaGlobe size={28} /> },
 ];
 
-const getCategoryIcon = (cat) =>
-  icons.find((i) => cat?.toLowerCase().includes(i.name.toLowerCase()))?.icon || <FaGlobe size={20} />;
+const getCategoryIcon = (cat = "") =>
+  icons.find((i) =>
+    cat
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\w\s]/g, "")
+      .toLowerCase()
+      .includes(i.name.toLowerCase())
+  )?.icon || <FaGlobe size={28} />;
+
 
 const getPlatformIcon = (name = "") => {
-  const lower = name.toLowerCase();
-  if (lower.includes("instagram")) return <FaInstagram size={28} className="text-pink-500 text-lg" />;
-  if (lower.includes("youtube")) return <FaYoutube size={28} className="text-red-500 text-lg" />;
-  if (lower.includes("facebook")) return <FaFacebookF size={28} className="text-blue-600 text-lg" />;
-  if (lower.includes("tiktok")) return <FaTiktok size={28} className="text-white text-lg" />;
-  if (lower.includes("telegram")) return <FaTelegramPlane size={28} className="text-sky-400 text-lg" />;
-  if (lower.includes("twitter")) return <FaTwitter size={28} className="text-blue-400 text-lg" />;
-  return <FaGlobe className="text-gray-500 text-lg" />;
+  const text = name
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s]/g, "")
+    .toLowerCase();
+
+  if (text.includes("instagram"))
+    return <FaInstagram size={28} className="text-pink-500" />;
+
+  if (text.includes("youtube"))
+    return <FaYoutube size={28} className="text-red-500" />;
+
+  if (text.includes("facebook"))
+    return <FaFacebookF size={28} className="text-blue-600" />;
+
+  if (text.includes("tiktok"))
+    return <FaTiktok size={28} className="text-white" />;
+
+  if (text.includes("telegram"))
+    return <FaTelegramPlane size={28} className="text-sky-400" />;
+
+  if (text.includes("twitter") || text.includes("x"))
+    return <FaTwitter size={28} className="text-blue-400" />;
+
+  return <FaGlobe size={28} className="text-gray-500" />;
 };
 
 // ---------------------------------------------------------
@@ -471,7 +496,7 @@ setCategories(matchedList)
           </div>
 
           {/* SERVICE INFO */}
-          {selectedService && (
+          {selectedService &&selectedService.desc && (
             <div className="border p-4 rounded-lg">
               <p className="text-sm opacity-75">{selectedService.desc || "No description available"}</p>
               <p className="flex items-center gap-2 mt-2 opacity-80">
@@ -504,6 +529,7 @@ setCategories(matchedList)
               onChange={(e) => setQuantity(e.target.value)}
               placeholder="Enter quantity"
             />
+            { selectedService&&<p className="text-red-400 text-sm">Minimum Quantity {selectedService?.min}</p>}
             {quantityError && <p className="text-red-400 text-sm">{quantityError}</p>}
           </div>
 
