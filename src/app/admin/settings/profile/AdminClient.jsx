@@ -23,6 +23,7 @@ export default function AdminClient({
 
   const filteredAdmins = admins.filter(a =>
     a.email.toLowerCase().includes(search.toLowerCase())
+    
   );
 
   const visibleAdmins = isSuperAdmin

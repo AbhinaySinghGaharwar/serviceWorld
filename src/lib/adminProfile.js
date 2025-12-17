@@ -15,13 +15,28 @@ async function getCollection(name) {
 /* ---------- CREATE ---------- */
 export async function createUser(collection, data) {
   if (!data.role) throw new Error("Role is required");
+  if (!data.email) throw new Error("Email is required");
 
-  const col = await getCollection(collection);
+  const client = await clientPromise;
+  const db = client.db(DB_ADMIN);
+
+  // 🔒 Check email in BOTH collections
+  const existing =
+    (await db.collection(ADMIN_COLLECTION).findOne({ email: data.email })) ||
+    (await db.collection(SUPER_ADMIN_COLLECTION).findOne({ email: data.email }));
+
+  if (existing) {
+    throw new Error("Email already exists");
+  }
+
+  const col = db.collection(collection);
+
   return col.insertOne({
     ...data,
     createdAt: new Date(),
   });
 }
+
 
 /* ---------- READ ---------- */
 export async function getUsers(collection) {
