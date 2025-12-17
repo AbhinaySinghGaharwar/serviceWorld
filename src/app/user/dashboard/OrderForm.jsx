@@ -529,7 +529,7 @@ setCategories(matchedList)
               onChange={(e) => setQuantity(e.target.value)}
               placeholder="Enter quantity"
             />
-            { selectedService&&<p className="text-red-400 text-sm">Minimum Quantity {selectedService?.min}</p>}
+            { selectedService&&<p className="text-gray-700 font-bold text-sm">Min: {selectedService?.min}-Max:{selectedService?.max}</p>}
             {quantityError && <p className="text-red-400 text-sm">{quantityError}</p>}
           </div>
 

@@ -28,7 +28,7 @@ const newOrders = orders?.orders.map((order) =>
         totalUsers={users.count || 0}
         Tickets={tickets}
         UT={unansweredTickets}
-        totalServices={services.length || 0}
+        totalServices={services.plain.length || 0}
         totalorders={orders.count}
         recentOrders={newOrders}
       />

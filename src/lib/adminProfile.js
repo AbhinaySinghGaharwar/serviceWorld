@@ -91,4 +91,5 @@ export const Admin = {
     updateUser(ADMIN_COLLECTION, id, data),
   delete: (id) =>
     deleteUser(ADMIN_COLLECTION, id),
+  getById:(id)=>getUserById(ADMIN_COLLECTION,id)
 };
