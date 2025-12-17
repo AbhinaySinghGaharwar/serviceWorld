@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-
+import { createSuperAdmin } from "@/lib/adminProfileHelper";
 export default function SuperAdminPage({
   isSuperAdmin,
   superAdmins,
@@ -13,13 +13,48 @@ export default function SuperAdminPage({
   const [isPending, startTransition] = useTransition();
 
   if (!isSuperAdmin) return null;
-
+const handleAdd=async (formData)=>{
+try {
+    const res=await createSuperAdmin(formData)
+    console.log(res)
+    if(res.status){
+        alert(res.message)
+        return 
+    }
+    alert(res.message)
+} catch (error) {
+    
+    alert(error.message||error)
+}
+}
   return (
     <div className="mt-10">
       <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
         Super Admins
       </h2>
-
+  {/* CREATE ADMIN */}
+        {isSuperAdmin && (
+          <form
+            action={handleAdd}
+            className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-3"
+          >
+            <input
+              name="email"
+              placeholder="Admin email"
+              required
+              className="rounded-lg border border-gray-300 dark:border-gray-700 px-3 py-2 text-sm bg-white dark:bg-[#0f0f11]"
+            />
+            <input
+              name="password"
+              placeholder="Admin password"
+              required
+              className="rounded-lg border border-gray-300 dark:border-gray-700 px-3 py-2 text-sm bg-white dark:bg-[#0f0f11]"
+            />
+            <button className="rounded-lg bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium">
+              Add SuperAdmin
+            </button>
+          </form>
+        )}
       <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
         <table className="w-full text-sm">
           <thead className="bg-gray-100 dark:bg-[#1b1b1d]">

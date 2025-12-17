@@ -22,7 +22,10 @@ async function getAuthUser() {
 export async function createAdmin(formData) {
   const user = await getAuthUser();
   if (user?.role !== "superadmin") {
-    throw new Error("Unauthorized");
+    return {
+            status:false,
+            message:"unauthorized"
+        }
   }
 
   const email = formData.get("email");
@@ -31,9 +34,32 @@ export async function createAdmin(formData) {
   if (!email || !password) return;
 
   await Admin.create({ email, password });
+  
   revalidatePath("/admin");
+   return{
+    status:true,
+    message:'Admin Added Successfully',
+  }
 }
+export async function createSuperAdmin(formData){
+    const user=await getAuthUser()
+    if(user?.role!=='superadmin'){
+        return {
+            status:false,
+            message:"unauthorized"
+        }
+    }
+    const email = formData.get("email");
+  const password = formData.get("password");
 
+  if (!email || !password) return;
+
+  await SuperAdmin.create({ email, password });
+  return{
+    status:true,
+    message:'SuperAdmin Added Successfully',
+  }
+}
 /* ---------- DELETE ADMIN ---------- */
 export async function deleteAdmin(id) {
   const user = await getAuthUser();
