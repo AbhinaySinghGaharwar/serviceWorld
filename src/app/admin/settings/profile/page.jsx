@@ -29,8 +29,7 @@ export default async function Page() {
     ...a,
     _id: a._id.toString(),
   }));
- 
-console.log(safeSuperAdmins,'parent page')
+
   return (
     <AdminClient
       admins={safeAdmins}

@@ -93,7 +93,10 @@ export async function deleteSuperAdmin(id) {
 
   // optional: prevent self-delete
   if (user.id === id) {
-    throw new Error("You cannot delete yourself");
+   return {
+    status:false,
+    message:'you cannot delete yourself',
+   }
   }
 
   await SuperAdmin.delete(id);
