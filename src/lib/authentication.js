@@ -328,29 +328,50 @@ export async function changePassword({ currentPassword, newPassword, ip = "127.0
 
 
 
-
-export async function adminLoginAction(email,password) {
-
-  // Dummy check
-  if (email === "test@gmail.com" && password === "hello") {
-    // Create token
-    const token = jwt.sign({ email,role:'admin' }, process.env.JWT_SECRET, { expiresIn: "7d" });
-
-    // Set cookie
-  const cookieStore= await cookies()
-  cookieStore.set({
-      name: "admin_token",
-      value: token,
-      httpOnly: true,
-      secure: true,
-      path: "/",
-      maxAge: 60 * 60, // 1 hour
-    });
-
-    return { success: true, message: "Login successful" };
-  } else {
-    return { success: false, message: "Invalid credentials" };
+export async function adminLoginAction(email, password) {
+  const client = await clientPromise;
+  const db = client.db("smmadmin");
+console.log(email,password)
+  // 🔍 check admin collection
+  let user = await db.collection("admin").findOne({ email });
+console.log('amdin',user)
+  // 🔍 if not found, check superadmin
+  if (!user) {
+    user = await db.collection("superadmin").findOne({ email });
+    console.log('superadmin',user)
   }
+
+  if (!user) {
+    return { success: false, message: "User not found" };
+  }
+
+  const isValid = password===user.password
+  if (!isValid) {
+    return { success: false, message: "Invalid password" };
+  }
+
+  // ✅ role comes from DB
+  const token = jwt.sign(
+    {
+      id: user._id.toString(),
+      email: user.email,
+      role: user.role,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  const cookieStore =await cookies();
+  cookieStore.set({
+    name: "admin_token",
+    value: token,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+
+  return { success: true, role: user.role };
 }
 
 
