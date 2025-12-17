@@ -198,7 +198,7 @@ useEffect(() => {
           <thead className="bg-gray-100 dark:bg-gray-700">
             <tr>
 
-              <th className="p-3 font-semibold">Selected</th>
+              {/* <th className="p-3 font-semibold">Selected</th> */}
               <th className="p-3 font-semibold">ID</th>
               <th className="p-3 font-semibold">Balance</th>
               <th className="p-3 font-semibold">Provider URL</th>
@@ -227,7 +227,7 @@ useEffect(() => {
                   className="border-t hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
 
-                  <td className="p-3">
+                  {/* <td className="p-3">
                     <span>
                       <input
   type="radio"
@@ -238,9 +238,10 @@ useEffect(() => {
 />
 
                     </span>
-                  </td>
+                  </td> */}
                   <td className="p-3">{item.id}</td>
-                  <td className="p-3">{item.balance}</td>
+                  <td className="p-3">{Number(item.balance).toFixed(2)}
+</td>
                   <td className="p-3">{item.providerUrl}</td>
                   <td className="p-3">{item.apiKey}</td>
 

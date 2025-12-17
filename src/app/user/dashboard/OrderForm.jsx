@@ -553,15 +553,20 @@ setCategories(matchedList)
           </button>
         </form>
 
-        {responseMessage && (
-          <p
-            className={`mt-4 text-center ${
-              responseType === "error" ? "text-red-400" : "text-green-400"
-            }`}
-          >
-            {responseMessage}
-          </p>
-        )}
+       {responseMessage && (
+  <p
+    className={`mt-4 text-center ${
+      responseType === "error" ? "text-red-400" : "text-green-400"
+    }`}
+  >
+    {responseMessage.replace(/\(ID:.*?\)/, "")}
+    <br />
+    <span className="text-sm opacity-80">
+      ID: {responseMessage.match(/\(ID:\s*(\d+)\)/)?.[1]}
+    </span>
+  </p>
+)}
+
       </div>
     </div>
   );

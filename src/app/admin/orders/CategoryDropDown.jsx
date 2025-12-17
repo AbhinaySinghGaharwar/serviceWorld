@@ -1,17 +1,15 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 
-export default function Dropdown({  onSelect, label = "Select" , options}) {
-  const [open, setOpen] = useState(false);
+export default function Dropdown({ onSelect, label = "Select", options }) {
   const [selected, setSelected] = useState(null);
-
   const ref = useRef();
 
-  // Close dropdown on outside click
+  // optional: reset selection on outside click
   useEffect(() => {
     const handleClick = (e) => {
       if (ref.current && !ref.current.contains(e.target)) {
-        setOpen(false);
+        // no open state, but keeping logic safe
       }
     };
     document.addEventListener("click", handleClick);
@@ -20,32 +18,27 @@ export default function Dropdown({  onSelect, label = "Select" , options}) {
 
   const selectOption = (opt) => {
     setSelected(opt);
-    setOpen(false);
-    onSelect && onSelect(opt);
+    onSelect?.(opt);
   };
 
   return (
-    <div ref={ref} className="relative inline-block w-48">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full bg-white border px-3 py-2 rounded-md shadow-sm text-left"
-      >
-        {selected ? selected.label : label}
-      </button>
+    <div ref={ref} className="w-full">
+   
 
-      {open && (
-        <ul className="absolute w-full bg-white border rounded-md mt-1 shadow max-h-40 overflow-y-auto z-50">
-          {options.map((opt) => (
-            <li
-              key={opt.value}
-              onClick={() => selectOption(opt)}
-              className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-            >
-              {opt.label}
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* Options always visible */}
+      <ul className="bg-white border rounded-md shadow ">
+        {options.map((opt) => (
+          <li
+            key={opt.value}
+            onClick={() => selectOption(opt)}
+            className={`px-3 py-2 cursor-pointer hover:bg-gray-100
+              ${selected?.value === opt.value ? "bg-gray-100 font-medium" : ""}
+            `}
+          >
+            {opt.label}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

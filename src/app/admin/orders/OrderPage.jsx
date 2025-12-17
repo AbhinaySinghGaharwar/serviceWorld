@@ -163,18 +163,18 @@ export default function OrdersPage({ sorders = "[]" }) {
       <h1 className="text-2xl font-semibold mb-6">Orders Overview</h1>
 
       {/* Search + Dropdown */}
-      <div className="flex flex-col md:flex-row gap-4 mb-4">
+      <div className=" mb-4 w-full">
         <input
           type="text"
           placeholder="Search anything..."
-          className="w-full md:w-1/2 px-4 py-2 rounded-lg border dark:border-gray-700 bg-white dark:bg-gray-900"
+          className="w-full  px-4 py-2 rounded-lg border dark:border-gray-700 bg-white dark:bg-gray-900"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        <Dropdown label="All Orders" options={options} onSelect={handleSelect} />
       </div>
 
+        <Dropdown label="All Orders" options={options} onSelect={handleSelect} />
       {/* Loading */}
       {loading && (
         <div className="space-y-3 animate-pulse">
