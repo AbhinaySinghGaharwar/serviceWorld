@@ -456,12 +456,6 @@ export async function updateMultipleOrderStatus(orderIds = [], status) {
 
 export async function MultipleCancelWithRefund(orderIds = []) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("admin_token")?.value;
-    if (!token) return { status: false, message: "Unauthorized Admin" };
-
-    jwt.verify(token, process.env.JWT_SECRET);
-
     const client = await clientPromise;
     const db = client.db("smmpanel");
 

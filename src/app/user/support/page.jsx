@@ -8,8 +8,16 @@ export default async function SupportPage() {
   const result = await getUserTickets();
   const tickets = result?.success ? result.tickets : [];
 
-  console.log("🎫 Tickets fetched:", result);
+
+const filteredTickets=tickets.map((t)=>{
+return {
+  _id:t._id.toString(),
+  userId:t.userId.toString(),
+  ...t,
+}
+
+})
 
   // ✅ Pass tickets into client component
-  return <TicketSupport tickets={tickets} />;
+  return <TicketSupport tickets={filteredTickets} />;
 }
