@@ -282,7 +282,7 @@ const allSelected =
 
                     <td className="p-3">
                       <div className="flex flex-col leading-tight">
-                        <span className="font-medium">{order.service}</span>
+                        <span className="font-medium">{order?.orderNumber}</span>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
                           {order.providerOrderId}
                         </span>
@@ -302,7 +302,7 @@ const allSelected =
                     <td className="p-3">₹{order.charge}</td>
                     <td className="p-3">₹{order?.profit || "0"}</td>
                    <td className="p-3 max-w-[300px] truncate" title={order?.name}>
-  {order?.name}
+ {order?.service} {order?.name}
 </td>
 
 

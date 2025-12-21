@@ -333,7 +333,7 @@ export async function createOrderAction(service, link, qua, paying) {
       .collection("Providers")
       .find({})
       .toArray();
-console.log(service)
+
     // fetch service once and reuse
     const dbservice = await client
       .db(DB_ADMIN)
@@ -369,7 +369,22 @@ console.log(service)
     } catch (e) {
       response = null;
     }
+let counter = await db.collection("counters").findOne({ _id: "orderNumber" });
 
+if (counter) {
+  await db.collection("counters").updateOne(
+    { _id: "orderNumber" },
+    { $inc: { seq: 1 } }
+  );
+} else {
+  await db.collection("counters").insertOne({
+    _id: "orderNumber",
+    seq: 3000
+  });
+}
+
+counter = await db.collection("counters").findOne({ _id: "orderNumber" });
+const orderNumber = counter.seq;
     // ========================= PROVIDER FAILED =========================
     if (!response || response.error) {
       console.log("❌ Provider failed:", response?.error);
@@ -407,7 +422,7 @@ name:dbservice.name,
         quantity,
         charge,
         profit,
-
+orderNumber,
         status: "Pending",
         providerOrderId: fallbackId,
         providerError: response?.error || "Provider unreachable",
@@ -421,7 +436,7 @@ name:dbservice.name,
       return {
         success: true,
         message: "Order placed successfully!",
-        orderId: fallbackId,
+        orderId: orderNumber,
         balanceAfter: updatedBalance,
         warning: "Provider not available, order queued.",
       };
@@ -448,22 +463,7 @@ name:dbservice.name,
     // Use the matched provider info found earlier (result)
     const providerUrlForOrder = result?.providerUrl || null;
     const providerApiKeyForOrder = result?.apiKey || null;
-let counter = await db.collection("counters").findOne({ _id: "orderNumber" });
 
-if (counter) {
-  await db.collection("counters").updateOne(
-    { _id: "orderNumber" },
-    { $inc: { seq: 1 } }
-  );
-} else {
-  await db.collection("counters").insertOne({
-    _id: "orderNumber",
-    seq: 3000
-  });
-}
-
-counter = await db.collection("counters").findOne({ _id: "orderNumber" });
-const orderNumber = counter.seq;
     const newOrder = {
       userId: user._id.toString(),
       username: user.username,
@@ -483,6 +483,7 @@ orderNumber,
       startCount: 0,
       remains: 0,
       providerOrderId: response.order,
+      counter,
       createdAt: new Date(),
     };
 
@@ -494,7 +495,7 @@ orderNumber,
     return {
       success: true,
       message: "Order created successfully!",
-      orderId: response.order,
+      orderId: orderNumber,
       balanceAfter: updatedBalance,
       profit,
     };

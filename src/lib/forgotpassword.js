@@ -56,8 +56,8 @@ export async function forgotPasswordAction(email) {
         });
 
         // 5️⃣ Send Email
-     await transporter.sendMail({
-  from: `"${smtp.fromName}" <${smtp.fromEmail}>`,
+   const data=  await transporter.sendMail({
+  from: `"${smtp.user}" <${smtp.user}>`,
   to: email,
   subject: "Password Reset Request",
   html: `
@@ -67,7 +67,7 @@ export async function forgotPasswordAction(email) {
     <p>This link will expire in 30 minutes.</p>
   `,
 });
-
+console.log(data)
       return { success: true, message: "Reset email sent" };
 
     } catch (err) {
