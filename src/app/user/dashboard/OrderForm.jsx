@@ -547,7 +547,7 @@ setCategories(matchedList)
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3 rounded-lg bg-gray-800 text-white"
+            className="w-full py-3 rounded-lg bg-gray-800 text-white font-bold"
           >
             {submitting ? "Processing..." : "Place Order"}
           </button>
@@ -561,9 +561,11 @@ setCategories(matchedList)
   >
     {responseMessage.replace(/\(ID:.*?\)/, "")}
     <br />
-    <span className="text-sm opacity-80">
-      ID: {responseMessage.match(/\(ID:\s*(\d+)\)/)?.[1]}
-    </span>
+<span className="text-sm opacity-80">
+  {!(responseType?.toLowerCase() === 'error') &&
+    `ID: ${responseMessage.match(/\(ID:\s*(\d+)\)/)?.[1]}`}
+</span>
+
   </p>
 )}
 

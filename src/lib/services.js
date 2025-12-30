@@ -29,6 +29,7 @@ export async function getServices() {
       rate: Number(s.rate) || 0,
       provider: s.provider ?? "",
       service: s.service ?? null,
+      cancel:s?.cancel?? "No",
       average_time:s?.average_time,
       type: s.type ?? "Default",
       desc: s.desc ?? "",
@@ -115,7 +116,7 @@ export async function importServicesAction({url,api}) {
 
 
 export async function StoreServicesInDB({ services, profitPercentage }) {
-  console.log(services)
+
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("admin_token")?.value;
@@ -154,6 +155,7 @@ export async function StoreServicesInDB({ services, profitPercentage }) {
     service: s.service ?? null,
     type: s.type?.trim() || "Default",
     status: "enabled",
+    cancel:'No',
     desc: s.desc?.trim() || "",
     profitPercentage:pr,  // keep original
     storedBy: admin.id ?? "system",

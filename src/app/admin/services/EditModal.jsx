@@ -102,7 +102,18 @@ export default function EditServiceModal({ editData, onSave, onClose, category }
               <option value="disabled">Disabled</option>
             </select>
 
-          ) : key === "average_time" ? (
+          ) :key === "cancel" ? (
+            /* STATUS */
+            <select
+              value={value}
+              onChange={(e) => handleChange(key, e.target.value)}
+              className="w-full px-3 py-2 rounded border bg-white dark:bg-[#1E1F23]"
+            >
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+
+          ): key === "average_time" ? (
             /* ⭐ ALWAYS SHOW average_time */
             <input
               type="text"

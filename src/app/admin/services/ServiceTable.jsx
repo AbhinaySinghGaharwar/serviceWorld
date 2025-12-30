@@ -54,8 +54,8 @@ const [isDeleteCategory,setIsDeleteCategory]=useState(false)
 
     visibleCategories.forEach((catName) => {
       const services = grouped[catName] || [];
-      services.forEach((_, idx) => {
-        const rowKey = `${catName}-${idx}`;
+      services.forEach((srv) => {
+        const rowKey = `${srv.service}`;
         allSelected[rowKey] = true;
       });
     });
@@ -67,47 +67,28 @@ const bulkDelete = async () => {
   if (deleting) return; // prevent double clicks
   setDeleting(true);
 
-  const selectedKeys = Object.entries(selectedRows)
-    .filter(([_, v]) => v)
-    .map(([k]) => k);
-
-    console.log(selectedKeys)
-  if (selectedKeys.length === 0) {
+ 
+  const serviceIds = Object.keys(selectedRows);
+ console.log(serviceIds)
+  if (serviceIds.length === 0) {
     setDeleting(false);
     return alert("No rows selected!");
   }
-
-  try {
-    // sequential delete (keeps order and easier error handling)
-    for (const key of selectedKeys) {
-      const lastDash = key.lastIndexOf("-");
-const catName = key.substring(0, lastDash);
-const idxStr = key.substring(lastDash + 1);
-const idx = Number(idxStr);
-
-
-      // guard: existence checks
-      if (!grouped?.[catName] || Number.isNaN(idx) || !grouped[catName][idx]) {
-        console.warn("Skipping invalid selection key:", key,idx,catName,);
-        continue;
-      }
-
-      const srv = grouped[catName][idx];
-
-      try {
-        const res = await DeleteServiceAction(srv.service);
-        // optionally check res.success or res.message
-      } catch (err) {
-        console.error("Failed to delete", srv, err);
-        // continue with other deletes instead of aborting everything
-      }
-    }
+    try {
+       const result = await Promise.all(
+  serviceIds.map(srv => DeleteServiceAction(srv))
+);
+console.log(result,'result here')
+       
+    
+    
 
     alert("Bulk delete completed");
     setSelectedRows({});
   } catch (err) {
     console.error("Bulk delete: unexpected error", err);
     alert("Something went wrong while deleting. Check console for details.");
+    setDeleting(false)
   } finally {
     setDeleting(false);
   }
@@ -115,11 +96,22 @@ const idx = Number(idxStr);
 
   // -------------------- BULK EDIT --------------------
   const bulkEdit = () => {
-    const firstKey = Object.entries(selectedRows).find(([_, v]) => v)?.[0];
+    const firstKey=Object.keys(selectedRows)[0]; 
+
+    let service;
+      visibleCategories.forEach((catName) => {
+      const services = grouped[catName] || [];
+      services.forEach((srv) => {
+      
+       if(Number(srv.service)===Number(firstKey)){
+        service=srv
+       }
+      });
+    });
+   
     if (!firstKey) return alert("No rows selected!");
 
-    const [catName, idx] = firstKey.split("-");
-    setEditData(grouped[catName][idx]);
+    setEditData(service);
   };
 
   const onEdit = async (updated) => {
@@ -227,7 +219,7 @@ const idx = Number(idxStr);
 
                     {/* SERVICES */}
                     {services.map((srv, idx) => {
-                      const rowKey = `${catName}-${idx}`;
+                      const rowKey = `${srv.service}`;
 
                       return (
                         <tr key={rowKey} className="border-b hover:bg-gray-100 dark:hover:bg-gray-800">
@@ -244,7 +236,7 @@ const idx = Number(idxStr);
                           <td className="px-2 font-extrabold text-sm">{srv.name}</td>
                           <td className="px-2">{srv.type}</td>
                           <td className="px-2">{srv.refill ? "Yes" : "No"}</td>
-                          <td className="px-2">{srv.cancelAllowed ? "Yes" : "No"}</td>
+                          <td className="px-2">{srv.cancel }</td>
 
                           <td className="px-2 text-xs">
                             <span className="font-bold block">{srv.provider}</span>

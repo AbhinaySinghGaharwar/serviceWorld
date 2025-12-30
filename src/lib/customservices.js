@@ -245,7 +245,7 @@ export async function UpdateAllCategoryServiceAction(newCategory, oldCategory) {
 
 
 export async function UpdateMultipleServicesAction(data, services){
-  console.log(data)
+  console.log(services)
 
  const isEmpty = Object.keys(services).length === 0
   if(isEmpty){
@@ -279,7 +279,7 @@ export async function UpdateMultipleServicesAction(data, services){
 average_time:data?.average_time,
       refill: data.refill === true || data.refill === "yes",
       cancelAllowed: data.cancelAllowed === true || data.cancelAllowed === "yes",
-
+cancel:data?.cancel,
 
       rate: Number(data.rate ?? data.price ?? 0), // ✅ updates `rate` not `price`
       min: data.min !== "" ? Number(data.min) : null,
@@ -314,12 +314,10 @@ profitPercentage:data?.profitPercentage,
     const db = client.db(DB_ADMIN);
     const collection = db.collection("services");
 
-    const serviceIds = Object.keys(services)
-  .map(key => key.match(/-(\d+)$/)?.[1]) // capture last number before end
-  .filter(Boolean)
-  .map(Number);
+ const serviceIds = Object.keys(services);
 
 
+console.log(serviceIds)
 
 
     if (serviceIds.length === 0) {
@@ -327,13 +325,14 @@ profitPercentage:data?.profitPercentage,
     }
 
     const updatePayload = {
-       id:data?.id,
+      
       provider:data?.provider,
-      service:data?.service,
+     
       category: data.category ?? "",
       min: data.min !== "" ? Number(data.min) : null,
       max: data.max !== "" ? Number(data.max) : null,
       rate: Number(data.rate ?? 0),
+      cancel:data?.cancel,
       average_time:data?.average_time,
       type: data.type ?? "Default",
       desc: data.desc ?? "",
@@ -342,7 +341,7 @@ profitPercentage:data?.profitPercentage,
     };
 
     const result = await collection.updateMany(
-      { id: { $in: serviceIds } }, // ✅ FIXED MATCH
+      { service: { $in: serviceIds } }, // ✅ FIXED MATCH
       { $set: updatePayload }
     );
 

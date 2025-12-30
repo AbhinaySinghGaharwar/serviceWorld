@@ -516,10 +516,10 @@ export async function CancelUserOrder(orderIds = []) {
   try {
     const client = await clientPromise;
     const db = client.db("smmpanel");
-
+const adminDb=client.db('smmadmin')
     const ordersCol = db.collection("orders");
     const usersCol = db.collection("users");
-
+const serviceCol=adminDb.collection('services')
     // 1️⃣ Fetch orders (not already cancelled/refunded)
     const orders = await ordersCol
       .find({
@@ -529,20 +529,23 @@ export async function CancelUserOrder(orderIds = []) {
       })
       .toArray();
 
+const serviceId=orders[0].service
+
     if (!orders.length)
       return { status: false, message: "No valid orders to refund" };
+const service = await serviceCol.findOne({ service: serviceId });
+console.log(service)
 
-
-    // 4️⃣ Update orders status + mark refunded
-    const updateResult = await ordersCol.updateMany(
-      { _id: { $in: orders.map(o => o._id) } },
-      {
-        $set: {
-          status: "cancelled",
+    // // 4️⃣ Update orders status + mark refunded
+    // const updateResult = await ordersCol.updateMany(
+    //   { _id: { $in: orders.map(o => o._id) } },
+    //   {
+    //     $set: {
+    //       status: "cancelled",
           
-        },
-      }
-    );
+    //     },
+    //   }
+    // );
 
     return {
       status: true,

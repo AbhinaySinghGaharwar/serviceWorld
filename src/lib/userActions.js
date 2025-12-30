@@ -314,6 +314,9 @@ export async function createOrderAction(service, link, qua, paying) {
     let userData;
     try {
       userData = jwt.verify(token, JWT_SECRET);
+    
+    
+     
     } catch {
       return { success: false, message: "Invalid or expired token." };
     }
@@ -326,7 +329,10 @@ export async function createOrderAction(service, link, qua, paying) {
     // 4️⃣ Find user
     const user = await usersCollection.findOne({ _id: new ObjectId(userData.id) });
     if (!user) return { success: false, message: "User not found." };
-
+   
+ if(user.frozen){
+        return{success:false,message:'Account is freezed,Please Contact Admin'}
+      }
     // -------------------- Providers & Service --------------------
     const providers = await client
       .db(DB_ADMIN)
