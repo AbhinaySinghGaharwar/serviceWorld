@@ -104,250 +104,275 @@ const [allCategory,setAllCategory]=useState([])
   const dropdownRef = useRef();
   const categoryRef = useRef();
   const searchRef = useRef();
+// ---------------------------------------------------------
+// LOAD ALL DATA FIRST (CATEGORIES + SERVICES)
+// ---------------------------------------------------------
+useEffect(() => {
+  let alive = true;
 
-  // ---------------------------------------------------------
-  // LOAD ALL DATA FIRST (CATEGORIES + SERVICES)
-  // ---------------------------------------------------------
-  useEffect(() => {
+  async function load() {
+    try {
+      const srvRes = await getServices();
+      const catRes = await getCategories();
 
-    let alive = true;
+      const srvList = Array.isArray(srvRes?.plain)
+        ? srvRes.plain
+        : Array.isArray(srvRes)
+        ? srvRes
+        : [];
 
-    async function load() {
-      try {
-        const srvRes = await getServices();
-        const catRes = await getCategories();
-
-        const srvList = Array.isArray(srvRes?.plain)
-          ? srvRes.plain
-          : Array.isArray(srvRes)
-          ? srvRes
-          : [];
-
-        const catList = Array.isArray(catRes?.data)
-          ? catRes.data
-          : [...new Set(srvList.map((s) => s.category).filter(Boolean))];
-
-        if (!alive) return;
-
-        setServices(srvList);
-        setCategories(catList);
-setAllCategory(catList)
-        // Auto-select category after everything is loaded
-        let chosenCategory = selectedCategory
-          ? catList.find((c) => c.toLowerCase().includes(selectedCategory.toLowerCase())) || catList[0]
-          : catList[0];
-
-        setCategory(chosenCategory);
-
-        const filtered = srvList.filter((s) => s.category === chosenCategory);
-        const firstSrv = filtered[0] || null;
-
-        setSelectedService(firstSrv);
-        setService(firstSrv?.service || "");
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    load();
-    return () => (alive = false);
-  }, []);
-
-
-  // ---------------------------------------------------------
-  // MEMOIZED FILTERED SERVICES
-  // ---------------------------------------------------------
-  const filteredServices = useMemo(() => {
-    if (!services.length) return [];
-
-    const term = searchTerm.toLowerCase();
-
-    return services.filter((s) => {
-      if (category && s.category !== category) return false;
-      if (!term) return true;
-
-      return (
-        s.name?.toLowerCase().includes(term) ||
-        s.desc?.toLowerCase().includes(term) ||
-        s.service?.toLowerCase().includes(term)
+      // collect categories that actually HAVE services
+      const serviceCategories = new Set(
+        srvList.map(s => s.category).filter(Boolean)
       );
-    });
-  }, [services, category, searchTerm]);
 
-  // ---------------------------------------------------------
-  // MEMOIZED SERVICE OBJ
-  // ---------------------------------------------------------
-  const activeService = useMemo(
-    () => services.find((s) => s.service === service) || null,
-    [services, service]
+      const rawCatList = Array.isArray(catRes?.data)
+        ? catRes.data
+        : [...serviceCategories];
+
+      // ❗ FILTER OUT EMPTY CATEGORIES
+      const catList = rawCatList.filter(c =>
+        serviceCategories.has(c)
+      );
+
+      if (!alive) return;
+
+      setServices(srvList);
+      setCategories(catList);
+      setAllCategory(catList);
+
+      let chosenCategory = selectedCategory
+        ? catList.find(c =>
+            c.toLowerCase().includes(selectedCategory.toLowerCase())
+          ) || catList[0]
+        : catList[0];
+
+      setCategory(chosenCategory);
+
+      const filtered = srvList.filter(
+        s => s.category === chosenCategory
+      );
+
+      const firstSrv = filtered[0] || null;
+      setSelectedService(firstSrv);
+      setService(firstSrv?.service || "");
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  load();
+  return () => (alive = false);
+}, []);
+
+
+// ---------------------------------------------------------
+// MEMOIZED FILTERED SERVICES
+// ---------------------------------------------------------
+const filteredServices = useMemo(() => {
+  if (!services.length) return [];
+
+  const term = searchTerm.toLowerCase();
+
+  return services.filter(s => {
+    if (category && s.category !== category) return false;
+    if (!term) return true;
+
+    return (
+      s.name?.toLowerCase().includes(term) ||
+      s.desc?.toLowerCase().includes(term) ||
+      s.service?.toLowerCase().includes(term)
+    );
+  });
+}, [services, category, searchTerm]);
+
+
+// ---------------------------------------------------------
+// ACTIVE SERVICE
+// ---------------------------------------------------------
+const activeService = useMemo(
+  () => services.find(s => s.service === service) || null,
+  [services, service]
+);
+
+
+// ---------------------------------------------------------
+// QUANTITY VALIDATION + CHARGE
+// ---------------------------------------------------------
+useEffect(() => {
+  if (!activeService || !quantity) {
+    setCharge("");
+    setQuantityError("");
+    return;
+  }
+
+  const qty = Number(quantity);
+  const min = Number(activeService.min || 0);
+  const max = Number(activeService.max || Infinity);
+
+  if (qty < min) {
+    setQuantityError(`Minimum allowed quantity is ${min}`);
+    return;
+  }
+
+  if (qty > max) {
+    setQuantityError(`Maximum allowed quantity is ${max}`);
+    return;
+  }
+
+  setQuantityError("");
+
+  const base = Number(activeService.rate || 0);
+  const profit = Number(
+    activeService.profitPercentage ||
+    activeService.Profitpercentage ||
+    0
   );
 
-  // ---------------------------------------------------------
-  // QUANTITY VALIDATION + CHARGE CALCULATION
-  // ---------------------------------------------------------
-  useEffect(() => {
-    if (!activeService || !quantity) {
-      setCharge("");
-      setQuantityError("");
-      return;
-    }
-
-    const qty = Number(quantity);
-    const min = Number(activeService.min || 0);
-    const max = Number(activeService.max || Infinity);
-
-    if (qty < min) return setQuantityError(`Minimum allowed quantity is ${min}`);
-    if (qty > max) return setQuantityError(`Maximum allowed quantity is ${max}`);
-
-    setQuantityError("");
-
-    const base = Number(activeService.rate || 0);
-    const profit = Number(activeService.profitPercentage || activeService.Profitpercentage || 0);
-    const finalRate = base * (1 + profit / 100);
-
-    const total = (finalRate / 1000) * qty;
-
-    setCharge(total.toFixed(2));
-  }, [quantity, activeService]);
-
-  // ---------------------------------------------------------
-  // CLICK OUTSIDE CLOSE DROPDOWNS
-  // ---------------------------------------------------------
-  useEffect(() => {
-    function close(e) {
-      if (!dropdownRef.current?.contains(e.target)) setDropdownOpen(false);
-      if (!categoryRef.current?.contains(e.target)) setCategoryDropdownOpen(false);
-      if (!searchRef.current?.contains(e.target)) setSearchDropdownOpen(false);
-    }
-
-    document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
-  }, []);
+  const total = ((base * (1 + profit / 100)) / 1000) * qty;
+  setCharge(total.toFixed(2));
+}, [quantity, activeService]);
 
 
-  // when category or services change, pick first service in that category
+// ---------------------------------------------------------
+// CLICK OUTSIDE CLOSE DROPDOWNS
+// ---------------------------------------------------------
 useEffect(() => {
-  if (!category || !services?.length) {
+  function close(e) {
+    if (!dropdownRef.current?.contains(e.target))
+      setDropdownOpen(false);
+    if (!categoryRef.current?.contains(e.target))
+      setCategoryDropdownOpen(false);
+    if (!searchRef.current?.contains(e.target))
+      setSearchDropdownOpen(false);
+  }
+
+  document.addEventListener("mousedown", close);
+  return () => document.removeEventListener("mousedown", close);
+}, []);
+
+
+// ---------------------------------------------------------
+// CATEGORY CHANGE → PICK FIRST SERVICE
+// ---------------------------------------------------------
+useEffect(() => {
+  if (!category || !services.length) {
     setSelectedService(null);
     setService("");
     return;
   }
 
-  const filtered = services.filter((s) => s.category === category);
-  const first = filtered[0] || null;
+  const filtered = services.filter(
+    s => s.category === category
+  );
 
+  const first = filtered[0] || null;
   setSelectedService(first);
   setService(first?.service || "");
 }, [category, services]);
 
-// Re-apply selectedCategory when categories or param changes
-useEffect(() => {
-  if (!categories.length) return;
 
-  let chosen =
-    selectedCategory
-      ? categories.find((c) =>
-          c.toLowerCase().includes(selectedCategory.toLowerCase())
-        ) || categories[0]
-      : categories[0];
-
-  setCategory(chosen);
-}, [ categories]);
+// ---------------------------------------------------------
+// APPLY selectedCategory PARAM (FILTER SAFE)
+// ---------------------------------------------------------
 useEffect(() => {
-  if(!selectedCategory){
-setCategories(allCategory)
+  if (!selectedCategory) {
+    setCategories(allCategory);
+    return;
   }
-  if (!selectedCategory || categories.length === 0) return;
 
   const target = selectedCategory
     .normalize("NFKD")
     .replace(/[^\x00-\x7F]/g, "")
     .toLowerCase();
 
-  const matchedList = allCategory.filter((c) => {
+  const matched = allCategory.filter(c => {
     const clean = c
       .normalize("NFKD")
       .replace(/[^\x00-\x7F]/g, "")
       .toLowerCase();
-
     return clean.startsWith(target);
   });
 
-  console.log("Matched Categories:", matchedList,categories);
+  if (!matched.length) return;
 
-  if (matchedList.length > 0) {
-    const firstMatch = matchedList[0];
+  setCategories(matched);
+  setCategory(matched[0]);
 
-setCategories(matchedList)
-    // set selected category
-    setCategory(matchedList[0]);
+  const firstSrv = services.find(
+    s => s.category === matched[0]
+  ) || null;
 
-    // pick first service from matched category
-    const filtered = services.filter((s) => s.category === firstMatch);
-    const firstSrv = filtered[0] || null;
-
-    setSelectedService(firstSrv);
-    setService(firstSrv?.service || "");
-  }
+  setSelectedService(firstSrv);
+  setService(firstSrv?.service || "");
 }, [selectedCategory]);
 
 
-  // ---------------------------------------------------------
-  // SELECT SERVICE HANDLER (MEMOIZED)
-  // ---------------------------------------------------------
-  const handleServiceSelect = useCallback((srv) => {
-    setSelectedService(srv);
-    setService(srv.service);
-    setDropdownOpen(false);
-  }, []);
+// ---------------------------------------------------------
+// SELECT SERVICE HANDLER
+// ---------------------------------------------------------
+const handleServiceSelect = useCallback((srv) => {
+  setSelectedService(srv);
+  setService(srv.service);
+  setDropdownOpen(false);
+}, []);
 
-  // ---------------------------------------------------------
-  // SUBMIT HANDLER
-  // ---------------------------------------------------------
-  const handleSubmit = async (e) => {
-    e.preventDefault();
 
-    if (!service || !link || !quantity || !charge) {
-      setResponseMessage("⚠️ Please fill all fields.");
+// ---------------------------------------------------------
+// SUBMIT HANDLER
+// ---------------------------------------------------------
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!service || !link || !quantity || !charge) {
+    setResponseType("error");
+    setResponseMessage("⚠️ Please fill all fields.");
+    return;
+  }
+
+  if (quantityError) {
+    setResponseType("error");
+    setResponseMessage(quantityError);
+    return;
+  }
+
+  setSubmitting(true);
+
+  try {
+    const res = await createOrderAction(
+      service,
+      link,
+      quantity,
+      charge
+    );
+
+    if (!res.success) {
       setResponseType("error");
-      return;
+      setResponseMessage(
+        res.message === "Insufficient balance."
+          ? "Insufficient balance. Please Add Fund In Your Account"
+          : res.message
+      );
+    } else {
+      setResponseType("success");
+      setResponseMessage(
+        `✅ Order created successfully (ID: ${res.orderId})`
+      );
+
+      setService("");
+      setLink("");
+      setQuantity("");
+      setCharge("");
+      setSearchTerm("");
     }
-
-    if (quantityError) {
-      setResponseMessage(quantityError);
-      setResponseType("error");
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      const res = await createOrderAction(service, link, quantity, charge);
-
-      if (!res.success) {
-        setResponseType("error");
-        setResponseMessage(
-          res.message === "Insufficient balance."
-            ? "Insufficient balance. Please Add Fund In Your Account"
-            : res.message
-        );
-      } else {
-        setResponseType("success");
-        setResponseMessage(`✅ Order created successfully (ID: ${res.orderId})`);
-
-        setService("");
-        setLink("");
-        setQuantity("");
-        setCharge("");
-        setSearchTerm("");
-      }
-    } catch (err) {
-      setResponseType("error");
-      setResponseMessage("❌ Something went wrong.");
-    }
-
+  } catch {
+    setResponseType("error");
+    setResponseMessage("❌ Something went wrong.");
+  } finally {
     setSubmitting(false);
-  };
+  }
+};
+
 
   // ---------------------------------------------------------
   // JSX (UNCHANGED UI)
