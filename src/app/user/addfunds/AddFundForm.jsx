@@ -17,8 +17,9 @@ export default function AddFundForm({
   loading,
   setLoading,
   setPopup,
-  Instructions,
+  instructions,
 }) {
+
   const router = useRouter();
   const { symbol } = useCurrency(); 
   const handleSubmit = async (e) => {
@@ -102,7 +103,7 @@ export default function AddFundForm({
             onChange={(e) => setPaymentType(e.target.value)}
           >
             {paymentMethods?.map((item) => (
-              <option key={item._id} value={item.Name}>
+              <option key={item._id} value={item.type}>
                 {item.Name || item.type}
               </option>
             ))}
@@ -112,7 +113,7 @@ export default function AddFundForm({
         {/* QR Section */}
         <QRSection
           filteredPaymentMethod={filteredPaymentMethod}
-          Instructions={Instructions}
+          Instructions={instructions}
         />
 
         {/* UTR */}

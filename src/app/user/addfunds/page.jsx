@@ -7,7 +7,7 @@ import { getUserTransactions } from "@/lib/userActions";
 export default async function AddFundsPage() {
   const paymentMethods = await getAllPaymentMethods();
 
- 
+
   const { transactions = [] } = (await getUserTransactions()) || {};
 
   return (

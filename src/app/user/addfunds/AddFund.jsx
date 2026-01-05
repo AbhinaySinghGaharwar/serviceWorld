@@ -6,6 +6,7 @@ import TransactionHistory from "./TransactionHistory";
 import PopupMessage from "./PopupMessage";
 
 export default function AddFund({ paymentMethods = [], transactions = [] }) {
+
   const [paymentType, setPaymentType] = useState(paymentMethods[0]?.type);
   const [utr, setUtr] = useState("");
   const [amount, setAmount] = useState("");
@@ -18,13 +19,14 @@ export default function AddFund({ paymentMethods = [], transactions = [] }) {
     transaction: null,
   });
 
-  const [instructions, setInstructions] = useState("");
+  const [instructions, setInstructions] = useState(paymentMethods[0]?.instruction);
   const [filteredPaymentMethod, setFilteredPaymentMethod] = useState("");
 
   // Update QR + instructions
   useEffect(() => {
     const match = paymentMethods.find((i) => i.type === paymentType);
-    setInstructions(match?.instruction || "");
+   
+    setInstructions(match.instruction || "");
     setFilteredPaymentMethod(match?.qrImage || "");
   }, [paymentType, paymentMethods]);
 

@@ -9,6 +9,7 @@ export default function QRSection({
   bgMain,
   Instructions,
 }) {
+  console.log('qrsection ',Instructions)
   const [expanded, setExpanded] = useState(false);
 
   // Truncate text helper
