@@ -69,7 +69,7 @@ const bulkDelete = async () => {
 
  
   const serviceIds = Object.keys(selectedRows);
- console.log(serviceIds)
+
   if (serviceIds.length === 0) {
     setDeleting(false);
     return alert("No rows selected!");

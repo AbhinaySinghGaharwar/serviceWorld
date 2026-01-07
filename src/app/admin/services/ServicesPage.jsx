@@ -22,7 +22,8 @@ const [isDeleteCategory,setIsDeleteCategory]=useState(false)
       const matchesSearch =
         srv.name?.toLowerCase().includes(s) ||
         srv.description?.toLowerCase().includes(s) ||
-        srv.id?.toString().includes(s);
+        srv.id?.toString().includes(s)||
+        srv?.service?.toString().includes(s)
 
       const matchesCategory =
         selectedCategory === "All" ||
