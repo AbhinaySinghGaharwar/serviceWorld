@@ -378,14 +378,24 @@ export async function createOrderAction(service, link, qua, paying) {
 let counter = await db.collection("counters").findOne({ _id: "orderNumber" });
 
 if (counter) {
+  // If counter exists but is below 107000, normalize it first
+  if (counter.seq < 107000) {
+    await db.collection("counters").updateOne(
+      { _id: "orderNumber" },
+      { $set: { seq: 106999 } }
+    );
+  }
+
+  // Always increment after ensuring minimum
   await db.collection("counters").updateOne(
     { _id: "orderNumber" },
     { $inc: { seq: 1 } }
   );
 } else {
+  // First time only
   await db.collection("counters").insertOne({
     _id: "orderNumber",
-    seq: 3000
+    seq: 107000
   });
 }
 
