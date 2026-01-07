@@ -14,6 +14,7 @@ export default function TicketSupport({ tickets = [] }) {
 
   return (
     <div className="min-h-screen py-10 px-4 flex justify-center bg-gray-100 dark:bg-[#0F1117] text-gray-900 dark:text-gray-200">
+
       <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8">
 
         {/* New Ticket Form */}
@@ -21,6 +22,51 @@ export default function TicketSupport({ tickets = [] }) {
 
         {/* Ticket History */}
         <TicketHistory tickets={ticketList} openTicket={openTicket} />
+<div
+  className="
+    relative bottom-6 left-1/2 -translate-x-1/2
+    w-full max-w-md
+    bg-gray-200 dark:bg-[#1A1F2B]
+    border border-gray-300 dark:border-[#2B3143]
+    rounded-xl
+    p-5
+    text-center
+    space-y-2
+    shadow-lg
+    z-50
+    
+  "
+>
+  <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+    Need more help or facing an urgent issue?
+  </p>
+
+  <p className="text-sm text-gray-700 dark:text-gray-300">
+    Our support team is available to assist you with orders, payments,
+    technical issues, or account-related queries.
+  </p>
+
+  <p className="text-xs text-gray-600 dark:text-gray-400">
+    Please include your <span className="font-medium">Order ID</span> or
+    <span className="font-medium"> Ticket ID</span> for faster resolution.
+  </p>
+
+  <a
+    href="mailto:support@instantsmmboost.com"
+    className="
+      block font-semibold
+      text-gray-900 dark:text-gray-100
+      hover:underline
+      pt-1
+    "
+  >
+    support@instantsmmboost.com
+  </a>
+
+  <p className="text-xs text-gray-500 dark:text-gray-500">
+    Typical response time: within 24 hours
+  </p>
+</div>
 
         {/* Ticket Popup */}
         {selectedTicket && (
@@ -142,6 +188,7 @@ export default function TicketSupport({ tickets = [] }) {
         )}
 
       </div>
+      
     </div>
   );
 }
