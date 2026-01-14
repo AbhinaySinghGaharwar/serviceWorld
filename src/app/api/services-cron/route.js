@@ -5,7 +5,7 @@ import { importServicesAction } from "@/lib/services";
 export async function GET() {
   const services = await getEnabledServices();     // DB services
   const providers = await getProvidersAction();   // Providers
-console.log(services.plain)
+
   // Fetch all provider services
   const allServices = await Promise.all(
     providers.map(async (p) => {
