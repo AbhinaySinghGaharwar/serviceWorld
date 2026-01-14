@@ -1,12 +1,11 @@
-import { getEnabledServices } from "@/lib/services";
+import { getEnabledServices, bulkUpdateServices } from "@/lib/services";
 import { getProvidersAction } from "@/lib/providerActions";
 import { importServicesAction } from "@/lib/services";
 
 export async function GET() {
-  const services = await getEnabledServices();     // DB services
-  const providers = await getProvidersAction();   // Providers
+  const services = await getEnabledServices();
+  const providers = await getProvidersAction();
 
-  // Fetch all provider services
   const allServices = await Promise.all(
     providers.map(async (p) => {
       return await importServicesAction({
@@ -16,35 +15,35 @@ export async function GET() {
     })
   );
 
-  // Flatten provider services
   const providerServices = allServices.flat();
 
-  // Compare + merge
   const updatedServices = services.plain.map((c) => {
-  const match = providerServices.find(
-    (s) => s.service === c.service
-  );
+    const match = providerServices.find(
+      (s) => s.service === c.service
+    );
 
-  if (match) {
-  return {
-    ...c,
-    category: match.category ?? c.category,
-    rate: match.rate ?? c.rate,
-    min: match.min ?? c.min,
-    max: match.max ?? c.max,
-    status: match.status ?? c.status ?? "enabled",
-  };
-}
+    if (match) {
+      return {
+        ...c,
+        category: match.category ?? c.category,
+        rate: match.rate ?? c.rate,
+        min: match.min ?? c.min,
+        max: match.max ?? c.max,
+        status: match.status ?? c.status ?? "enabled",
+      };
+    }
 
-  // ❌ Not found in provider → disable it
-  return {
-    ...c,
-    status: "disabled",
-  };
-});
+    return {
+      ...c,
+      status: "disabled",
+    };
+  });
 
+  // 🔥 SAVE TO DATABASE
+  await bulkUpdateServices(updatedServices);
 
-  
-
-  return Response.json({ success: true, });
+  return Response.json({
+    success: true,
+    updatedCount: updatedServices.length,
+  });
 }

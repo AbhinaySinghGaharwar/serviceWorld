@@ -157,6 +157,33 @@ export async function importServicesAction({url,api}) {
     return { error: error.response?.data || error.message };
   }
 }
+export async function bulkUpdateServices(updatedServices) {
+  const client = await clientPromise;
+  const servicesCollection = client.db(DB_ADMIN).collection("services");
+
+  const bulkOps = updatedServices.map((s) => ({
+    updateOne: {
+      filter: { service: s.service },
+      update: {
+        $set: {
+          category: s.category,
+          rate: s.rate,
+          min: s.min,
+          max: s.max,
+          status: s.status,
+          updatedAt: new Date(),
+        },
+      },
+      upsert: false, // only update existing
+    },
+  }));
+
+  if (bulkOps.length > 0) {
+    await servicesCollection.bulkWrite(bulkOps);
+  }
+
+  return true;
+}
 
 
 export async function StoreServicesInDB({ services, profitPercentage }) {
