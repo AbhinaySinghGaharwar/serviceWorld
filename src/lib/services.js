@@ -61,10 +61,10 @@ export async function getEnabledServices() {
     const client = await clientPromise;
     const servicesCollection = client.db(DB_ADMIN).collection("services");
 
-    // 👇 only enabled services
-    const data = await servicesCollection
-      .find({ status: "enabled" })
-      .toArray();
+const data = await servicesCollection.find({
+  status: { $regex: /^(enabled|active)$/i }
+}).toArray();
+
 
     const plain = data.map(s => ({
       _id: s._id ? s._id.toString() : null,
