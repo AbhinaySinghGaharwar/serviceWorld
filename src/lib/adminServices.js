@@ -544,15 +544,17 @@ export async function putPaymentMethodDetails(
 export async function ValidateTransactionBharatPe(internalUtr, amount) {
   try {
     const payment_methods=await getAllPaymentMethods()
+  
    const methods=payment_methods?.methods
    const bharatPe = methods
-  .filter(m => m.type === "BharatPe")
+  .filter(m => m.type?.trim().toLowerCase() === "bharatpe")
+
   .map(m => ({ merchantId: m.merchantId, token: m.token }));
 
 // Since bharatPe is an array, pick the first one
 const merchantId = bharatPe[0]?.merchantId;
 const token = bharatPe[0]?.token;
-
+console.log(merchantId,token)
     const toDate = new Date();
     const fromDate = new Date();
     fromDate.setDate(toDate.getDate() - 25);

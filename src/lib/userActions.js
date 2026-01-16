@@ -1139,13 +1139,24 @@ export async function addFundAction({ utr, amount }) {
       return { status: false, message: "Invalid transaction details" };
     }
 
-    // 7) Ensure balance field exists if missing
-    if (user.balance === undefined || user.balance === null || isNaN(user.balance)) {
-      await db.collection("users").updateOne(
-        { _id: user._id },
-        { $set: { balance: 0 } }
-      );
-    }
+   // 7) Ensure balance is a NUMBER
+if (
+  user.balance === undefined ||
+  user.balance === null ||
+  isNaN(Number(user.balance))
+) {
+  await db.collection("users").updateOne(
+    { _id: user._id },
+    { $set: { balance: 0 } }
+  );
+} else if (typeof user.balance === "string") {
+  // Convert string balance to number
+  await db.collection("users").updateOne(
+    { _id: user._id },
+    { $set: { balance: Number(user.balance) } }
+  );
+}
+
 
     // 8) Add funds atomically (safest way)
     const updateResult = await db.collection("users").updateOne(
