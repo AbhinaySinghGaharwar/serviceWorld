@@ -1462,7 +1462,30 @@ export async function updateAffiliateSettings({ commission_rate, minimum_payout 
 
 
 
+export async function getOrdersForCron() {
+  try {
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+    const ordersCollection = db.collection("orders");
 
+const orders = await ordersCollection
+  .find({ status: { $regex: /^(pending|processing|partial)$/i } })
+  .toArray();
+
+    return {
+      success: true,
+      orders,
+    };
+  } catch (error) {
+    console.error("getOrdersForCron error:", error);
+
+    return {
+      success: false,
+      orders: [],
+      error: error.message,
+    };
+  }
+}
 
 export async function getAllOrdersAction() {
   try {
@@ -1482,107 +1505,10 @@ const orders = await ordersCollection
       return { success: true, count: 0, orders: [] };
     }
 
-    const updatedOrders = await Promise.all(
-      orders.map(async (order) => {
-        let providerResult = null;
-
-        // ⭐ Only fetch from provider API when status is pending or partial
-        const canFetch =
-          order.status === "pending" || order.status === "partial";
-
-        if (canFetch) {
-          // ⏳ Skip if fetched within last 1 hour
-          const oneHour = 60 * 60 * 1000;
-          const now = Date.now();
-          const lastFetched = order.fetchedAt
-            ? new Date(order.fetchedAt).getTime()
-            : 0;
-
-          const shouldFetch = now - lastFetched > oneHour;
-
-          if (
-            shouldFetch &&
-            order.ProviderUrl &&
-            order.providerApiKey &&
-            order.providerOrderId
-          ) {
-            try {
-              const params = new URLSearchParams();
-              params.append("key", order.providerApiKey);
-              params.append("action", "status");
-              params.append("order", String(order.providerOrderId));
-
-              const res = await axios.post(order.ProviderUrl, params, {
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                timeout: 10000,
-              });
-
-              providerResult = res.data;
-
-              // ⭐ Update DB
-              await ordersCollection.updateOne(
-                { _id: order._id },
-                {
-                  $set: {
-                    status: providerResult.status ?? order.status,
-                    startCount: Number(
-                      providerResult.start_count ?? order.startCount ?? 0
-                    ),
-                    remains: Number(
-                      providerResult.remains ?? order.remains ?? 0
-                    ),
-                    charge: Number(
-                      providerResult.charge ?? order.charge ?? 0
-                    ),
-                    fetchedAt: new Date(),
-                    updatedAt: new Date(),
-                  },
-                }
-              );
-            } catch (err) {
-              providerResult = {
-                error: "Provider request failed",
-                details: err.message,
-              };
-            }
-          } else {
-            providerResult = {
-              note: "Skipped — fetched recently (<1 hour)",
-            };
-          }
-        } else {
-          // ⭐ Completed orders → no API calls
-          providerResult = {
-            note: "Completed — no API request needed",
-          };
-        }
-
-        // Always return latest version
-        const fresh = await ordersCollection.findOne({ _id: order._id });
-
-     return {
-  ...fresh,
-
-  _id: fresh._id?.toString(),
-
-  userId: fresh.userId?.toString?.() ?? String(fresh.userId ?? ""),
-
-  orderNumber: Number(fresh.orderNumber) || 0, // 👈 IMPORTANT
-
-  createdAt: fresh.createdAt?.toISOString?.() ?? "",
-  updatedAt: fresh.updatedAt?.toISOString?.() ?? "",
-  fetchedAt: fresh.fetchedAt?.toISOString?.() ?? "",
-
-  providerResult,
-};
-
-      })
-    );
-
     return {
       success: true,
-      count: updatedOrders.length,
-      orders: updatedOrders,
+      count: orders.length,
+      orders: orders,
     };
   } catch (err) {
     console.error("❌ Error in getAllOrdersAction:", err);
@@ -1904,5 +1830,42 @@ export async function getBlogsAction() {
     };
   } catch (err) {
     return { status: false, message: "Server error fetching blogs", blogs: [] };
+  }
+}
+
+
+
+
+
+
+
+export async function updateOrderStatusCron({
+  orderId,
+  status,
+  startCount,
+  remains,
+}) {
+  try {
+    const client = await clientPromise;
+    const db = client.db("smmpanel");
+    const orders = db.collection("orders");
+
+    const update = {
+      status,
+      updatedAt: new Date(),
+    };
+
+    if (startCount !== undefined) update.startCount = startCount;
+    if (remains !== undefined) update.remains = remains;
+
+    await orders.updateOne(
+      { _id: orderId },
+      { $set: update }
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("updateOrderStatus error:", error);
+    return { success: false, error: error.message };
   }
 }
