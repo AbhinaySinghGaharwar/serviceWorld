@@ -345,14 +345,14 @@ export async function createOrderAction(service, link, qua, paying) {
       .db(DB_ADMIN)
       .collection("services")
       .findOne({ service: (service) });
-
+console.log(dbservice)
     // find provider matching the service provider URL
     const result = providers.find((p) => p.providerUrl === dbservice?.provider);
 
     // 5️⃣ Inputs
     const quantity = Number(qua);
     const charge = Number(paying);
-
+console.log('charge',charge)
     if (!service || !link || !Number.isFinite(quantity) || quantity <= 0)
       return { success: false, message: "Invalid input." };
 
@@ -561,94 +561,19 @@ export async function getUserOrders() {
       })
       .sort({ createdAt: -1 })
       .toArray();
+const clientOrders=orders.map((o)=>({
+  ...o,
+  _id:o._id.toString(),
+userId:o.userId.toString(),
 
-    // 5. Iterate each order and update provider data (if needed)
-    const finalOrders = await Promise.all(
-      orders.map(async (order) => {
-        let providerStatus = null;
 
-        // ⏳ cooldown logic (1 hour = 3600000 ms)
-        const oneHour = 60 * 60 * 1000;
-        const now = Date.now();
-        const lastFetched = order.fetchedAt
-          ? new Date(order.fetchedAt).getTime()
-          : 0;
-
-        const shouldFetch = now - lastFetched > oneHour;
-
-        if (
-          shouldFetch &&
-          order.providerOrderId &&
-          order.providerApiKey &&
-          order.ProviderUrl
-        ) {
-          // 🔥 Fetch fresh provider status
-          try {
-            const params = new URLSearchParams();
-            params.append("key", order.providerApiKey);
-            params.append("action", "status");
-            params.append("order", order.providerOrderId);
-
-            const res = await axios.post(order.ProviderUrl, params, {
-              headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            });
-
-            providerStatus = res.data;
-
-            // 🔥 Update DB with new provider data + timestamp
-            await db.collection("orders").updateOne(
-              { _id: order._id },
-              {
-                $set: {
-                  status: providerStatus.status ?? order.status,
-                  startCount: Number(providerStatus.start_count ?? order.startCount ?? 0),
-                  remains: Number(providerStatus.remains ?? order.remains ?? 0),
-                  charge: Number(providerStatus.charge ?? order.charge ?? 0),
-                  fetchedAt: new Date(),   // ⭐ added
-                  updatedAt: new Date(),
-                },
-              }
-            );
-          } catch (err) {
-            providerStatus = { error: "Provider API failed", details: err.message };
-          }
-        } else {
-          // ❌ No provider fetch this time (cooldown)
-          providerStatus = {
-            note: "Skipped fetch — last fetched < 1 hour ago",
-          };
-        }
-
-        // Get latest version from DB
-        const fresh = await db.collection("orders").findOne({ _id: order._id });
-
-        // Return JSON-safe object
-        return {
-          ...fresh,
-          _id: fresh._id.toString(),
-          userId: fresh.userId?.toString?.() ?? String(fresh.userId ?? ""),
-          createdAt:
-            fresh.createdAt instanceof Date
-              ? fresh.createdAt.toISOString()
-              : String(fresh.createdAt ?? ""),
-          updatedAt:
-            fresh.updatedAt instanceof Date
-              ? fresh.updatedAt.toISOString()
-              : String(fresh.updatedAt ?? ""),
-          fetchedAt:
-            fresh.fetchedAt instanceof Date
-              ? fresh.fetchedAt.toISOString()
-              : "",
-          providerStatus,
-        };
-      })
-    );
-
+}))
+   
     // 6. Return updated orders
     return {
       success: true,
-      count: finalOrders.length,
-      orders: finalOrders,
+      count: clientOrders.length,
+      orders: clientOrders,
     };
 
   } catch (err) {

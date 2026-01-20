@@ -12,7 +12,7 @@ export default function LatestOrders() {
 useEffect(()=>{
   const loadorder=async ()=>{
     const res=await getUserOrders()
-    console.log(res)
+    console.log(res.orders)
     if(res.success){
       setLatestOrders(res?.orders)
 

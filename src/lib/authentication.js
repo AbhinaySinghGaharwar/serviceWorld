@@ -100,6 +100,7 @@ export async function registerUser({ email, username, password, mobile, ip = "12
 
 export async function loginUser({ email, password, ip = "127.0.0.1" }) {
   try {
+
     // 🧠 1. Rate limiting
     if (checkRateLimit(ip)) {
       return { error: "Too many requests, please try again later." };
@@ -130,6 +131,7 @@ export async function loginUser({ email, password, ip = "127.0.0.1" }) {
 
     // 🔑 7. Verify password
     const validPassword = await bcrypt.compare(password, user.password);
+   
     if (!validPassword) return { error: "Invalid credentials." };
 
     // 🔒 8. Create JWT token
