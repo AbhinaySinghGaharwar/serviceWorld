@@ -489,6 +489,24 @@ finalCharge,
             {quantityError && <p className="text-red-400 text-sm">{quantityError}</p>}
           </div>
 
+{/* PRICE SUMMARY */}
+{charge && (
+  <div className="mt-3 rounded-lg border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 px-4 py-4">
+    <p className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+      <span className="block">
+        Price:{" "}
+        <span className="font-semibold">
+          {symbol}{charge}
+        </span>
+      </span>
+
+      <span className="block text-base font-semibold mt-2">
+        ✅ Final Price: {symbol}{charge}
+      </span>
+    </p>
+  </div>
+)}
+
  {/* DISCOUNT SUMMARY */}
 {charge && user?.discount > 0 && (() => {
   const discountAmount = (charge * user.discount) / 100;

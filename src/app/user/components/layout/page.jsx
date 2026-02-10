@@ -41,7 +41,7 @@ export default function Page({ user, children, websiteName }) {
   // 🧭 Sidebar Menu Items (unchanged)
   const menuItems = [
     { icon: <MdDashboard />, text: "New Order", href: "/user/dashboard" },
-    { icon: <MdInventory />, text: "Mass Order", href: "/user/mass-order" },
+    // { icon: <MdInventory />, text: "Mass Order", href: "/user/mass-order" },
     { icon: <MdHistory />, text: "Services", href: "/user/services" },
     { icon: <MdHistory />, text: "Orders History", href: "/user/orders" },
     { icon: <MdPayment />, text: "Add Funds", href: "/user/addfunds" },
