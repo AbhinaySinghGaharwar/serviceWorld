@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaCogs, FaCode, FaBlog } from "react-icons/fa";
+import { FaCogs, FaCode,  } from "react-icons/fa";
 import Link from "next/link";
 import ThemeSwitcher from "./ThemeSwitcher";
 
@@ -52,13 +52,7 @@ export default function Navbar({ logo,siteName }) {
             </Link>
           </li>
 
-          <li>
-            <Link href="/blogs" 
-              className="flex items-center hover:text-[#4A6CF7] dark:hover:text-[#4A6CF7] transition-colors">
-              <FaBlog className="text-[#4A6CF7] mr-2 text-[18px]" />
-              Blogs
-            </Link>
-          </li>
+        
         </ul>
 
         {/* Desktop Buttons */}
@@ -148,12 +142,7 @@ export default function Navbar({ logo,siteName }) {
                 </Link>
               </li>
 
-              <li>
-                <Link href="/blogs" onClick={() => setMenuOpen(false)}
-                  className="hover:text-[#4A6CF7] transition-colors">
-                  Blogs
-                </Link>
-              </li>
+           
 
               {/* Mobile Buttons */}
               <div className="flex flex-col space-y-3 w-3/4 pt-2">

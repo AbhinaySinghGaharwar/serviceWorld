@@ -43,12 +43,7 @@ export default function SettingsPage() {
           link: "/admin/settings/affiliate",
         },
 
-        // ✅ New options
-        {
-          name: "Manage Blog",
-          icon: <FileText size={18} />,
-          link: "/admin/settings/blog-write",
-        },
+       
         {
           name: "Social Media Links",
           icon: <Share2 size={18} />,
