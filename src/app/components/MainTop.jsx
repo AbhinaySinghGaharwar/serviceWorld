@@ -187,7 +187,7 @@ export default function MainTop({ websiteName }) {
       <div className="flex justify-center md:justify-end">
   <div className="relative w-72 h-72 sm:w-96 sm:h-96 md:w-[28rem] md:h-[28rem] lg:w-[32rem] lg:h-[32rem]">
     <Image
-      src="testlogo.png"
+      src="/testlogo.png"
       alt="hero"
       fill
       className="object-contain"
